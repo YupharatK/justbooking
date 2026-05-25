@@ -5,8 +5,20 @@ import 'package:image_picker/image_picker.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:latlong2/latlong.dart' hide Path;
 import '../core/api_client.dart';
+import 'package:http/http.dart' as http;
 import '../services/owner_service.dart';
 import 'map_picker_page.dart';
+
+/// ----------------------------------------------------------------------
+/// [AddDormInfoPage]
+/// ฟีเจอร์: "หน้าลงทะเบียนหอพักใหม่"
+/// หน้านี้ให้เจ้าของหอพักกรอกข้อมูลพื้นฐานของหอพัก เช่น ชื่อ, ที่อยู่, อัปโหลดรูปภาพปก (Cover Image)
+/// รวมถึงสามารถกด "ปักหมุดแผนที่" เพื่อให้ได้ละติจูด/ลองจิจูด มาเก็บลงในฐานข้อมูล
+/// 
+/// การเชื่อมต่อ API หลักในหน้านี้:
+/// - OwnerService.createDormitory() -> ใช้สร้างข้อมูลหอพักใหม่ลงฐานข้อมูล
+/// - OwnerService.uploadDormitoryCoverImage() -> อัปโหลดไฟล์รูปภาพปกแบบ Multipart
+/// ----------------------------------------------------------------------
 
 class AddDormInfoPage extends StatefulWidget {
   const AddDormInfoPage({super.key});

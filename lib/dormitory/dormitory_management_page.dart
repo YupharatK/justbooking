@@ -4,6 +4,16 @@ import '../models/dormitory.dart';
 import '../services/dormitory_service.dart';
 import 'add_room_page.dart';
 
+/// ----------------------------------------------------------------------
+/// [DormitoryManagementPage]
+/// ฟีเจอร์: "หน้ารายละเอียดและจัดการหอพัก (สำหรับเจ้าของ)"
+/// หน้านี้จะถูกเปิดขึ้นเมื่อเจ้าของหอพักกดที่รายการหอพักในหน้า Dashboard
+/// โดยจะแสดงข้อมูลของหอพักนั้น และรายการ **ประเภทห้องพักทั้งหมด** ที่มีอยู่
+/// 
+/// การเชื่อมต่อ API หลักในหน้านี้:
+/// - DormitoryService.getDormitoryDetail() -> ใช้ดึงข้อมูลล่าสุดของหอพักและห้องทั้งหมด
+/// ----------------------------------------------------------------------
+
 class DormitoryManagementPage extends StatefulWidget {
   final Dormitory dormitory;
   const DormitoryManagementPage({super.key, required this.dormitory});
@@ -142,6 +152,9 @@ class _DormitoryManagementPageState extends State<DormitoryManagementPage> {
                 ],
               ),
             ),
+      /// ฟีเจอร์: ปุ่ม "เพิ่มห้องพัก" (Add Room)
+      /// เมื่อกดปุ่ม ระบบจะเปิดหน้า AddRoomPage โดยส่งรหัสหอพัก (dormitoryId) ปัจจุบันไปให้
+      /// เพื่อให้เวลาสร้างห้องพักใหม่ API จะรู้ว่าต้องผูกห้องพักนี้เข้ากับหอพักใด (One-to-Many)
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Navigator.push(

@@ -8,6 +8,19 @@ import '../services/owner_service.dart';
 import '../services/auth_service.dart';
 import '../wellcome/login.dart';
 
+/// ----------------------------------------------------------------------
+/// [DormitoryHomePage]
+/// หน้า Dashboard หลักสำหรับ "เจ้าของหอพัก" (Owner)
+/// ทำหน้าที่เป็นศูนย์กลางรวบรวมฟีเจอร์ต่างๆ ของเจ้าของหอพัก ได้แก่:
+/// 1. เมนู "เพิ่มข้อมูลหอพัก" (AddDormInfoPage)
+/// 2. เมนู "จัดการคำขอจอง" (OwnerBookingDashboard)
+/// 3. แสดงรายการ "หอพักของฉัน" ทั้งหมดที่ดึงมาจาก API (_ownerService.getMyDormitories)
+/// 
+/// การเชื่อมต่อ API หลักในหน้านี้:
+/// - OwnerService.getMyDormitories() -> ดึงรายการหอพักทั้งหมดของ Owner คนนี้
+/// - AuthService.getCurrentUser() -> ดึงข้อมูลโปรไฟล์ของ Owner มาแสดงด้านบน
+/// ----------------------------------------------------------------------
+
 class DormitoryHomePage extends StatefulWidget {
   const DormitoryHomePage({super.key});
 
@@ -208,6 +221,8 @@ class _DormitoryHomePageState extends State<DormitoryHomePage> {
               Row(
                 children: [
                   Expanded(
+                    // ฟีเจอร์: การเพิ่มหอพักใหม่
+                    // เมื่อกดจะเปิดหน้า AddDormInfoPage เพื่อกรอกข้อมูลหอพัก
                     child: _buildMainMenuCard(
                       icon: Icons.storefront_outlined,
                       title: 'เพิ่มข้อมูลหอพัก',
@@ -223,6 +238,8 @@ class _DormitoryHomePageState extends State<DormitoryHomePage> {
                     ),
                   ),
                   Expanded(
+                    // ฟีเจอร์: จัดการคำขอจอง
+                    // เมื่อกดจะเปิดหน้า OwnerBookingDashboard เพื่อดูคำขอที่ผู้เช่าส่งมา
                     child: _buildMainMenuCard(
                       icon: Icons.receipt_long_outlined,
                       title: 'จัดการคำขอจอง',
@@ -241,7 +258,10 @@ class _DormitoryHomePageState extends State<DormitoryHomePage> {
               ),
               const SizedBox(height: 40),
 
-              // 3. My Dormitories Section
+              // 3. My Dormitories Section (ส่วนแสดงรายการหอพักทั้งหมดของฉัน)
+              // ฟีเจอร์: เรียกดูรายชื่อหอพักที่เราเป็นเจ้าของ
+              // วนลูป (ListView) นำ _dorms แต่ละตัวมาแสดงเป็น _buildStatusCard
+              // เมื่อกดที่การ์ดจะพาไปหน้าจัดการหอพักนั้นๆ (DormitoryManagementPage)
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -429,6 +449,9 @@ class _DormitoryHomePageState extends State<DormitoryHomePage> {
     );
   }
 
+  /// ฟีเจอร์: สร้าง Card แสดงข้อมูลของแต่ละหอพัก
+  /// หากคลิกที่การ์ด ระบบจะส่ง object [dorm] ตัวนี้ไปให้หน้า [DormitoryManagementPage] 
+  /// เพื่อแสดงรายละเอียดและจัดการเพิ่มห้องพักต่อไป
   Widget _buildStatusCard(Dormitory dorm) {
     final bool isApproved = dorm.status == 'approved';
     bool isRejected = dorm.status == 'rejected';

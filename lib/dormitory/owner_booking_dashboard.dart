@@ -1,6 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../services/owner_service.dart';
 import '../models/booking.dart';
+
+/// ----------------------------------------------------------------------
+/// [OwnerBookingDashboard]
+/// ฟีเจอร์: "หน้าจัดการคำขอจองสำหรับเจ้าของหอพัก"
+/// หน้านี้ใช้สำหรับแสดงรายการคำขอจองห้องพัก (Bookings) ที่ผู้ใช้ส่งเข้ามาทั้งหมด
+/// เจ้าของสามารถเรียกดูรูปภาพสลิปที่ผู้ใช้อัปโหลดมา และกด "อนุมัติ" (Approve) 
+/// หรือ "ปฏิเสธ" (Reject) เพื่อเปลี่ยนสถานะคำขอในระบบ
+/// 
+/// การเชื่อมต่อ API หลักในหน้านี้:
+/// - OwnerService.getOwnerBookings() -> ดึงรายการคำขอจองทั้งหมดของเจ้าของหอพักคนนี้
+/// - OwnerService.updateBookingStatus() -> ยิง API เพื่ออัปเดตสถานะเป็น 'approved' หรือ 'rejected'
+/// ----------------------------------------------------------------------
 
 class OwnerBookingDashboard extends StatefulWidget {
   const OwnerBookingDashboard({super.key});

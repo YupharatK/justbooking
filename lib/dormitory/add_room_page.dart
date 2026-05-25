@@ -5,6 +5,17 @@ import 'package:image_picker/image_picker.dart';
 import '../core/api_client.dart';
 import '../services/owner_service.dart';
 
+/// ----------------------------------------------------------------------
+/// [AddRoomPage]
+/// ฟีเจอร์: "หน้าลงทะเบียนห้องพัก"
+/// หน้านี้สำหรับให้เจ้าของหอพักกรอกรายละเอียดของแต่ละประเภทห้องพัก 
+/// เช่น ระบุประเภทห้อง (แอร์/พัดลม), ราคา, จำนวนห้องว่าง, เลือกสิ่งอำนวยความสะดวก และอัปโหลดภาพห้องพักหลายๆ รูป
+/// 
+/// การเชื่อมต่อ API หลักในหน้านี้:
+/// - OwnerService.createRoom(dormitoryId) -> สร้างห้องพักและผูกเข้ากับหอพักที่ระบุ
+/// - OwnerService.uploadRoomImages() -> อัปโหลดไฟล์รูปภาพห้องพักทีละหลายรูป (Multi-Multipart)
+/// ----------------------------------------------------------------------
+
 class AddRoomPage extends StatefulWidget {
   final int dormitoryId;
   const AddRoomPage({super.key, required this.dormitoryId});
