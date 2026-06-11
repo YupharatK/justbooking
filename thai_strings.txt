@@ -1,0 +1,748 @@
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations.dart:1:import 'dart:async';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations.dart:3:import 'package:flutter/foundation.dart';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations.dart:4:import 'package:flutter/widgets.dart';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations.dart:5:import 'package:flutter_localizations/flutter_localizations.dart';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations.dart:6:import 'package:intl/intl.dart' as intl;
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations.dart:106:  /// **'Just Booking'**
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations.dart:142:  /// **'คุณแน่ใจหรือไม่ว่าต้องการออกจากระบบบัญชีผู้ใช้นี้?'**
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations.dart:190:  /// **'English'**
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations.dart:280:  /// **'ว่าง {count} ห้อง'**
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations.dart:373:    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations.dart:374:    'an issue with the localizations generation tool. Please file an issue '
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations.dart:375:    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations.dart:376:    'that was used.',
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_th.dart:2:import 'package:intl/intl.dart' as intl;
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_th.dart:12:  String get appTitle => 'Just Booking';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_th.dart:31:      'คุณแน่ใจหรือไม่ว่าต้องการออกจากระบบบัญชีผู้ใช้นี้?';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_th.dart:56:  String get languageEnglish => 'English';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_th.dart:102:    return 'ว่าง $count ห้อง';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_zh.dart:2:import 'package:intl/intl.dart' as intl;
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_zh.dart:12:  String get appTitle => 'Just Booking';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_zh.dart:54:  String get languageEnglish => 'English';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_zh.dart:100:    return '剩余 $count 间';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_en.dart:2:import 'package:intl/intl.dart' as intl;
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_en.dart:12:  String get appTitle => 'Just Booking';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_en.dart:15:  String get profileEdit => 'Edit Profile';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_en.dart:18:  String get profileFavorites => 'Favorites';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_en.dart:21:  String get profileChangeLanguage => 'Change Language';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_en.dart:24:  String get profileLogout => 'Logout';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_en.dart:27:  String get profileLogoutConfirmTitle => 'Logout';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_en.dart:31:      'Are you sure you want to log out of this account?';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_en.dart:34:  String get profileLogoutCancel => 'Cancel';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_en.dart:37:  String get profileLogoutConfirmBtn => 'Confirm Logout';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_en.dart:41:      'Opening camera to change profile picture...';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_en.dart:44:  String get profileLoadError => 'Error loading user data';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_en.dart:47:  String get profileUnknownUser => 'System User';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_en.dart:50:  String get languageTitle => 'Change Language';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_en.dart:56:  String get languageEnglish => 'English';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_en.dart:62:  String get languageConfirm => 'Confirm';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_en.dart:65:  String get homeTab => 'Home';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_en.dart:68:  String get bookingTab => 'Bookings';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_en.dart:71:  String get messageTab => 'Messages';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_en.dart:74:  String get notificationTab => 'Alerts';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_en.dart:77:  String get homeSearchHint => 'Search dorms, location, or price..';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_en.dart:80:  String get homeRecentSearches => 'Recent Searches';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_en.dart:83:  String get homeSeeAll => 'See All';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_en.dart:86:  String get homeNoDormsFound => 'No dormitories found';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_en.dart:89:  String get homePopularDorms => 'Popular Dorms';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_en.dart:92:  String get homeRecommended => 'Recommended';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_en.dart:95:  String get homeAvailable => 'Available';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_en.dart:102:    return '$count rooms left';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_en.dart:106:  String get homeFull => 'Full';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_en.dart:110:    return '$dist km from Uni';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_en.dart:114:  String get homeAirConFan => 'A/C / Fan';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_en.dart:117:  String get homeNotificationsTitle => 'Notifications';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_en.dart:120:  String get homeReadAll => 'Read All';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_en.dart:123:  String get bookingStatusPendingOwnerApproval => 'Pending Owner Approval';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_en.dart:126:  String get bookingStatusPendingPayment => 'Pending Payment';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_en.dart:129:  String get bookingStatusCompleted => 'Completed';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_en.dart:132:  String get bookingStatusRejected => 'Rejected';
+/Users/yupharat/just_booking/lib/l10n/generated/app_localizations_en.dart:135:  String get bookingStatusCancelled => 'Cancelled';
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:2:  "@@locale": "th",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:3:  "appTitle": "Just Booking",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:4:  "profileEdit": "แก้ไขโปรไฟล์",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:5:  "profileFavorites": "รายการโปรด",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:6:  "profileChangeLanguage": "เปลี่ยนภาษา",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:7:  "profileLogout": "ออกจากระบบ",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:8:  "profileLogoutConfirmTitle": "ออกจากระบบ",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:9:  "profileLogoutConfirmDesc": "คุณแน่ใจหรือไม่ว่าต้องการออกจากระบบบัญชีผู้ใช้นี้?",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:10:  "profileLogoutCancel": "ยกเลิก",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:11:  "profileLogoutConfirmBtn": "ยืนยันการออกจากระบบ",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:12:  "profileCameraToast": "กำลังเปิดกล้องถ่ายรูปเพื่อเปลี่ยนโปรไฟล์...",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:13:  "profileLoadError": "เกิดข้อผิดพลาดในการโหลดข้อมูลผู้ใช้",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:14:  "profileUnknownUser": "ผู้ใช้งานระบบ",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:16:  "languageTitle": "เปลี่ยนภาษา",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:17:  "languageThai": "ภาษาไทย",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:18:  "languageEnglish": "English",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:19:  "languageChinese": "中文",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:20:  "languageConfirm": "ยืนยัน",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:21:  "homeTab": "หน้าหลัก",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:22:  "bookingTab": "การจอง",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:23:  "messageTab": "ข้อความ",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:24:  "notificationTab": "แจ้งเตือน",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:25:  "homeSearchHint": "ค้นหาหอพัก, ทำเล, หรือราคา..",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:26:  "homeRecentSearches": "ค้นหาล่าสุด",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:27:  "homeSeeAll": "ดูทั้งหมด",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:28:  "homeNoDormsFound": "ไม่พบข้อมูลหอพัก",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:29:  "homePopularDorms": "หอพักที่เป็นที่นิยม",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:30:  "homeRecommended": "แนะนำเพิ่มเติม",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:31:  "homeAvailable": "ว่าง",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:32:  "homePerMonth": "/เดือน",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:33:  "homeRoomsLeft": "ว่าง {count} ห้อง",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:34:  "@homeRoomsLeft": {
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:36:      "count": {
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:37:        "type": "int"
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:41:  "homeFull": "เต็มแล้ว",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:42:  "homeDistanceFromUni": "{dist} กม. จาก ม.",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:43:  "@homeDistanceFromUni": {
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:46:        "type": "String"
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:50:  "homeAirConFan": "แอร์/พัดลม",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:51:  "homeNotificationsTitle": "การแจ้งเตือน",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:52:  "homeReadAll": "อ่านทั้งหมด",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:53:  "bookingStatusPendingOwnerApproval": "รอเจ้าของอนุมัติ",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:54:  "bookingStatusPendingPayment": "รอชำระเงิน",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:55:  "bookingStatusCompleted": "เสร็จสิ้น",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:56:  "bookingStatusRejected": "ถูกปฏิเสธ",
+/Users/yupharat/just_booking/lib/l10n/app_th.arb:57:  "bookingStatusCancelled": "ยกเลิก"
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:2:  "@@locale": "en",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:3:  "appTitle": "Just Booking",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:4:  "profileEdit": "Edit Profile",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:5:  "profileFavorites": "Favorites",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:6:  "profileChangeLanguage": "Change Language",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:7:  "profileLogout": "Logout",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:8:  "profileLogoutConfirmTitle": "Logout",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:9:  "profileLogoutConfirmDesc": "Are you sure you want to log out of this account?",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:10:  "profileLogoutCancel": "Cancel",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:11:  "profileLogoutConfirmBtn": "Confirm Logout",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:12:  "profileCameraToast": "Opening camera to change profile picture...",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:13:  "profileLoadError": "Error loading user data",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:14:  "profileUnknownUser": "System User",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:16:  "languageTitle": "Change Language",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:17:  "languageThai": "ภาษาไทย",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:18:  "languageEnglish": "English",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:19:  "languageChinese": "中文",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:20:  "languageConfirm": "Confirm",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:21:  "homeTab": "Home",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:22:  "bookingTab": "Bookings",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:23:  "messageTab": "Messages",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:24:  "notificationTab": "Alerts",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:25:  "homeSearchHint": "Search dorms, location, or price..",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:26:  "homeRecentSearches": "Recent Searches",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:27:  "homeSeeAll": "See All",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:28:  "homeNoDormsFound": "No dormitories found",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:29:  "homePopularDorms": "Popular Dorms",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:30:  "homeRecommended": "Recommended",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:31:  "homeAvailable": "Available",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:32:  "homePerMonth": "/month",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:33:  "homeRoomsLeft": "{count} rooms left",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:34:  "@homeRoomsLeft": {
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:36:      "count": {
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:37:        "type": "int"
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:41:  "homeFull": "Full",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:42:  "homeDistanceFromUni": "{dist} km from Uni",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:43:  "@homeDistanceFromUni": {
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:46:        "type": "String"
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:50:  "homeAirConFan": "A/C / Fan",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:51:  "homeNotificationsTitle": "Notifications",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:52:  "homeReadAll": "Read All",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:53:  "bookingStatusPendingOwnerApproval": "Pending Owner Approval",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:54:  "bookingStatusPendingPayment": "Pending Payment",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:55:  "bookingStatusCompleted": "Completed",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:56:  "bookingStatusRejected": "Rejected",
+/Users/yupharat/just_booking/lib/l10n/app_en.arb:57:  "bookingStatusCancelled": "Cancelled"
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:2:  "@@locale": "zh",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:3:  "appTitle": "Just Booking",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:4:  "profileEdit": "编辑个人资料",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:5:  "profileFavorites": "收藏夹",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:6:  "profileChangeLanguage": "改变语言",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:7:  "profileLogout": "登出",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:8:  "profileLogoutConfirmTitle": "登出",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:9:  "profileLogoutConfirmDesc": "您确定要退出此帐户吗？",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:10:  "profileLogoutCancel": "取消",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:11:  "profileLogoutConfirmBtn": "确认登出",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:12:  "profileCameraToast": "正在打开相机以更改个人资料图片...",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:13:  "profileLoadError": "加载用户数据时出错",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:14:  "profileUnknownUser": "系统用户",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:16:  "languageTitle": "改变语言",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:17:  "languageThai": "ภาษาไทย",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:18:  "languageEnglish": "English",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:19:  "languageChinese": "中文",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:20:  "languageConfirm": "确认",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:21:  "homeTab": "主页",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:22:  "bookingTab": "预订",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:23:  "messageTab": "消息",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:24:  "notificationTab": "通知",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:25:  "homeSearchHint": "搜索宿舍、地点或价格..",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:26:  "homeRecentSearches": "最近搜索",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:27:  "homeSeeAll": "查看全部",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:28:  "homeNoDormsFound": "未找到宿舍",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:29:  "homePopularDorms": "热门宿舍",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:30:  "homeRecommended": "推荐宿舍",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:31:  "homeAvailable": "空房",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:32:  "homePerMonth": "/月",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:33:  "homeRoomsLeft": "剩余 {count} 间",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:34:  "@homeRoomsLeft": {
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:36:      "count": {
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:37:        "type": "int"
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:41:  "homeFull": "已满",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:42:  "homeDistanceFromUni": "距大学 {dist} 公里",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:43:  "@homeDistanceFromUni": {
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:46:        "type": "String"
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:50:  "homeAirConFan": "空调 / 风扇",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:51:  "homeNotificationsTitle": "通知",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:52:  "homeReadAll": "全部已读",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:53:  "bookingStatusPendingOwnerApproval": "等待房东批准",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:54:  "bookingStatusPendingPayment": "待付款",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:55:  "bookingStatusCompleted": "已完成",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:56:  "bookingStatusRejected": "已拒绝",
+/Users/yupharat/just_booking/lib/l10n/app_zh.arb:57:  "bookingStatusCancelled": "已取消"
+/Users/yupharat/just_booking/lib/core/constants/map_constants.dart:1:import 'package:flutter_map/flutter_map.dart';
+/Users/yupharat/just_booking/lib/core/constants/map_constants.dart:2:import 'package:latlong2/latlong.dart';
+/Users/yupharat/just_booking/lib/core/constants/map_constants.dart:12:  static const String osmTileUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+/Users/yupharat/just_booking/lib/core/constants/map_constants.dart:13:  static const String userAgent = 'com.example.just_booking'; // Update this if app package name changes
+/Users/yupharat/just_booking/lib/core/api_config.dart:1:import 'dart:io' show Platform;
+/Users/yupharat/just_booking/lib/core/api_config.dart:2:import 'package:flutter/foundation.dart';
+/Users/yupharat/just_booking/lib/core/api_config.dart:6:    return 'https://just-booking-backend.onrender.com';
+/Users/yupharat/just_booking/lib/core/api_client.dart:1:import 'dart:convert';
+/Users/yupharat/just_booking/lib/core/api_client.dart:2:import 'dart:io';
+/Users/yupharat/just_booking/lib/core/api_client.dart:3:import 'package:http/http.dart' as http;
+/Users/yupharat/just_booking/lib/core/api_client.dart:4:import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+/Users/yupharat/just_booking/lib/core/api_client.dart:5:import 'package:http_parser/http_parser.dart';
+/Users/yupharat/just_booking/lib/core/api_client.dart:14:  String toString() => 'ApiException: $message (Status: $statusCode)';
+/Users/yupharat/just_booking/lib/core/api_client.dart:39:      'Content-Type': 'application/json',
+/Users/yupharat/just_booking/lib/core/api_client.dart:40:      'Accept': 'application/json',
+/Users/yupharat/just_booking/lib/core/api_client.dart:45:        headers['Authorization'] = 'Bearer $token';
+/Users/yupharat/just_booking/lib/core/api_client.dart:70:    final url = Uri.parse('${ApiConfig.baseUrl}$endpoint');
+/Users/yupharat/just_booking/lib/core/api_client.dart:77:    final url = Uri.parse('${ApiConfig.baseUrl}$endpoint');
+/Users/yupharat/just_booking/lib/core/api_client.dart:84:    final url = Uri.parse('${ApiConfig.baseUrl}$endpoint');
+/Users/yupharat/just_booking/lib/core/api_client.dart:91:    final url = Uri.parse('${ApiConfig.baseUrl}$endpoint');
+/Users/yupharat/just_booking/lib/core/api_client.dart:104:    final url = Uri.parse('${ApiConfig.baseUrl}$endpoint');
+/Users/yupharat/just_booking/lib/core/api_client.dart:105:    final request = http.MultipartRequest('POST', url);
+/Users/yupharat/just_booking/lib/core/api_client.dart:107:    headers.remove('Content-Type'); // Let http set multipart type
+/Users/yupharat/just_booking/lib/core/api_client.dart:116:    if (ext == 'png') mediaType = MediaType('image', 'png');
+/Users/yupharat/just_booking/lib/core/api_client.dart:117:    else if (ext == 'jpg' || ext == 'jpeg') mediaType = MediaType('image', 'jpeg');
+/Users/yupharat/just_booking/lib/core/api_client.dart:136:    final url = Uri.parse('${ApiConfig.baseUrl}$endpoint');
+/Users/yupharat/just_booking/lib/core/api_client.dart:137:    final request = http.MultipartRequest('POST', url);
+/Users/yupharat/just_booking/lib/core/api_client.dart:139:    headers.remove('Content-Type');
+/Users/yupharat/just_booking/lib/core/api_client.dart:145:      if (ext == 'png') mediaType = MediaType('image', 'png');
+/Users/yupharat/just_booking/lib/core/api_client.dart:146:      else if (ext == 'jpg' || ext == 'jpeg') mediaType = MediaType('image', 'jpeg');
+/Users/yupharat/just_booking/lib/core/localization/localization_extension.dart:1:import 'package:flutter/material.dart';
+/Users/yupharat/just_booking/lib/core/localization/localization_extension.dart:2:import 'package:just_booking/l10n/generated/app_localizations.dart';
+/Users/yupharat/just_booking/lib/core/localization/locale_controller.dart:1:import 'package:flutter/material.dart';
+/Users/yupharat/just_booking/lib/core/localization/locale_controller.dart:2:import 'package:shared_preferences/shared_preferences.dart';
+/Users/yupharat/just_booking/lib/utils/distance_calculator.dart:1:import 'package:latlong2/latlong.dart';
+/Users/yupharat/just_booking/lib/models/review.dart:1:import 'user.dart';
+/Users/yupharat/just_booking/lib/models/review.dart:29:      dormitoryId: json['dormitoryId'] ?? json['dormitory_id'] ?? 0,
+/Users/yupharat/just_booking/lib/models/review.dart:30:      userId: json['userId'] ?? json['user_id'] ?? 0,
+/Users/yupharat/just_booking/lib/models/review.dart:32:      comment: json['comment'] ?? '',
+/Users/yupharat/just_booking/lib/models/review.dart:33:      ownerReply: json['ownerReply'] ?? json['owner_reply'],
+/Users/yupharat/just_booking/lib/models/review.dart:34:      status: json['status'] ?? 'active',
+/Users/yupharat/just_booking/lib/models/review.dart:35:      createdAt: json['createdAt'] ?? json['created_at'] ?? '',
+/Users/yupharat/just_booking/lib/models/review.dart:36:      user: json['user'] != null 
+/Users/yupharat/just_booking/lib/models/review.dart:37:          ? User.fromJson(json['user']) 
+/Users/yupharat/just_booking/lib/models/review.dart:38:          : (json['first_name'] != null || json['nickname'] != null)
+/Users/yupharat/just_booking/lib/models/review.dart:40:                  id: json['userId'] ?? json['user_id'] ?? 0,
+/Users/yupharat/just_booking/lib/models/review.dart:42:                  role: 'user',
+/Users/yupharat/just_booking/lib/models/review.dart:43:                  firstName: json['firstName'] ?? json['first_name'],
+/Users/yupharat/just_booking/lib/models/review.dart:44:                  lastName: json['lastName'] ?? json['last_name'],
+/Users/yupharat/just_booking/lib/models/room.dart:10:      url: json['url'] ?? json['image_url'] ?? '',
+/Users/yupharat/just_booking/lib/models/room.dart:45:    final parsedPrice = double.tryParse(json['price']?.toString() ?? '0') ?? 0.0;
+/Users/yupharat/just_booking/lib/models/room.dart:48:    final parsedSecurityDeposit = double.tryParse(json['security_deposit']?.toString() ?? '') ?? parsedPrice;
+/Users/yupharat/just_booking/lib/models/room.dart:52:      dormitoryId: json['dormitoryId'] ?? json['dormitory_id'] ?? 0,
+/Users/yupharat/just_booking/lib/models/room.dart:53:      roomNumber: json['roomNumber'] ?? json['room_number'] ?? '',
+/Users/yupharat/just_booking/lib/models/room.dart:54:      roomType: json['roomType'] ?? json['room_type'] ?? '',
+/Users/yupharat/just_booking/lib/models/room.dart:57:      availableCount: json['availableCount'] ?? json['available_count'] ?? 0,
+/Users/yupharat/just_booking/lib/models/room.dart:58:      status: json['status'] ?? 'available',
+/Users/yupharat/just_booking/lib/models/room.dart:59:      availableFrom: json['availableFrom'] ?? json['available_from'],
+/Users/yupharat/just_booking/lib/models/user.dart:31:      email: json['email'] ?? '',
+/Users/yupharat/just_booking/lib/models/user.dart:32:      role: json['role'] ?? 'user',
+/Users/yupharat/just_booking/lib/models/user.dart:33:      firstName: json['firstName'] ?? json['first_name'],
+/Users/yupharat/just_booking/lib/models/user.dart:34:      lastName: json['lastName'] ?? json['last_name'],
+/Users/yupharat/just_booking/lib/models/user.dart:38:      status: json['status'] ?? 'active',
+/Users/yupharat/just_booking/lib/models/user.dart:39:      profileImageUrl: json['profileImageUrl'] ?? json['profile_image_url'],
+/Users/yupharat/just_booking/lib/models/user.dart:40:      promptpayId: json['promptpayId'] ?? json['promptpay_id'],
+/Users/yupharat/just_booking/lib/models/user.dart:49:      'firstName': firstName,
+/Users/yupharat/just_booking/lib/models/user.dart:50:      'lastName': lastName,
+/Users/yupharat/just_booking/lib/models/user.dart:54:      'status': status,
+/Users/yupharat/just_booking/lib/models/user.dart:55:      'promptpayId': promptpayId,
+/Users/yupharat/just_booking/lib/models/booking.dart:3:import 'user.dart';
+/Users/yupharat/just_booking/lib/models/booking.dart:54:        if (status == 'pending') return 'รอเจ้าของอนุมัติ';
+/Users/yupharat/just_booking/lib/models/booking.dart:64:    } else if (json['room_number'] != null || json['room_type'] != null) {
+/Users/yupharat/just_booking/lib/models/booking.dart:66:        id: json['roomId'] ?? json['room_id'] ?? 0,
+/Users/yupharat/just_booking/lib/models/booking.dart:68:        roomNumber: json['roomNumber'] ?? json['room_number'] ?? '',
+/Users/yupharat/just_booking/lib/models/booking.dart:69:        roomType: json['roomType'] ?? json['room_type'] ?? '',
+/Users/yupharat/just_booking/lib/models/booking.dart:70:        price: double.tryParse(json['totalAmount']?.toString() ?? json['total_amount']?.toString() ?? '0') ?? 0.0,
+/Users/yupharat/just_booking/lib/models/booking.dart:71:        securityDeposit: double.tryParse(json['totalAmount']?.toString() ?? json['total_amount']?.toString() ?? '0') ?? 0.0,
+/Users/yupharat/just_booking/lib/models/booking.dart:85:        name: json['dormitoryName'] ?? json['dormitory_name'] ?? '',
+/Users/yupharat/just_booking/lib/models/booking.dart:100:    if (json['user'] != null) {
+/Users/yupharat/just_booking/lib/models/booking.dart:101:      parsedUser = User.fromJson(json['user']);
+/Users/yupharat/just_booking/lib/models/booking.dart:102:    } else if (json['first_name'] != null || json['firstName'] != null) {
+/Users/yupharat/just_booking/lib/models/booking.dart:104:        id: json['userId'] ?? json['user_id'] ?? 0,
+/Users/yupharat/just_booking/lib/models/booking.dart:105:        email: json['email'] ?? '',
+/Users/yupharat/just_booking/lib/models/booking.dart:106:        role: 'user',
+/Users/yupharat/just_booking/lib/models/booking.dart:107:        firstName: json['firstName'] ?? json['first_name'],
+/Users/yupharat/just_booking/lib/models/booking.dart:108:        lastName: json['lastName'] ?? json['last_name'],
+/Users/yupharat/just_booking/lib/models/booking.dart:116:      id: json['id'] ?? json['bookingId'] ?? 0,
+/Users/yupharat/just_booking/lib/models/booking.dart:117:      userId: json['userId'] ?? json['user_id'] ?? 0,
+/Users/yupharat/just_booking/lib/models/booking.dart:118:      roomId: json['roomId'] ?? json['room_id'] ?? 0,
+/Users/yupharat/just_booking/lib/models/booking.dart:119:      moveInDate: json['moveInDate'] ?? json['move_in_date'] ?? '',
+/Users/yupharat/just_booking/lib/models/booking.dart:121:      status: json['status'] ?? 'pending',
+/Users/yupharat/just_booking/lib/models/booking.dart:122:      paymentStatus: json['paymentStatus'] ?? json['payment_status'] ?? 'pending',
+/Users/yupharat/just_booking/lib/models/booking.dart:123:      qrCodeUrl: json['qrCodeUrl'] ?? json['qr_code_url'],
+/Users/yupharat/just_booking/lib/models/booking.dart:124:      paymentSlipUrl: json['paymentSlipUrl'] ?? json['payment_slip_url'] ?? json['slip_image_url'] ?? json['slipImageUrl'],
+/Users/yupharat/just_booking/lib/models/booking.dart:125:      createdAt: json['createdAt'] ?? json['created_at'] ?? '',
+/Users/yupharat/just_booking/lib/models/dormitory.dart:65:      name: json['name'] ?? '',
+/Users/yupharat/just_booking/lib/models/dormitory.dart:66:      description: json['description'] ?? '',
+/Users/yupharat/just_booking/lib/models/dormitory.dart:67:      address: json['address'] ?? '',
+/Users/yupharat/just_booking/lib/models/dormitory.dart:68:      latitude: _parseDouble(json['latitude']),
+/Users/yupharat/just_booking/lib/models/dormitory.dart:69:      longitude: _parseDouble(json['longitude']),
+/Users/yupharat/just_booking/lib/models/dormitory.dart:70:      distanceFromUniversityKm: _parseDouble(json['distance_from_university_km']),
+/Users/yupharat/just_booking/lib/models/dormitory.dart:71:      facilities: json['facilities'] != null ? List<String>.from(json['facilities']) : [],
+/Users/yupharat/just_booking/lib/models/dormitory.dart:72:      securityFeatures: json['security_features'] != null ? List<String>.from(json['security_features']) : [],
+/Users/yupharat/just_booking/lib/models/dormitory.dart:73:      rentalTerms: json['rental_terms'] ?? '',
+/Users/yupharat/just_booking/lib/models/dormitory.dart:74:      rules: json['rules'] ?? '',
+/Users/yupharat/just_booking/lib/models/dormitory.dart:75:      status: json['status'] ?? 'pending',
+/Users/yupharat/just_booking/lib/models/dormitory.dart:76:      coverImageUrl: json['cover_image_url'],
+/Users/yupharat/just_booking/lib/models/dormitory.dart:77:      rating: json['rating'] != null ? _parseDouble(json['rating']) : null,
+/Users/yupharat/just_booking/lib/models/dormitory.dart:85:      accountName: json['account_name'],
+/Users/yupharat/just_booking/lib/models/dormitory.dart:86:      accountNumber: json['account_number'],
+/Users/yupharat/just_booking/lib/models/dormitory.dart:87:      promptPayNumber: json['promptpay_number'],
+/Users/yupharat/just_booking/lib/dormitory/owner_booking_dashboard.dart:1:import 'package:flutter/material.dart';
+/Users/yupharat/just_booking/lib/dormitory/owner_booking_dashboard.dart:2:import 'package:intl/intl.dart';
+/Users/yupharat/just_booking/lib/dormitory/owner_booking_dashboard.dart:66:          debugPrint('Notification Error: $e');
+/Users/yupharat/just_booking/lib/dormitory/owner_booking_dashboard.dart:79:      debugPrint('Error updateStatus: $e');
+/Users/yupharat/just_booking/lib/dormitory/owner_booking_dashboard.dart:81:        SnackBar(content: Text('เกิดข้อผิดพลาด: ${e.toString()}')),
+/Users/yupharat/just_booking/lib/dormitory/owner_booking_dashboard.dart:186:            'ผู้จอง: ${user?.firstName ?? ''} ${user?.lastName ?? ''}',
+/Users/yupharat/just_booking/lib/dormitory/owner_booking_dashboard.dart:195:            Text('เบอร์โทรศัพท์: ${user.phone}', style: TextStyle(fontSize: 14, color: Colors.grey.shade700)),
+/Users/yupharat/just_booking/lib/dormitory/owner_booking_dashboard.dart:199:            Text('ที่อยู่: ${user.address}', style: TextStyle(fontSize: 14, color: Colors.grey.shade700)),
+/Users/yupharat/just_booking/lib/dormitory/owner_booking_dashboard.dart:203:            Text('อีเมล: ${user.email}', style: TextStyle(fontSize: 14, color: Colors.grey.shade700)),
+/Users/yupharat/just_booking/lib/dormitory/owner_booking_dashboard.dart:207:            'หอพัก: ${dorm?.name ?? ''} | ห้อง: ${room?.roomNumber ?? ''}',
+/Users/yupharat/just_booking/lib/dormitory/owner_booking_dashboard.dart:215:            'วันที่เข้าอยู่: ${booking.moveInDate}',
+/Users/yupharat/just_booking/lib/dormitory/owner_booking_dashboard.dart:223:            'วันที่จอง: ${booking.createdAt}',
+/Users/yupharat/just_booking/lib/dormitory/owner_booking_dashboard.dart:231:            const Text('หลักฐานการโอนเงิน:', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+/Users/yupharat/just_booking/lib/dormitory/owner_booking_dashboard.dart:287:          ] else if (booking.status == 'pending_payment_verification' || (booking.status == 'pending_payment' && (booking.paymentStatus == 'submitted' || booking.paymentSlipUrl != null))) ...[
+/Users/yupharat/just_booking/lib/dormitory/owner_booking_dashboard.dart:331:          status == 'approved' ? 'คุณต้องการอนุมัติการจองนี้ใช่หรือไม่?' : 'คุณต้องการปฏิเสธการจองนี้ใช่หรือไม่?',
+/Users/yupharat/just_booking/lib/dormitory/owner_booking_dashboard.dart:364:          action == 'verified' ? 'คุณต้องการยืนยันการรับเงินใช่หรือไม่?' : 'คุณต้องการปฏิเสธสลิปนี้ใช่หรือไม่?',
+/Users/yupharat/just_booking/lib/dormitory/owner_booking_dashboard.dart:406:      debugPrint('Error updateSlipStatus: $e');
+/Users/yupharat/just_booking/lib/dormitory/owner_booking_dashboard.dart:408:        SnackBar(content: Text('เกิดข้อผิดพลาด: ${e.toString()}')),
+/Users/yupharat/just_booking/lib/dormitory/owner_chat_dashboard.dart:1:import 'package:flutter/material.dart';
+/Users/yupharat/just_booking/lib/dormitory/owner_chat_dashboard.dart:2:import 'package:cloud_firestore/cloud_firestore.dart';
+/Users/yupharat/just_booking/lib/dormitory/owner_chat_dashboard.dart:3:import 'package:just_booking/models/dormitory.dart';
+/Users/yupharat/just_booking/lib/dormitory/owner_chat_dashboard.dart:4:import 'package:just_booking/services/chat_service.dart';
+/Users/yupharat/just_booking/lib/dormitory/owner_chat_dashboard.dart:5:import 'package:just_booking/users/chat_screen.dart';
+/Users/yupharat/just_booking/lib/dormitory/owner_chat_dashboard.dart:6:import 'package:intl/intl.dart';
+/Users/yupharat/just_booking/lib/dormitory/owner_chat_dashboard.dart:81:              return const Text('Error loading chats');
+/Users/yupharat/just_booking/lib/dormitory/owner_chat_dashboard.dart:112:                final userName = chat['userName'] ?? 'ผู้ใช้';
+/Users/yupharat/just_booking/lib/dormitory/owner_chat_dashboard.dart:113:                final lastMessage = chat['lastMessage'] ?? '';
+/Users/yupharat/just_booking/lib/dormitory/owner_chat_dashboard.dart:114:                final lastMessageTime = (chat['lastMessageTime'] as Timestamp?)?.toDate() ?? DateTime.now();
+/Users/yupharat/just_booking/lib/dormitory/owner_chat_dashboard.dart:115:                final timeStr = DateFormat('HH:mm').format(lastMessageTime);
+/Users/yupharat/just_booking/lib/dormitory/map_picker_page.dart:1:import 'package:flutter/material.dart';
+/Users/yupharat/just_booking/lib/dormitory/map_picker_page.dart:2:import 'package:flutter_map/flutter_map.dart';
+/Users/yupharat/just_booking/lib/dormitory/map_picker_page.dart:3:import 'package:latlong2/latlong.dart';
+/Users/yupharat/just_booking/lib/dormitory/add_room_page.dart:1:import 'dart:io';
+/Users/yupharat/just_booking/lib/dormitory/add_room_page.dart:2:import 'package:flutter/material.dart';
+/Users/yupharat/just_booking/lib/dormitory/add_room_page.dart:3:import 'dart:ui';
+/Users/yupharat/just_booking/lib/dormitory/add_room_page.dart:4:import 'package:image_picker/image_picker.dart';
+/Users/yupharat/just_booking/lib/dormitory/add_room_page.dart:44:    'Wi-Fi': false,
+/Users/yupharat/just_booking/lib/dormitory/add_room_page.dart:51:    'Wi-Fi': Icons.wifi_rounded,
+/Users/yupharat/just_booking/lib/dormitory/add_room_page.dart:65:      if (r.roomType.contains('พัดลม')) _selectedAirType = 'พัดลม';
+/Users/yupharat/just_booking/lib/dormitory/add_room_page.dart:66:      if (r.roomType.contains('เตียงคู่')) _selectedBedType = 'เตียงคู่';
+/Users/yupharat/just_booking/lib/dormitory/add_room_page.dart:110:        const SnackBar(content: Text('กรุณาเลือกรูปห้องตัวอย่างอย่างน้อย 1 รูป')),
+/Users/yupharat/just_booking/lib/dormitory/add_room_page.dart:126:        'roomNumber': roomNumber.isNotEmpty ? roomNumber : null,
+/Users/yupharat/just_booking/lib/dormitory/add_room_page.dart:127:        'roomType': '$_selectedAirType - $_selectedBedType',
+/Users/yupharat/just_booking/lib/dormitory/add_room_page.dart:129:        'availableCount': int.tryParse(countStr) ?? 1,
+/Users/yupharat/just_booking/lib/dormitory/add_room_page.dart:183:          widget.roomToEdit == null ? 'เพิ่มห้องพัก' : 'แก้ไขห้องพัก',
+/Users/yupharat/just_booking/lib/dormitory/add_room_page.dart:214:                        '${_roomImages.length} / 5 รูป',
+/Users/yupharat/just_booking/lib/dormitory/add_room_page.dart:282:                                'เพิ่มรูปภาพ (สูงสุด 5 รูป)',
+/Users/yupharat/just_booking/lib/dormitory/add_room_page.dart:301:                    hintText: 'เช่น A101 หรือ ห้องสแตนดาร์ด',
+/Users/yupharat/just_booking/lib/dormitory/add_room_page.dart:311:                    hintText: 'ระบุจำนวนห้องว่าง เช่น 5',
+/Users/yupharat/just_booking/lib/dormitory/add_room_page.dart:377:                      hintText: 'เช่น 4500',
+/Users/yupharat/just_booking/lib/dormitory/add_dorm_info_page.dart:1:import 'dart:io';
+/Users/yupharat/just_booking/lib/dormitory/add_dorm_info_page.dart:2:import 'package:flutter/material.dart';
+/Users/yupharat/just_booking/lib/dormitory/add_dorm_info_page.dart:3:import 'dart:ui';
+/Users/yupharat/just_booking/lib/dormitory/add_dorm_info_page.dart:4:import 'package:image_picker/image_picker.dart';
+/Users/yupharat/just_booking/lib/dormitory/add_dorm_info_page.dart:5:import 'package:geocoding/geocoding.dart';
+/Users/yupharat/just_booking/lib/dormitory/add_dorm_info_page.dart:6:import 'package:latlong2/latlong.dart' hide Path;
+/Users/yupharat/just_booking/lib/dormitory/add_dorm_info_page.dart:8:import 'package:http/http.dart' as http;
+/Users/yupharat/just_booking/lib/dormitory/add_dorm_info_page.dart:56:    'Wi-Fi': false,
+/Users/yupharat/just_booking/lib/dormitory/add_dorm_info_page.dart:64:    'Wi-Fi': Icons.wifi_rounded,
+/Users/yupharat/just_booking/lib/dormitory/add_dorm_info_page.dart:97:      if (dorm.description.contains('ว่างภายใน 1 เดือน')) {
+/Users/yupharat/just_booking/lib/dormitory/add_dorm_info_page.dart:172:        debugPrint('Geocoding error: $e');
+/Users/yupharat/just_booking/lib/dormitory/add_dorm_info_page.dart:205:      final description = 'ประเภท: $_selectedDormType\nสถานะ: ${_statusSelection == 0 ? 'พร้อมเข้าอยู่' : 'ว่างภายใน 1 เดือน'}\nห้องว่าง: $_availableRooms ห้อง';
+/Users/yupharat/just_booking/lib/dormitory/add_dorm_info_page.dart:210:        'latitude': _latitude,
+/Users/yupharat/just_booking/lib/dormitory/add_dorm_info_page.dart:211:        'longitude': _longitude,
+/Users/yupharat/just_booking/lib/dormitory/add_dorm_info_page.dart:214:        'rules': rules.isNotEmpty ? rules : null,
+/Users/yupharat/just_booking/lib/dormitory/add_dorm_info_page.dart:216:        'account_name': _accountNameController.text.trim().isNotEmpty ? _accountNameController.text.trim() : null,
+/Users/yupharat/just_booking/lib/dormitory/add_dorm_info_page.dart:217:        'account_number': _accountNumberController.text.trim().isNotEmpty ? _accountNumberController.text.trim() : null,
+/Users/yupharat/just_booking/lib/dormitory/add_dorm_info_page.dart:218:        'promptpay_number': _promptPayNumberController.text.trim().isNotEmpty ? _promptPayNumberController.text.trim() : null,
+/Users/yupharat/just_booking/lib/dormitory/add_dorm_info_page.dart:237:          content: Text(widget.dormitoryToEdit == null ? 'เพิ่มข้อมูลหอพักสำเร็จ' : 'อัปเดตข้อมูลหอพักสำเร็จ', style: const TextStyle()),
+/Users/yupharat/just_booking/lib/dormitory/add_dorm_info_page.dart:276:          widget.dormitoryToEdit == null ? 'เพิ่มข้อมูลหอพัก' : 'แก้ไขข้อมูลหอพัก',
+/Users/yupharat/just_booking/lib/dormitory/add_dorm_info_page.dart:398:                            'https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=600', 
+/Users/yupharat/just_booking/lib/dormitory/add_dorm_info_page.dart:423:                                  _latitude != null ? 'เปลี่ยนพิกัดบนแผนที่' : 'เลือกพิกัดจากแผนที่',
+/Users/yupharat/just_booking/lib/dormitory/add_dorm_info_page.dart:455:                          title: 'ว่างภายใน 1 เดือน',
+/Users/yupharat/just_booking/lib/dormitory/add_dorm_info_page.dart:550:                    hintText: 'เช่น ค่ามัดจำ 2 เดือน, สัญญา 1 ปี, ห้ามเลี้ยงสัตว์...',
+/Users/yupharat/just_booking/lib/dormitory/add_dorm_info_page.dart:579:                    hintText: 'PromptPay (เบอร์โทร หรือ เลขบัตรประชาชน)',
+/Users/yupharat/just_booking/lib/dormitory/dormitory_home_page.dart:1:import 'package:flutter/material.dart';
+/Users/yupharat/just_booking/lib/dormitory/dormitory_home_page.dart:6:import '../models/user.dart';
+/Users/yupharat/just_booking/lib/dormitory/dormitory_home_page.dart:8:import '../services/auth_service.dart';
+/Users/yupharat/just_booking/lib/dormitory/dormitory_home_page.dart:11:import 'package:cloud_firestore/cloud_firestore.dart';
+/Users/yupharat/just_booking/lib/dormitory/dormitory_home_page.dart:12:import 'package:intl/intl.dart';
+/Users/yupharat/just_booking/lib/dormitory/dormitory_home_page.dart:14:import '../users/edit_profile_page.dart';
+/Users/yupharat/just_booking/lib/dormitory/dormitory_home_page.dart:61:      debugPrint('Error fetching user data: $e');
+/Users/yupharat/just_booking/lib/dormitory/dormitory_home_page.dart:74:      debugPrint('Error fetching dormitories: $e');
+/Users/yupharat/just_booking/lib/dormitory/dormitory_home_page.dart:120:                          'สวัสดี, ${_currentUser?.firstName ?? 'เจ้าของหอพัก'}',
+/Users/yupharat/just_booking/lib/dormitory/dormitory_home_page.dart:141:                                currentName: '${_currentUser!.firstName ?? ''} ${_currentUser!.lastName ?? ''}'.trim(),
+/Users/yupharat/just_booking/lib/dormitory/dormitory_home_page.dart:144:                                imageUrl: _currentUser!.profileImageUrl ?? 'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=200',
+/Users/yupharat/just_booking/lib/dormitory/dormitory_home_page.dart:171:                                    _currentUser?.profileImageUrl ?? 'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=200'),
+/Users/yupharat/just_booking/lib/dormitory/dormitory_home_page.dart:198:                                  content: const Text('คุณต้องการออกจากระบบใช่หรือไม่?', style: TextStyle()),
+/Users/yupharat/just_booking/lib/dormitory/dormitory_home_page.dart:466:    String statusText = 'REVIEWING';
+/Users/yupharat/just_booking/lib/dormitory/dormitory_home_page.dart:471:      statusText = 'APPROVED';
+/Users/yupharat/just_booking/lib/dormitory/dormitory_home_page.dart:475:      statusText = 'REJECTED';
+/Users/yupharat/just_booking/lib/dormitory/dormitory_home_page.dart:510:                  dorm.coverImageUrl ?? 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=150',
+/Users/yupharat/just_booking/lib/dormitory/dormitory_home_page.dart:533:                      'ID: #DORM-${dorm.id}',
+/Users/yupharat/just_booking/lib/dormitory/dormitory_home_page.dart:600:                    label: isRejected ? 'ถูกปฏิเสธ' : 'กำลังตรวจ',
+/Users/yupharat/just_booking/lib/dormitory/dormitory_home_page.dart:723:                          final bool isRead = notifData['isRead'] ?? false;
+/Users/yupharat/just_booking/lib/dormitory/dormitory_home_page.dart:724:                          final String title = notifData['title'] ?? '';
+/Users/yupharat/just_booking/lib/dormitory/dormitory_home_page.dart:725:                          final String desc = notifData['desc'] ?? '';
+/Users/yupharat/just_booking/lib/dormitory/dormitory_home_page.dart:732:                            timeStr = DateFormat('HH:mm').format(time);
+/Users/yupharat/just_booking/lib/dormitory/dormitory_home_page.dart:736:                            timeStr = DateFormat('d MMM').format(time);
+/Users/yupharat/just_booking/lib/dormitory/dormitory_home_page.dart:742:                          if (notifData['type'] == 'booking_success') {
+/Users/yupharat/just_booking/lib/dormitory/dormitory_home_page.dart:745:                          } else if (notifData['type'] == 'new_booking') {
+/Users/yupharat/just_booking/lib/dormitory/dormitory_management_page.dart:1:import 'package:flutter/material.dart';
+/Users/yupharat/just_booking/lib/dormitory/dormitory_management_page.dart:2:import 'package:just_booking/models/room.dart';
+/Users/yupharat/just_booking/lib/dormitory/dormitory_management_page.dart:64:        content: const Text('คุณแน่ใจหรือไม่ว่าต้องการลบหอพักนี้? การกระทำนี้ไม่สามารถย้อนกลับได้', style: TextStyle()),
+/Users/yupharat/just_booking/lib/dormitory/dormitory_management_page.dart:160:                        '${_dormitory.rooms?.length ?? 0} ห้อง',
+/Users/yupharat/just_booking/lib/dormitory/dormitory_management_page.dart:220:                        '${_dormitory.reviews?.length ?? 0} รีวิว',
+/Users/yupharat/just_booking/lib/dormitory/dormitory_management_page.dart:328:                  _dormitory.coverImageUrl ?? 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=150',
+/Users/yupharat/just_booking/lib/dormitory/dormitory_management_page.dart:462:                            room.availableCount > 0 ? 'ว่าง ${room.availableCount} ห้อง' : 'เต็มแล้ว',
+/Users/yupharat/just_booking/lib/dormitory/dormitory_management_page.dart:487:                                  content: const Text('คุณต้องการลบห้องพักนี้ใช่หรือไม่?'),
+/Users/yupharat/just_booking/lib/dormitory/dormitory_management_page.dart:546:                  '฿${room.price.toStringAsFixed(0)} / เดือน',
+/Users/yupharat/just_booking/lib/dormitory/dormitory_management_page.dart:585:                  (review.user?.firstName ?? 'U').substring(0, 1).toUpperCase(),
+/Users/yupharat/just_booking/lib/dormitory/dormitory_management_page.dart:598:                      '${review.user?.firstName ?? 'ผู้ใช้งาน'} ${review.user?.lastName ?? ''}'.trim(),
+/Users/yupharat/just_booking/lib/dormitory/dormitory_management_page.dart:615:                review.createdAt.split('T').first,
+/Users/yupharat/just_booking/lib/main.dart:1:import 'package:flutter/material.dart';
+/Users/yupharat/just_booking/lib/main.dart:2:import 'package:firebase_core/firebase_core.dart';
+/Users/yupharat/just_booking/lib/main.dart:3:import 'package:just_booking/users/home_page.dart';
+/Users/yupharat/just_booking/lib/main.dart:4:import 'package:just_booking/wellcome/login.dart';
+/Users/yupharat/just_booking/lib/main.dart:5:import 'package:just_booking/services/auth_service.dart';
+/Users/yupharat/just_booking/lib/main.dart:6:import 'package:just_booking/dormitory/dormitory_home_page.dart';
+/Users/yupharat/just_booking/lib/main.dart:7:import 'package:flutter_localizations/flutter_localizations.dart';
+/Users/yupharat/just_booking/lib/main.dart:8:import 'package:just_booking/l10n/generated/app_localizations.dart';
+/Users/yupharat/just_booking/lib/main.dart:9:import 'package:just_booking/core/localization/locale_controller.dart';
+/Users/yupharat/just_booking/lib/main.dart:10:import 'package:google_fonts/google_fonts.dart';
+/Users/yupharat/just_booking/lib/main.dart:12:import 'package:firebase_messaging/firebase_messaging.dart';
+/Users/yupharat/just_booking/lib/main.dart:13:import 'package:just_booking/services/notification_service.dart';
+/Users/yupharat/just_booking/lib/main.dart:15:import 'package:flutter/foundation.dart';
+/Users/yupharat/just_booking/lib/main.dart:33:        print('Firebase initialization error: $e');
+/Users/yupharat/just_booking/lib/main.dart:38:      print('Bypassed Firebase initialization on Web');
+/Users/yupharat/just_booking/lib/main.dart:53:          title: 'Just Booking',
+/Users/yupharat/just_booking/lib/map/widgets/dormitory_marker_builder.dart:1:import 'package:flutter/material.dart';
+/Users/yupharat/just_booking/lib/map/widgets/dormitory_marker_builder.dart:2:import 'package:flutter_map/flutter_map.dart';
+/Users/yupharat/just_booking/lib/map/widgets/dormitory_marker_builder.dart:3:import 'package:latlong2/latlong.dart';
+/Users/yupharat/just_booking/lib/map/dormitory_map_page.dart:1:import 'package:flutter/material.dart';
+/Users/yupharat/just_booking/lib/map/dormitory_map_page.dart:2:import 'package:flutter_map/flutter_map.dart';
+/Users/yupharat/just_booking/lib/map/dormitory_map_page.dart:3:import 'package:latlong2/latlong.dart';
+/Users/yupharat/just_booking/lib/map/dormitory_map_page.dart:8:import 'widgets/dormitory_marker_builder.dart';
+/Users/yupharat/just_booking/lib/map/dormitory_map_page.dart:9:import '../users/dorm_detail_page.dart';
+/Users/yupharat/just_booking/lib/map/dormitory_map_page.dart:85:                    dorm.coverImageUrl ?? 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267',
+/Users/yupharat/just_booking/lib/map/dormitory_map_page.dart:105:                        'ห่างจาก ม. ${dorm.distanceFromUniversityKm} กม.',
+/Users/yupharat/just_booking/lib/wellcome/login.dart:2:import 'package:flutter/material.dart';
+/Users/yupharat/just_booking/lib/wellcome/login.dart:4:import '../services/auth_service.dart';
+/Users/yupharat/just_booking/lib/wellcome/login.dart:5:import '../users/home_page.dart';
+/Users/yupharat/just_booking/lib/wellcome/login.dart:40:    if (!email.contains('@')) {
+/Users/yupharat/just_booking/lib/wellcome/login.dart:117:                          'JUST',
+/Users/yupharat/just_booking/lib/wellcome/login.dart:128:                      'B O O K I N G',
+/Users/yupharat/just_booking/lib/wellcome/login.dart:257:                              'ลืมรหัสผ่าน?',
+/Users/yupharat/just_booking/lib/wellcome/login.dart:308:                              'ยังไม่มีบัญชี? ',
+/Users/yupharat/just_booking/lib/wellcome/Register.dart:1:import 'dart:io';
+/Users/yupharat/just_booking/lib/wellcome/Register.dart:2:import 'package:flutter/material.dart';
+/Users/yupharat/just_booking/lib/wellcome/Register.dart:3:import 'package:image_picker/image_picker.dart';
+/Users/yupharat/just_booking/lib/wellcome/Register.dart:5:import '../services/auth_service.dart';
+/Users/yupharat/just_booking/lib/wellcome/Register.dart:85:        role: widget.isOwner ? 'owner' : 'member',
+/Users/yupharat/just_booking/lib/wellcome/Register.dart:208:                          'JUST',
+/Users/yupharat/just_booking/lib/wellcome/Register.dart:219:                      'B O O K I N G',
+/Users/yupharat/just_booking/lib/wellcome/Register.dart:393:                              'มีบัญชีอยู่แล้ว? ',
+/Users/yupharat/just_booking/lib/wellcome/wellcome.dart:1:import 'package:flutter/material.dart';
+/Users/yupharat/just_booking/lib/wellcome/wellcome.dart:2:import 'Register.dart';
+/Users/yupharat/just_booking/lib/wellcome/wellcome.dart:43:                        'คุณคือใคร ?',
+/Users/yupharat/just_booking/lib/wellcome/wellcome.dart:52:                        'เลือกตัวเลือกที่ตรงกับ\nความต้องการของคุณ',
+/Users/yupharat/just_booking/lib/wellcome/wellcome.dart:137:                        'ต้องการความช่วยเหลือ? ',
+/Users/yupharat/just_booking/lib/users/edit_profile_page.dart:1:import 'package:flutter/material.dart';
+/Users/yupharat/just_booking/lib/users/edit_profile_page.dart:2:import '../services/auth_service.dart';
+/Users/yupharat/just_booking/lib/users/edit_profile_page.dart:71:      final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
+/Users/yupharat/just_booking/lib/users/edit_profile_page.dart:74:        'firstName': firstName,
+/Users/yupharat/just_booking/lib/users/edit_profile_page.dart:75:        'lastName': lastName,
+/Users/yupharat/just_booking/lib/users/edit_profile_page.dart:78:        // Optional: 'profileImageUrl': _imageUrl if your API supports updating it this way
+/Users/yupharat/just_booking/lib/users/edit_profile_page.dart:183:                                    if (_imageUrl.contains('photo-1573496359142-b8d87734a5a2')) {
+/Users/yupharat/just_booking/lib/users/edit_profile_page.dart:184:                                      _imageUrl = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=300';
+/Users/yupharat/just_booking/lib/users/edit_profile_page.dart:186:                                      _imageUrl = 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=300';
+/Users/yupharat/just_booking/lib/users/language_page.dart:1:import 'package:flutter/material.dart';
+/Users/yupharat/just_booking/lib/users/language_page.dart:2:import 'package:just_booking/main.dart'; // To access localeController
+/Users/yupharat/just_booking/lib/users/language_page.dart:3:import 'package:just_booking/core/localization/localization_extension.dart';
+/Users/yupharat/just_booking/lib/users/language_page.dart:83:            content: Text('คุณต้องการเปลี่ยนภาษาเป็น "$title" ใช่หรือไม่?\nDo you want to change language to "$title"?'),
+/Users/yupharat/just_booking/lib/users/language_page.dart:88:                child: const Text('ยกเลิก (Cancel)', style: TextStyle(color: Colors.grey)),
+/Users/yupharat/just_booking/lib/users/language_page.dart:95:                child: const Text('ยืนยัน (Confirm)', style: TextStyle(color: Color(0xFF4274E6), fontWeight: FontWeight.bold)),
+/Users/yupharat/just_booking/lib/users/booking_history_tab.dart:1:import 'package:flutter/material.dart';
+/Users/yupharat/just_booking/lib/users/booking_history_tab.dart:141:    bool isCompleted = booking.status == 'completed' || booking.status == 'confirmed';
+/Users/yupharat/just_booking/lib/users/booking_history_tab.dart:146:    if (isPendingPayment && booking.paymentStatus == 'submitted') {
+/Users/yupharat/just_booking/lib/users/booking_history_tab.dart:170:        ? 'ห้อง ${booking.room!.roomNumber} • ${booking.room!.roomType}'
+/Users/yupharat/just_booking/lib/users/booking_history_tab.dart:172:    final bookingFeeText = booking.room != null ? '฿${booking.room!.bookingFee.toStringAsFixed(0)}' : '฿0';
+/Users/yupharat/just_booking/lib/users/booking_history_tab.dart:173:    final imageUrl = booking.dormitory?.coverImageUrl ?? 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=150';
+/Users/yupharat/just_booking/lib/users/booking_history_tab.dart:218:                'รหัสการจอง #JB${booking.id}',
+/Users/yupharat/just_booking/lib/users/booking_history_tab.dart:295:                if (booking.paymentStatus == 'submitted' || (booking.paymentSlipUrl != null && booking.paymentStatus != 'rejected'))
+/Users/yupharat/just_booking/lib/users/booking_history_tab.dart:336:                                monthlyPrice: booking.room != null ? booking.room!.price.toStringAsFixed(0) : '0',
+/Users/yupharat/just_booking/lib/users/booking_history_tab.dart:337:                                securityDeposit: booking.room != null ? booking.room!.securityDeposit.toStringAsFixed(0) : '0',
+/Users/yupharat/just_booking/lib/users/booking_history_tab.dart:338:                                bookingFee: booking.room != null ? booking.room!.bookingFee.toStringAsFixed(0) : '0',
+/Users/yupharat/just_booking/lib/users/chat_screen.dart:1:import 'package:flutter/material.dart';
+/Users/yupharat/just_booking/lib/users/chat_screen.dart:2:import 'package:just_booking/models/user.dart';
+/Users/yupharat/just_booking/lib/users/chat_screen.dart:3:import 'package:just_booking/services/auth_service.dart';
+/Users/yupharat/just_booking/lib/users/chat_screen.dart:4:import 'package:just_booking/services/chat_service.dart';
+/Users/yupharat/just_booking/lib/users/chat_screen.dart:5:import 'package:intl/intl.dart';
+/Users/yupharat/just_booking/lib/users/chat_screen.dart:54:          const SnackBar(content: Text('Failed to load user info')),
+/Users/yupharat/just_booking/lib/users/chat_screen.dart:76:          const SnackBar(content: Text('Failed to send message')),
+/Users/yupharat/just_booking/lib/users/chat_screen.dart:92:        appBar: AppBar(title: const Text('Error')),
+/Users/yupharat/just_booking/lib/users/chat_screen.dart:93:        body: const Center(child: Text('Please login to chat.')),
+/Users/yupharat/just_booking/lib/users/chat_screen.dart:125:                  return const Center(child: Text('Error loading messages.'));
+/Users/yupharat/just_booking/lib/users/chat_screen.dart:160:    final timeStr = DateFormat('HH:mm').format(msg.timestamp);
+/Users/yupharat/just_booking/lib/users/message_page.dart:1:import 'package:flutter/material.dart';
+/Users/yupharat/just_booking/lib/users/message_page.dart:2:import 'package:cloud_firestore/cloud_firestore.dart';
+/Users/yupharat/just_booking/lib/users/message_page.dart:3:import 'package:intl/intl.dart';
+/Users/yupharat/just_booking/lib/users/message_page.dart:4:import 'package:just_booking/services/chat_service.dart';
+/Users/yupharat/just_booking/lib/users/message_page.dart:5:import 'package:just_booking/services/auth_service.dart';
+/Users/yupharat/just_booking/lib/users/message_page.dart:6:import 'package:just_booking/models/user.dart';
+/Users/yupharat/just_booking/lib/users/message_page.dart:7:import 'package:just_booking/users/chat_screen.dart';
+/Users/yupharat/just_booking/lib/users/message_page.dart:115:                        final dormName = chatData['dormName'] ?? 'หอพัก';
+/Users/yupharat/just_booking/lib/users/message_page.dart:116:                        final lastMessage = chatData['lastMessage'] ?? '';
+/Users/yupharat/just_booking/lib/users/message_page.dart:117:                        final lastMessageTime = (chatData['lastMessageTime'] as Timestamp?)?.toDate() ?? DateTime.now();
+/Users/yupharat/just_booking/lib/users/message_page.dart:122:                          timeStr = DateFormat('HH:mm').format(lastMessageTime);
+/Users/yupharat/just_booking/lib/users/message_page.dart:126:                          timeStr = DateFormat('d MMM').format(lastMessageTime);
+/Users/yupharat/just_booking/lib/users/message_page.dart:130:                        final initialLetter = dormName.isNotEmpty ? dormName[0].toUpperCase() : 'H';
+/Users/yupharat/just_booking/lib/users/message_page.dart:146:                                  dormId: int.tryParse(chatData['dormId'].toString()) ?? 0,
+/Users/yupharat/just_booking/lib/users/payment_section_widget.dart:1:import 'dart:io';
+/Users/yupharat/just_booking/lib/users/payment_section_widget.dart:2:import 'package:flutter/material.dart';
+/Users/yupharat/just_booking/lib/users/payment_section_widget.dart:3:import 'package:image_picker/image_picker.dart';
+/Users/yupharat/just_booking/lib/users/payment_section_widget.dart:55:          debugPrint('Notification error: $e');
+/Users/yupharat/just_booking/lib/users/payment_section_widget.dart:85:        : '0999999999'; // Fallback สำหรับทดสอบระบบเนื่องจาก Backend ยังไม่รองรับ promptpay_number
+/Users/yupharat/just_booking/lib/users/payment_section_widget.dart:87:    bool isCompleted = widget.booking.status == 'completed' || widget.booking.paymentStatus == 'submitted';
+/Users/yupharat/just_booking/lib/users/payment_section_widget.dart:123:              child: Text('สแกนเพื่อชำระเงิน (PromptPay)', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black54)),
+/Users/yupharat/just_booking/lib/users/payment_section_widget.dart:129:                amount: double.tryParse(widget.price.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0,
+/Users/yupharat/just_booking/lib/users/payment_section_widget.dart:153:              const Text('ภาพสลิปของคุณ:', style: TextStyle(fontWeight: FontWeight.bold)),
+/Users/yupharat/just_booking/lib/users/payment_section_widget.dart:166:                label: Text(_slipImage == null ? 'เลือกสลิปโอนเงิน' : 'เปลี่ยนรูปสลิป'),
+/Users/yupharat/just_booking/lib/users/home_page.dart:1:import 'package:firebase_auth/firebase_auth.dart';
+/Users/yupharat/just_booking/lib/users/home_page.dart:2:import 'package:flutter/material.dart';
+/Users/yupharat/just_booking/lib/users/home_page.dart:9:import 'package:cloud_firestore/cloud_firestore.dart';
+/Users/yupharat/just_booking/lib/users/home_page.dart:10:import 'package:intl/intl.dart';
+/Users/yupharat/just_booking/lib/users/home_page.dart:13:import '../services/auth_service.dart';
+/Users/yupharat/just_booking/lib/users/home_page.dart:15:import '../models/user.dart' as app_user;
+/Users/yupharat/just_booking/lib/users/home_page.dart:33:  final String _profileEmail = 'nopparat.w@gmail.com';
+/Users/yupharat/just_booking/lib/users/home_page.dart:34:  String _profilePhone = '081-234-5678';
+/Users/yupharat/just_booking/lib/users/home_page.dart:35:  String _profileAddress = '123/45 ซอยสุขุมวิท 23 แขวงคลองเตยเหนือ เขตวัฒนา กรุงเทพมหานคร 10110';
+/Users/yupharat/just_booking/lib/users/home_page.dart:36:  String _profileImageUrl = 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=300';
+/Users/yupharat/just_booking/lib/users/home_page.dart:206:                        widget.isGuest ? 'สวัสดี, ผู้เยี่ยมชม 👋' : 'สวัสดี, ${_profileName.split(" ").first} 👋',
+/Users/yupharat/just_booking/lib/users/home_page.dart:246:                          _profileImageUrl = value['imageUrl'] ?? _profileImageUrl;
+/Users/yupharat/just_booking/lib/users/home_page.dart:413:                          imageUrl: dorm.coverImageUrl ?? 'https://images.unsplash.com/photo-1554995207-c18c203602cb?q=80&w=400',
+/Users/yupharat/just_booking/lib/users/home_page.dart:418:                              ? '฿${dorm.rooms!.first.price.toStringAsFixed(0)}' 
+/Users/yupharat/just_booking/lib/users/home_page.dart:419:                              : '฿3,000',
+/Users/yupharat/just_booking/lib/users/home_page.dart:457:                          imageUrl: dorm.coverImageUrl ?? 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=400',
+/Users/yupharat/just_booking/lib/users/home_page.dart:461:                              ? '฿${dorm.rooms!.first.price.toStringAsFixed(0)}/เดือน' 
+/Users/yupharat/just_booking/lib/users/home_page.dart:462:                              : '฿3,500/เดือน',
+/Users/yupharat/just_booking/lib/users/home_page.dart:495:                    imageUrl: dorm.coverImageUrl ?? 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=400',
+/Users/yupharat/just_booking/lib/users/home_page.dart:499:                              ? '฿${dorm.rooms!.first.price.toStringAsFixed(0)}' 
+/Users/yupharat/just_booking/lib/users/home_page.dart:500:                              : '฿3,200',
+/Users/yupharat/just_booking/lib/users/home_page.dart:1081:                          final bool isRead = notifData['isRead'] ?? false;
+/Users/yupharat/just_booking/lib/users/home_page.dart:1082:                          final String title = notifData['title'] ?? '';
+/Users/yupharat/just_booking/lib/users/home_page.dart:1083:                          final String desc = notifData['desc'] ?? '';
+/Users/yupharat/just_booking/lib/users/home_page.dart:1090:                            timeStr = DateFormat('HH:mm').format(time);
+/Users/yupharat/just_booking/lib/users/home_page.dart:1094:                            timeStr = DateFormat('d MMM').format(time);
+/Users/yupharat/just_booking/lib/users/home_page.dart:1100:                          if (notifData['type'] == 'booking_success') {
+/Users/yupharat/just_booking/lib/users/home_page.dart:1103:                          } else if (notifData['type'] == 'new_booking') {
+/Users/yupharat/just_booking/lib/users/home_page.dart:1232:                    _profileImageUrl = value['imageUrl'] ?? _profileImageUrl;
+/Users/yupharat/just_booking/lib/users/home_page.dart:1342:                    _profileImageUrl = value['imageUrl']!;
+/Users/yupharat/just_booking/lib/users/favorites_page.dart:1:import 'package:flutter/material.dart';
+/Users/yupharat/just_booking/lib/users/favorites_page.dart:121:                    final imageUrl = dorm.coverImageUrl ?? 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=600';
+/Users/yupharat/just_booking/lib/users/room_types_page.dart:1:import 'package:flutter/material.dart';
+/Users/yupharat/just_booking/lib/users/room_types_page.dart:82:                      String tagText = isAvailable ? 'ว่าง ${room.availableCount} ห้อง' : 'ไม่ว่าง';
+/Users/yupharat/just_booking/lib/users/room_types_page.dart:88:                          : 'https://images.unsplash.com/photo-1616594039964-ae9021a400a0?q=80&w=600';
+/Users/yupharat/just_booking/lib/users/room_types_page.dart:96:                          price: '฿${room.price.toStringAsFixed(0)}',
+/Users/yupharat/just_booking/lib/users/room_types_page.dart:115:                                    monthlyPrice: '฿${room.price.toStringAsFixed(0)}',
+/Users/yupharat/just_booking/lib/users/room_types_page.dart:116:                                    securityDeposit: '฿${room.securityDeposit.toStringAsFixed(0)}',
+/Users/yupharat/just_booking/lib/users/room_types_page.dart:117:                                    bookingFee: '฿${room.bookingFee.toStringAsFixed(0)}',
+/Users/yupharat/just_booking/lib/users/room_types_page.dart:343:                      'เลขห้อง $floorText',
+/Users/yupharat/just_booking/lib/users/room_types_page.dart:398:                          isAvailable ? 'เลือกห้องนี้' : 'ห้องเต็ม',
+/Users/yupharat/just_booking/lib/users/booking_detail_page.dart:1:import 'package:flutter/material.dart';
+/Users/yupharat/just_booking/lib/users/booking_detail_page.dart:4:import '../services/auth_service.dart';
+/Users/yupharat/just_booking/lib/users/booking_detail_page.dart:5:import '../models/user.dart';
+/Users/yupharat/just_booking/lib/users/booking_detail_page.dart:84:        moveInDate: DateTime.now().toIso8601String().split('T')[0],
+/Users/yupharat/just_booking/lib/users/booking_detail_page.dart:98:            debugPrint('Notification Error: $e');
+/Users/yupharat/just_booking/lib/users/booking_detail_page.dart:101:          debugPrint('Notification Skipped: Missing ownerId or _currentUser');
+/Users/yupharat/just_booking/lib/users/booking_detail_page.dart:104:        debugPrint('Notification Error: $e');
+/Users/yupharat/just_booking/lib/users/booking_detail_page.dart:151:                    'ทางเราได้รับสลิปการชำระเงินและรายละเอียดการจองของคุณเรียบร้อยแล้ว เจ้าของหอพักจะตรวจสอบสัญญาภายใน 24 ชม.',
+/Users/yupharat/just_booking/lib/users/booking_detail_page.dart:323:                                'ห้อง ${widget.roomNumber} • ${widget.roomType}',
+/Users/yupharat/just_booking/lib/users/booking_detail_page.dart:330:                                widget.facilities.isNotEmpty ? widget.facilities.join(' • ') : 'ไม่มีข้อมูลสิ่งอำนวยความสะดวก',
+/Users/yupharat/just_booking/lib/users/booking_detail_page.dart:348:                                      text: widget.monthlyPrice.replaceAll('฿', '').replaceAll('/เดือน', ''),
+/Users/yupharat/just_booking/lib/users/booking_detail_page.dart:356:                                    const TextSpan(text: '\nสัญญา 1 ปี'),
+/Users/yupharat/just_booking/lib/users/booking_detail_page.dart:405:                                _buildTenantRow('ชื่อ-นามสกุล', _currentUser != null ? '${_currentUser!.firstName} ${_currentUser!.lastName}' : 'กำลังโหลด...'),
+/Users/yupharat/just_booking/lib/users/booking_detail_page.dart:406:                                _buildTenantRow('เบอร์โทรศัพท์', _currentUser?.phone ?? '-'),
+/Users/yupharat/just_booking/lib/users/booking_detail_page.dart:407:                                _buildTenantRow('ที่อยู่', _currentUser?.address ?? '-'),
+/Users/yupharat/just_booking/lib/users/booking_detail_page.dart:410:                                  DateTime.now().day.toString().padLeft(2, '0') + '/' +
+/Users/yupharat/just_booking/lib/users/booking_detail_page.dart:411:                                  DateTime.now().month.toString().padLeft(2, '0') + '/' +
+/Users/yupharat/just_booking/lib/users/booking_detail_page.dart:474:                            widget.bookingFee.replaceAll(RegExp(r'[^0-9]'), ''),
+/Users/yupharat/just_booking/lib/users/dorm_detail_page.dart:1:import 'package:flutter/material.dart';
+/Users/yupharat/just_booking/lib/users/dorm_detail_page.dart:2:import 'package:url_launcher/url_launcher.dart';
+/Users/yupharat/just_booking/lib/users/dorm_detail_page.dart:3:import '../models/user.dart';
+/Users/yupharat/just_booking/lib/users/dorm_detail_page.dart:8:import '../utils/distance_calculator.dart';
+/Users/yupharat/just_booking/lib/users/dorm_detail_page.dart:57:    final url = Uri.parse('https://www.google.com/maps/dir/?api=1&destination=$lat,$lng');
+/Users/yupharat/just_booking/lib/users/dorm_detail_page.dart:61:        throw Exception('Could not launch map');
+/Users/yupharat/just_booking/lib/users/dorm_detail_page.dart:238:          final imageUrl = dorm.coverImageUrl ?? 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=600';
+/Users/yupharat/just_booking/lib/users/dorm_detail_page.dart:389:                                        isAvailable ? 'ว่าง' : 'เต็ม',
+/Users/yupharat/just_booking/lib/users/dorm_detail_page.dart:420:                                      '(${dorm.reviews?.length ?? 0} รีวิว)',
+/Users/yupharat/just_booking/lib/users/dorm_detail_page.dart:460:                                            text: '$availableRoomsCount ห้อง',
+/Users/yupharat/just_booking/lib/users/dorm_detail_page.dart:523:                                              : 'https://images.unsplash.com/photo-1616594039964-ae9021a400a0?q=80&w=400',
+/Users/yupharat/just_booking/lib/users/dorm_detail_page.dart:525:                                          subtitle: room.facilities.isNotEmpty ? room.facilities.join(', ') : 'ไม่มีข้อมูล',
+/Users/yupharat/just_booking/lib/users/dorm_detail_page.dart:527:                                          available: 'ว่าง ${room.availableCount} ห้อง',
+/Users/yupharat/just_booking/lib/users/dorm_detail_page.dart:677:                                          'https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=600',
+/Users/yupharat/just_booking/lib/users/dorm_detail_page.dart:732:                                    'ระยะกระจัดจากมหาวิทยาลัย: ${distanceKm.toStringAsFixed(1)} กม.',
+/Users/yupharat/just_booking/lib/users/dorm_detail_page.dart:797:                                      'ยังไม่มีรีวิวสำหรับหอพักนี้\nมาเป็นคนแรกที่รีวิวกันเถอะ!',
+/Users/yupharat/just_booking/lib/users/dorm_detail_page.dart:830:                                                      (review.user?.firstName ?? 'U').substring(0, 1).toUpperCase(),
+/Users/yupharat/just_booking/lib/users/dorm_detail_page.dart:836:                                                    '${review.user?.firstName ?? 'ผู้ใช้งาน'} ${review.user?.lastName ?? ''}',
+/Users/yupharat/just_booking/lib/users/search_page.dart:1:import 'package:flutter/material.dart';
+/Users/yupharat/just_booking/lib/users/search_page.dart:162:                      Text('ราคา (ไม่เกิน ฿${tempMaxPrice.toInt()}/เดือน)', style: TextStyle(fontWeight: FontWeight.w600, color: enablePrice ? Colors.black87 : Colors.black38)),
+/Users/yupharat/just_booking/lib/users/search_page.dart:176:                      label: '฿${tempMaxPrice.toInt()}',
+/Users/yupharat/just_booking/lib/users/search_page.dart:188:                      Text('ระยะห่างจาก ม. (ไม่เกิน ${tempMaxDistance.toStringAsFixed(1)} กม.)', style: TextStyle(fontWeight: FontWeight.w600, color: enableDistance ? Colors.black87 : Colors.black38)),
+/Users/yupharat/just_booking/lib/users/search_page.dart:202:                      label: '${tempMaxDistance.toStringAsFixed(1)} กม.',
+/Users/yupharat/just_booking/lib/users/search_page.dart:379:                'ผลการค้นหา (${_searchResults.length})',
+/Users/yupharat/just_booking/lib/users/search_page.dart:403:                        final imageUrl = dorm.coverImageUrl ?? 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=600';
+/Users/yupharat/just_booking/lib/users/search_page.dart:406:                                : '3,000';
+/Users/yupharat/just_booking/lib/users/search_page.dart:520:                                                '${dorm.address} • ห่าง ม. ${dorm.distanceFromUniversityKm} กม.',
+/Users/yupharat/just_booking/lib/users/search_page.dart:564:                                                isAvailable ? 'ว่าง' : 'เต็ม',
+/Users/yupharat/just_booking/lib/users/profile_page.dart:1:import 'package:flutter/material.dart';
+/Users/yupharat/just_booking/lib/users/profile_page.dart:2:import '../services/auth_service.dart';
+/Users/yupharat/just_booking/lib/users/profile_page.dart:3:import '../models/user.dart';
+/Users/yupharat/just_booking/lib/users/profile_page.dart:6:import 'language_page.dart';
+/Users/yupharat/just_booking/lib/users/profile_page.dart:176:          'The Modern Sanctuary',
+/Users/yupharat/just_booking/lib/users/profile_page.dart:218:                                backgroundImage: NetworkImage(_currentUser!.profileImageUrl ?? 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=300'),
+/Users/yupharat/just_booking/lib/users/profile_page.dart:261:                            ? '${_currentUser!.firstName} ${_currentUser!.lastName}' 
+/Users/yupharat/just_booking/lib/users/profile_page.dart:295:                            currentName: '${_currentUser!.firstName} ${_currentUser!.lastName}',
+/Users/yupharat/just_booking/lib/users/profile_page.dart:298:                            imageUrl: _currentUser!.profileImageUrl ?? 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=300',
+/Users/yupharat/just_booking/lib/just_booking.code-workspace:4:			"path": ".."
+/Users/yupharat/just_booking/lib/services/owner_service.dart:1:import 'dart:io';
+/Users/yupharat/just_booking/lib/services/owner_service.dart:33:      '/api/owner/dormitories/$dormitoryId/cover-image',
+/Users/yupharat/just_booking/lib/services/owner_service.dart:34:      'coverImage',
+/Users/yupharat/just_booking/lib/services/owner_service.dart:37:    return response['image']['url'];
+/Users/yupharat/just_booking/lib/services/owner_service.dart:42:    final response = await _api.post('/api/owner/dormitories/$dormitoryId/rooms', body: data);
+/Users/yupharat/just_booking/lib/services/owner_service.dart:47:    await _api.patch('/api/owner/rooms/$roomId', body: data);
+/Users/yupharat/just_booking/lib/services/owner_service.dart:51:    await _api.delete('/api/owner/rooms/$roomId');
+/Users/yupharat/just_booking/lib/services/owner_service.dart:56:      '/api/owner/rooms/$roomId/images',
+/Users/yupharat/just_booking/lib/services/owner_service.dart:57:      'roomImages',
+/Users/yupharat/just_booking/lib/services/owner_service.dart:71:    await _api.patch('/api/owner/bookings/$bookingId/approve');
+/Users/yupharat/just_booking/lib/services/owner_service.dart:75:    await _api.patch('/api/owner/bookings/$bookingId/reject');
+/Users/yupharat/just_booking/lib/services/owner_service.dart:80:    await _api.patch('/api/owner/bookings/$bookingId/payment', body: {
+/Users/yupharat/just_booking/lib/services/owner_service.dart:81:      'status': 'verified',
+/Users/yupharat/just_booking/lib/services/owner_service.dart:86:    await _api.patch('/api/owner/bookings/$bookingId/payment', body: {
+/Users/yupharat/just_booking/lib/services/owner_service.dart:87:      'status': 'rejected',
+/Users/yupharat/just_booking/lib/services/owner_service.dart:93:    await _api.post('/api/owner/reviews/$reviewId/reply', body: {
+/Users/yupharat/just_booking/lib/services/admin_service.dart:2:import '../models/user.dart';
+/Users/yupharat/just_booking/lib/services/admin_service.dart:11:    final response = await _api.get('/api/admin/users');
+/Users/yupharat/just_booking/lib/services/admin_service.dart:12:    return (response['users'] as List)
+/Users/yupharat/just_booking/lib/services/admin_service.dart:18:    await _api.patch('/api/admin/users/$userId/status', body: {
+/Users/yupharat/just_booking/lib/services/admin_service.dart:19:      'status': status,
+/Users/yupharat/just_booking/lib/services/admin_service.dart:50:  //   await _api.patch('/api/admin/bookings/$bookingId/payment', body: {
+/Users/yupharat/just_booking/lib/services/admin_service.dart:51:  //     'status': status,
+/Users/yupharat/just_booking/lib/services/admin_service.dart:57:    await _api.patch('/api/admin/reviews/$reviewId/hide');
+/Users/yupharat/just_booking/lib/services/map_search_service.dart:1:import 'dart:convert';
+/Users/yupharat/just_booking/lib/services/map_search_service.dart:2:import 'package:http/http.dart' as http;
+/Users/yupharat/just_booking/lib/services/map_search_service.dart:3:import 'package:latlong2/latlong.dart';
+/Users/yupharat/just_booking/lib/services/map_search_service.dart:12:    final String url = 'https://nominatim.openstreetmap.org/search'
+/Users/yupharat/just_booking/lib/services/map_search_service.dart:13:        '?q=${Uri.encodeComponent(query)}'
+/Users/yupharat/just_booking/lib/services/map_search_service.dart:14:        '&format=json'
+/Users/yupharat/just_booking/lib/services/map_search_service.dart:15:        '&countrycodes=th'
+/Users/yupharat/just_booking/lib/services/map_search_service.dart:16:        '&limit=1';
+/Users/yupharat/just_booking/lib/services/map_search_service.dart:20:        'User-Agent': 'com.example.just_booking/1.0', // Required by Nominatim
+/Users/yupharat/just_booking/lib/services/map_search_service.dart:36:      print('Error searching place: $e');
+/Users/yupharat/just_booking/lib/services/promptpay_qr_service.dart:1:import 'package:flutter/material.dart';
+/Users/yupharat/just_booking/lib/services/promptpay_qr_service.dart:2:import 'package:promptpay_qrcode_generate/promptpay_qrcode_generate.dart';
+/Users/yupharat/just_booking/lib/services/auth_service.dart:1:import 'dart:io';
+/Users/yupharat/just_booking/lib/services/auth_service.dart:3:import '../models/user.dart';
+/Users/yupharat/just_booking/lib/services/auth_service.dart:9:    final response = await _api.post('/api/auth/login', body: {
+/Users/yupharat/just_booking/lib/services/auth_service.dart:35:      'firstName': firstName,
+/Users/yupharat/just_booking/lib/services/auth_service.dart:36:      'lastName': lastName,
+/Users/yupharat/just_booking/lib/services/auth_service.dart:45:        '/api/auth/register',
+/Users/yupharat/just_booking/lib/services/auth_service.dart:46:        'profileImage', // Field name for the file, change if your API uses 'image' or 'avatar'
+/Users/yupharat/just_booking/lib/services/auth_service.dart:53:      response = await _api.post('/api/auth/register', body: body, requireAuth: false);
+/Users/yupharat/just_booking/lib/services/auth_service.dart:62:    final response = await _api.get('/api/auth/me');
+/Users/yupharat/just_booking/lib/services/auth_service.dart:63:    return User.fromJson(response['user']);
+/Users/yupharat/just_booking/lib/services/auth_service.dart:68:    return User.fromJson(response['user']);
+/Users/yupharat/just_booking/lib/services/notification_service.dart:1:import 'package:firebase_messaging/firebase_messaging.dart';
+/Users/yupharat/just_booking/lib/services/notification_service.dart:2:import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+/Users/yupharat/just_booking/lib/services/notification_service.dart:3:import 'package:flutter/foundation.dart';
+/Users/yupharat/just_booking/lib/services/notification_service.dart:4:import 'package:cloud_firestore/cloud_firestore.dart';
+/Users/yupharat/just_booking/lib/services/notification_service.dart:22:        print('NotificationService is bypassed on Web.');
+/Users/yupharat/just_booking/lib/services/notification_service.dart:36:      print('User granted permission: ${settings.authorizationStatus}');
+/Users/yupharat/just_booking/lib/services/notification_service.dart:41:        AndroidInitializationSettings('@mipmap/ic_launcher');
+/Users/yupharat/just_booking/lib/services/notification_service.dart:60:          print('Notification payload: ${response.payload}');
+/Users/yupharat/just_booking/lib/services/notification_service.dart:68:      'High Importance Notifications', // name
+/Users/yupharat/just_booking/lib/services/notification_service.dart:69:      description: 'This channel is used for important notifications.', // description
+/Users/yupharat/just_booking/lib/services/notification_service.dart:88:        print('Got a message whilst in the foreground!');
+/Users/yupharat/just_booking/lib/services/notification_service.dart:89:        print('Message data: ${message.data}');
+/Users/yupharat/just_booking/lib/services/notification_service.dart:107:              icon: '@mipmap/ic_launcher',
+/Users/yupharat/just_booking/lib/services/notification_service.dart:125:        print('A new onMessageOpenedApp event was published!');
+/Users/yupharat/just_booking/lib/services/notification_service.dart:126:        print('Message data: ${message.data}');
+/Users/yupharat/just_booking/lib/services/notification_service.dart:150:      'userId': userId.toString(),
+/Users/yupharat/just_booking/lib/services/notification_service.dart:151:      'type': 'booking_success',
+/Users/yupharat/just_booking/lib/services/notification_service.dart:152:      'title': 'การจองสำเร็จ',
+/Users/yupharat/just_booking/lib/services/notification_service.dart:153:      'desc': 'คุณได้ทำการจองห้อง $roomName ที่ $dormName สำเร็จแล้ว รอการติดต่อจากเจ้าของหอพัก',
+/Users/yupharat/just_booking/lib/services/notification_service.dart:154:      'isRead': false,
+/Users/yupharat/just_booking/lib/services/notification_service.dart:161:      'userId': ownerId.toString(),
+/Users/yupharat/just_booking/lib/services/notification_service.dart:162:      'type': 'new_booking',
+/Users/yupharat/just_booking/lib/services/notification_service.dart:163:      'title': 'มีการจองใหม่',
+/Users/yupharat/just_booking/lib/services/notification_service.dart:164:      'desc': 'มีผู้เช่าใหม่ทำการจองห้อง $roomName ที่ $dormName ของคุณ',
+/Users/yupharat/just_booking/lib/services/notification_service.dart:165:      'isRead': false,
+/Users/yupharat/just_booking/lib/services/notification_service.dart:175:      'userId': userId.toString(),
+/Users/yupharat/just_booking/lib/services/notification_service.dart:176:      'type': 'booking_approved',
+/Users/yupharat/just_booking/lib/services/notification_service.dart:177:      'title': 'การจองได้รับการอนุมัติ',
+/Users/yupharat/just_booking/lib/services/notification_service.dart:178:      'desc': 'คำขอจองของคุณได้รับการอนุมัติแล้ว กรุณาชำระเงิน',
+/Users/yupharat/just_booking/lib/services/notification_service.dart:179:      'isRead': false,
+/Users/yupharat/just_booking/lib/services/notification_service.dart:187:      'userId': ownerId.toString(),
+/Users/yupharat/just_booking/lib/services/notification_service.dart:188:      'type': 'payment_slip',
+/Users/yupharat/just_booking/lib/services/notification_service.dart:189:      'title': 'แจ้งชำระเงิน',
+/Users/yupharat/just_booking/lib/services/notification_service.dart:190:      'desc': 'มีผู้ใช้ส่งหลักฐานการชำระเงินแล้ว',
+/Users/yupharat/just_booking/lib/services/notification_service.dart:191:      'isRead': false,
+/Users/yupharat/just_booking/lib/services/notification_service.dart:199:        .where('userId', isEqualTo: userId.toString())
+/Users/yupharat/just_booking/lib/services/notification_service.dart:206:      'isRead': true,
+/Users/yupharat/just_booking/lib/services/notification_service.dart:212:@pragma('vm:entry-point')
+/Users/yupharat/just_booking/lib/services/notification_service.dart:218:    print("Handling a background message: ${message.messageId}");
+/Users/yupharat/just_booking/lib/services/booking_service.dart:1:import 'dart:io';
+/Users/yupharat/just_booking/lib/services/booking_service.dart:14:      'roomId': roomId,
+/Users/yupharat/just_booking/lib/services/booking_service.dart:15:      'moveInDate': moveInDate,
+/Users/yupharat/just_booking/lib/services/booking_service.dart:18:    return response['bookingId'];
+/Users/yupharat/just_booking/lib/services/booking_service.dart:30:      '/api/bookings/$bookingId/payment-slip',
+/Users/yupharat/just_booking/lib/services/booking_service.dart:31:      'slipImage',
+/Users/yupharat/just_booking/lib/services/chat_service.dart:1:import 'package:cloud_firestore/cloud_firestore.dart';
+/Users/yupharat/just_booking/lib/services/chat_service.dart:2:import 'package:just_booking/models/user.dart';
+/Users/yupharat/just_booking/lib/services/chat_service.dart:21:      senderId: data['senderId'] ?? '',
+/Users/yupharat/just_booking/lib/services/chat_service.dart:22:      text: data['text'] ?? '',
+/Users/yupharat/just_booking/lib/services/chat_service.dart:29:      'senderId': senderId,
+/Users/yupharat/just_booking/lib/services/chat_service.dart:41:    return 'dorm_${dormId}_user_$userId';
+/Users/yupharat/just_booking/lib/services/chat_service.dart:69:      'senderId': currentUser.id.toString(),
+/Users/yupharat/just_booking/lib/services/chat_service.dart:77:      'dormId': dormId.toString(),
+/Users/yupharat/just_booking/lib/services/chat_service.dart:78:      'userId': currentUser.id.toString(),
+/Users/yupharat/just_booking/lib/services/chat_service.dart:79:      'lastMessage': text,
+/Users/yupharat/just_booking/lib/services/chat_service.dart:80:      'lastMessageTime': FieldValue.serverTimestamp(),
+/Users/yupharat/just_booking/lib/services/chat_service.dart:81:      'userName': '${currentUser.firstName ?? ''} ${currentUser.lastName ?? ''}'.trim(),
+/Users/yupharat/just_booking/lib/services/chat_service.dart:82:      'dormName': dormName ?? 'Dormitory $dormId',
+/Users/yupharat/just_booking/lib/services/chat_service.dart:92:        .where('userId', isEqualTo: userId.toString())
+/Users/yupharat/just_booking/lib/services/chat_service.dart:93:        .orderBy('lastMessageTime', descending: true)
+/Users/yupharat/just_booking/lib/services/chat_service.dart:101:        .where('dormId', isEqualTo: dormId.toString())
+/Users/yupharat/just_booking/lib/services/chat_service.dart:102:        .orderBy('lastMessageTime', descending: true)
+/Users/yupharat/just_booking/lib/services/dormitory_service.dart:16:    if (search != null) queryParams.add('search=$search');
+/Users/yupharat/just_booking/lib/services/dormitory_service.dart:17:    if (maxDistance != null) queryParams.add('maxDistance=$maxDistance');
+/Users/yupharat/just_booking/lib/services/dormitory_service.dart:18:    if (minPrice != null) queryParams.add('minPrice=$minPrice');
+/Users/yupharat/just_booking/lib/services/dormitory_service.dart:19:    if (maxPrice != null) queryParams.add('maxPrice=$maxPrice');
+/Users/yupharat/just_booking/lib/services/dormitory_service.dart:20:    if (roomType != null) queryParams.add('roomType=$roomType');
+/Users/yupharat/just_booking/lib/services/dormitory_service.dart:22:    final queryString = queryParams.isNotEmpty ? '?${queryParams.join('&')}' : '';
+/Users/yupharat/just_booking/lib/services/dormitory_service.dart:23:    final response = await _api.get('/api/dormitories$queryString', requireAuth: false);
+/Users/yupharat/just_booking/lib/services/dormitory_service.dart:34:      dormJson['rooms'] = response['rooms'];
+/Users/yupharat/just_booking/lib/services/dormitory_service.dart:37:      dormJson['reviews'] = response['reviews'];
+/Users/yupharat/just_booking/lib/services/dormitory_service.dart:51:    await _api.post('/api/favorites/$dormitoryId');
+/Users/yupharat/just_booking/lib/services/dormitory_service.dart:55:    await _api.delete('/api/favorites/$dormitoryId');
+/Users/yupharat/just_booking/lib/services/dormitory_service.dart:60:    await _api.post('/api/dormitories/$dormitoryId/reviews', body: {

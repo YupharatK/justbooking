@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 
+/// หน้าฟอร์มสำหรับแก้ไขข้อมูลส่วนตัว เช่น ชื่อ เบอร์โทร ที่อยู่ และรูปโปรไฟล์
+
 class EditProfilePage extends StatefulWidget {
   final String currentName;
   final String currentPhone;
@@ -28,7 +30,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
   bool _isSaving = false;
 
   @override
-  void initState() {
+    // ฟังก์ชัน initState จะถูกเรียกใช้งานเป็นสิ่งแรกสุดเมื่อเปิดหน้านี้ขึ้นมา (มักใช้สำหรับดึงข้อมูลเตรียมไว้)
+void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.currentName);
     _phoneController = TextEditingController(text: widget.currentPhone);
@@ -45,22 +48,26 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   // Handle Save
-  Future<void> _saveProfile() async {
+  // ฟังก์ชันบันทึกข้อมูลโปรไฟล์ใหม่ที่แก้ไข
+    // ฟังก์ชันแบบ Asynchronous สำหรับติดต่อระบบหลังบ้าน (Backend) หรือประมวลผลข้อมูล: _saveProfile
+Future<void> _saveProfile() async {
     final name = _nameController.text.trim();
     final phone = _phoneController.text.trim();
     final address = _addressController.text.trim();
 
     if (name.isEmpty || phone.isEmpty || address.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
+            // แสดงข้อความแจ้งเตือนป๊อปอัปเล็กๆ ที่ด้านล่างของจอ (SnackBar)
+ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('กรุณากรอกข้อมูลให้ครบถ้วน', style: TextStyle(fontFamily: 'Kanit')),
+          content: Text('กรุณากรอกข้อมูลให้ครบถ้วน', style: TextStyle()),
           backgroundColor: Colors.redAccent,
         ),
       );
       return;
     }
 
-    setState(() {
+        // คำสั่ง setState จะกระตุ้นให้ Flutter ทำการวาดหน้าจอ (build) ใหม่อีกครั้งเพื่ออัปเดตข้อมูลที่เปลี่ยนไป
+setState(() {
       _isSaving = true;
     });
 
@@ -78,20 +85,22 @@ class _EditProfilePageState extends State<EditProfilePage> {
         // Optional: 'profileImageUrl': _imageUrl if your API supports updating it this way
       });
 
-      setState(() {
+            // คำสั่ง setState จะกระตุ้นให้ Flutter ทำการวาดหน้าจอ (build) ใหม่อีกครั้งเพื่ออัปเดตข้อมูลที่เปลี่ยนไป
+setState(() {
         _isSaving = false;
       });
 
       if (!mounted) return;
 
       // Success feedback
-      ScaffoldMessenger.of(context).showSnackBar(
+            // แสดงข้อความแจ้งเตือนป๊อปอัปเล็กๆ ที่ด้านล่างของจอ (SnackBar)
+ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Row(
             children: [
               Icon(Icons.check_circle_rounded, color: Colors.white),
               SizedBox(width: 10),
-              Text('แก้ไขข้อมูลโปรไฟล์สำเร็จเรียบร้อยแล้ว', style: TextStyle(fontFamily: 'Kanit')),
+              Text('แก้ไขข้อมูลโปรไฟล์สำเร็จเรียบร้อยแล้ว', style: TextStyle()),
             ],
           ),
           backgroundColor: Color(0xFF2ECC71),
@@ -102,13 +111,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
       // Pop back with success flag
       Navigator.pop(context, true);
     } catch (e) {
-      setState(() {
+            // คำสั่ง setState จะกระตุ้นให้ Flutter ทำการวาดหน้าจอ (build) ใหม่อีกครั้งเพื่ออัปเดตข้อมูลที่เปลี่ยนไป
+setState(() {
         _isSaving = false;
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+                // แสดงข้อความแจ้งเตือนป๊อปอัปเล็กๆ ที่ด้านล่างของจอ (SnackBar)
+ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('เกิดข้อผิดพลาดในการอัปเดตโปรไฟล์', style: TextStyle(fontFamily: 'Kanit')),
+            content: Text('เกิดข้อผิดพลาดในการอัปเดตโปรไฟล์', style: TextStyle()),
             backgroundColor: Colors.redAccent,
           ),
         );
@@ -116,7 +127,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
   }
 
-  @override
+    // ฟังก์ชัน build ทำหน้าที่วาดหน้าจอ (UI) และจัดวาง Widget ต่างๆ ภายในหน้านี้
+@override
   Widget build(BuildContext context) {
     const primaryColor = Color(0xFF3F6DE3); // Matching brand blue
     const textDarkColor = Color(0xFF1F2937);
@@ -133,7 +145,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
         title: const Text(
           'แก้ไขโปรไฟล์',
           style: TextStyle(
-            fontFamily: 'Kanit',
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: primaryColor,
@@ -176,10 +187,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
                             Positioned(
                               bottom: 0,
                               right: 0,
-                              child: GestureDetector(
+                              child:                               // GestureDetector ใช้ครอบ Widget อื่นๆ เพื่อให้สามารถรับการกด (Tap) หรือสัมผัสจากผู้ใช้ได้
+GestureDetector(
                                 onTap: () {
                                   // Mock toggle image or change to different profile image
-                                  setState(() {
+                                                                    // คำสั่ง setState จะกระตุ้นให้ Flutter ทำการวาดหน้าจอ (build) ใหม่อีกครั้งเพื่ออัปเดตข้อมูลที่เปลี่ยนไป
+setState(() {
                                     // toggle between two professional avatars
                                     if (_imageUrl.contains('photo-1573496359142-b8d87734a5a2')) {
                                       _imageUrl = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=300';
@@ -187,9 +200,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                       _imageUrl = 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=300';
                                     }
                                   });
-                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                                    // แสดงข้อความแจ้งเตือนป๊อปอัปเล็กๆ ที่ด้านล่างของจอ (SnackBar)
+ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                      content: Text('เปลี่ยนรูปภาพโปรไฟล์เรียบร้อยแล้ว', style: TextStyle(fontFamily: 'Kanit')),
+                                      content: Text('เปลี่ยนรูปภาพโปรไฟล์เรียบร้อยแล้ว', style: TextStyle()),
                                       duration: Duration(seconds: 1),
                                     ),
                                   );
@@ -221,7 +235,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         const Text(
                           'แตะเพื่อเปลี่ยนรูปโปรไฟล์',
                           style: TextStyle(
-                            fontFamily: 'Kanit',
                             color: Colors.black38,
                             fontSize: 12.5,
                             fontWeight: FontWeight.bold,
@@ -237,7 +250,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   const Text(
                     'ชื่อผู้ใช้งาน',
                     style: TextStyle(
-                      fontFamily: 'Kanit',
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
                       color: textDarkColor,
@@ -252,7 +264,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: TextField(
                       controller: _nameController,
-                      style: const TextStyle(fontFamily: 'Kanit', color: textDarkColor, fontWeight: FontWeight.w600),
+                      style: const TextStyle(color: textDarkColor, fontWeight: FontWeight.w600),
                       decoration: const InputDecoration(
                         icon: Icon(Icons.person_outline_rounded, color: Colors.black54),
                         border: InputBorder.none,
@@ -266,7 +278,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   const Text(
                     'เบอร์โทรศัพท์',
                     style: TextStyle(
-                      fontFamily: 'Kanit',
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
                       color: textDarkColor,
@@ -282,7 +293,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     child: TextField(
                       controller: _phoneController,
                       keyboardType: TextInputType.phone,
-                      style: const TextStyle(fontFamily: 'Kanit', color: textDarkColor, fontWeight: FontWeight.w600),
+                      style: const TextStyle(color: textDarkColor, fontWeight: FontWeight.w600),
                       decoration: const InputDecoration(
                         icon: Icon(Icons.phone_outlined, color: Colors.black54),
                         border: InputBorder.none,
@@ -296,7 +307,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   const Text(
                     'ที่อยู่ปัจจุบัน',
                     style: TextStyle(
-                      fontFamily: 'Kanit',
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
                       color: textDarkColor,
@@ -313,7 +323,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       controller: _addressController,
                       maxLines: 3,
                       style: const TextStyle(
-                        fontFamily: 'Kanit',
                         color: textDarkColor,
                         fontWeight: FontWeight.w600,
                         height: 1.4,
@@ -341,7 +350,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
             child: SizedBox(
               width: double.infinity,
               height: 50,
-              child: ElevatedButton(
+              child:               // ปุ่มกดแบบมีพื้นหลัง (ElevatedButton) เมื่อกดแล้วจะเรียกคำสั่งใน onPressed
+ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF3F6DE3), // Elegant blue color as in button mockup
                   shape: RoundedRectangleBorder(
@@ -355,7 +365,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     : const Text(
                         'ยืนยัน',
                         style: TextStyle(
-                          fontFamily: 'Kanit',
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,

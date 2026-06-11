@@ -7,6 +7,11 @@ import '../models/user.dart';
 import '../services/owner_service.dart';
 import '../services/auth_service.dart';
 import '../wellcome/login.dart';
+import 'owner_chat_dashboard.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
+import '../services/notification_service.dart';
+import '../users/edit_profile_page.dart';
 
 /// ----------------------------------------------------------------------
 /// [DormitoryHomePage]
@@ -21,6 +26,8 @@ import '../wellcome/login.dart';
 /// - AuthService.getCurrentUser() -> ดึงข้อมูลโปรไฟล์ของ Owner มาแสดงด้านบน
 /// ----------------------------------------------------------------------
 
+/// หน้าจอหลัก (Dashboard) ของฝั่งเจ้าของหอพัก แสดงรายการหอพักทั้งหมดที่เปิดให้เช่า
+
 class DormitoryHomePage extends StatefulWidget {
   const DormitoryHomePage({super.key});
 
@@ -32,6 +39,7 @@ class _DormitoryHomePageState extends State<DormitoryHomePage> {
   int _currentIndex = 0;
   final OwnerService _ownerService = OwnerService();
   final AuthService _authService = AuthService();
+  final NotificationService _notificationService = NotificationService();
   List<Dormitory> _dorms = [];
   User? _currentUser;
   bool _isLoading = true;
@@ -42,6 +50,8 @@ class _DormitoryHomePageState extends State<DormitoryHomePage> {
     _fetchUserData();
     _fetchDormitories();
   }
+
+  // ฟังก์ชันดึงข้อมูลโปรไฟล์ของเจ้าของหอพัก (ชื่อ, รูปโปรไฟล์)
 
   Future<void> _fetchUserData() async {
     try {
@@ -55,6 +65,8 @@ class _DormitoryHomePageState extends State<DormitoryHomePage> {
       debugPrint('Error fetching user data: $e');
     }
   }
+
+  // ฟังก์ชันดึงข้อมูลรายชื่อหอพักที่เจ้าของคนนี้ดูแลอยู่
 
   Future<void> _fetchDormitories() async {
     try {
@@ -84,7 +96,11 @@ class _DormitoryHomePageState extends State<DormitoryHomePage> {
     return Scaffold(
       backgroundColor: bgColor,
       body: SafeArea(
-        child: SingleChildScrollView(
+        child: _currentIndex == 2 
+          ? OwnerChatDashboard(dormitories: _dorms)
+          : _currentIndex == 1
+              ? _buildNotificationTab()
+              : SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
           child: Column(
@@ -101,7 +117,6 @@ class _DormitoryHomePageState extends State<DormitoryHomePage> {
                         Text(
                           'ยินดีต้อนรับกลับ 👋',
                           style: TextStyle(
-                            fontFamily: 'Kanit',
                             fontSize: 14,
                             color: Colors.grey.shade600,
                           ),
@@ -110,7 +125,6 @@ class _DormitoryHomePageState extends State<DormitoryHomePage> {
                         Text(
                           'สวัสดี, ${_currentUser?.firstName ?? 'เจ้าของหอพัก'}',
                           style: const TextStyle(
-                            fontFamily: 'Kanit',
                             fontSize: 24,
                             fontWeight: FontWeight.w800,
                             color: textDarkColor,
@@ -123,41 +137,61 @@ class _DormitoryHomePageState extends State<DormitoryHomePage> {
                   ),
                   Row(
                     children: [
-                      Stack(
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white, width: 3),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: CircleAvatar(
-                              radius: 26,
-                              backgroundColor: Colors.grey.shade200,
-                              backgroundImage: NetworkImage(
-                                  _currentUser?.profileImageUrl ?? 'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=200'),
-                            ),
-                          ),
-                          Positioned(
-                            bottom: 0,
-                            right: 4,
-                            child: Container(
-                              width: 14,
-                              height: 14,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF10B981),
-                                shape: BoxShape.circle,
-                                border: Border.all(color: Colors.white, width: 2.5),
+                      GestureDetector(
+                        onTap: () {
+                          if (_currentUser == null) return;
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => EditProfilePage(
+                                currentName: '${_currentUser!.firstName ?? ''} ${_currentUser!.lastName ?? ''}'.trim(),
+                                currentPhone: _currentUser!.phone ?? '',
+                                currentAddress: _currentUser!.address ?? '',
+                                imageUrl: _currentUser!.profileImageUrl ?? 'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=200',
                               ),
                             ),
-                          ),
-                        ],
+                          ).then((value) {
+                            if (value == true) {
+                              _fetchUserData();
+                            }
+                          });
+                        },
+                        child: Stack(
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.white, width: 3),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: CircleAvatar(
+                                radius: 26,
+                                backgroundColor: Colors.grey.shade200,
+                                backgroundImage: NetworkImage(
+                                    _currentUser?.profileImageUrl ?? 'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=200'),
+                              ),
+                            ),
+                            Positioned(
+                              bottom: 0,
+                              right: 4,
+                              child: Container(
+                                width: 14,
+                                height: 14,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF10B981),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: Colors.white, width: 2.5),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                       const SizedBox(width: 8),
                       IconButton(
@@ -166,17 +200,17 @@ class _DormitoryHomePageState extends State<DormitoryHomePage> {
                           bool confirm = await showDialog(
                                 context: context,
                                 builder: (context) => AlertDialog(
-                                  title: const Text('ออกจากระบบ', style: TextStyle(fontFamily: 'Kanit', fontWeight: FontWeight.bold)),
-                                  content: const Text('คุณต้องการออกจากระบบใช่หรือไม่?', style: TextStyle(fontFamily: 'Kanit')),
+                                  title: const Text('ออกจากระบบ', style: TextStyle(fontWeight: FontWeight.bold)),
+                                  content: const Text('คุณต้องการออกจากระบบใช่หรือไม่?', style: TextStyle()),
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                                   actions: [
                                     TextButton(
                                       onPressed: () => Navigator.pop(context, false),
-                                      child: const Text('ยกเลิก', style: TextStyle(fontFamily: 'Kanit', color: Colors.grey)),
+                                      child: const Text('ยกเลิก', style: TextStyle(color: Colors.grey)),
                                     ),
                                     TextButton(
                                       onPressed: () => Navigator.pop(context, true),
-                                      child: const Text('ยืนยัน', style: TextStyle(fontFamily: 'Kanit', color: Colors.red, fontWeight: FontWeight.bold)),
+                                      child: const Text('ยืนยัน', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
                                     ),
                                   ],
                                 ),
@@ -188,7 +222,7 @@ class _DormitoryHomePageState extends State<DormitoryHomePage> {
                             if (mounted) {
                               Navigator.pushAndRemoveUntil(
                                 context,
-                                MaterialPageRoute(builder: (_) => const LoginScreen(isOwner: true)),
+                                MaterialPageRoute(builder: (_) => const LoginScreen()),
                                 (route) => false,
                               );
                             }
@@ -209,7 +243,6 @@ class _DormitoryHomePageState extends State<DormitoryHomePage> {
                   const Text(
                     'เมนูหลัก',
                     style: TextStyle(
-                      fontFamily: 'Kanit',
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: textDarkColor,
@@ -221,8 +254,6 @@ class _DormitoryHomePageState extends State<DormitoryHomePage> {
               Row(
                 children: [
                   Expanded(
-                    // ฟีเจอร์: การเพิ่มหอพักใหม่
-                    // เมื่อกดจะเปิดหน้า AddDormInfoPage เพื่อกรอกข้อมูลหอพัก
                     child: _buildMainMenuCard(
                       icon: Icons.storefront_outlined,
                       title: 'เพิ่มข้อมูลหอพัก',
@@ -238,8 +269,6 @@ class _DormitoryHomePageState extends State<DormitoryHomePage> {
                     ),
                   ),
                   Expanded(
-                    // ฟีเจอร์: จัดการคำขอจอง
-                    // เมื่อกดจะเปิดหน้า OwnerBookingDashboard เพื่อดูคำขอที่ผู้เช่าส่งมา
                     child: _buildMainMenuCard(
                       icon: Icons.receipt_long_outlined,
                       title: 'จัดการคำขอจอง',
@@ -258,10 +287,7 @@ class _DormitoryHomePageState extends State<DormitoryHomePage> {
               ),
               const SizedBox(height: 40),
 
-              // 3. My Dormitories Section (ส่วนแสดงรายการหอพักทั้งหมดของฉัน)
-              // ฟีเจอร์: เรียกดูรายชื่อหอพักที่เราเป็นเจ้าของ
-              // วนลูป (ListView) นำ _dorms แต่ละตัวมาแสดงเป็น _buildStatusCard
-              // เมื่อกดที่การ์ดจะพาไปหน้าจัดการหอพักนั้นๆ (DormitoryManagementPage)
+              // 3. My Dormitories Section
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -272,7 +298,6 @@ class _DormitoryHomePageState extends State<DormitoryHomePage> {
                       const Text(
                         'หอพักของฉัน',
                         style: TextStyle(
-                          fontFamily: 'Kanit',
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: textDarkColor,
@@ -298,14 +323,13 @@ class _DormitoryHomePageState extends State<DormitoryHomePage> {
                       : const Center(
                           child: Text(
                             'คุณยังไม่มีข้อมูลหอพัก',
-                            style: TextStyle(fontFamily: 'Kanit', color: Colors.grey),
+                            style: TextStyle(color: Colors.grey),
                           ),
                         ),
             ],
           ),
         ),
       ),
-      // 4. Bottom Navigation Bar
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -330,24 +354,15 @@ class _DormitoryHomePageState extends State<DormitoryHomePage> {
           unselectedItemColor: Colors.grey.shade400,
           selectedFontSize: 12,
           unselectedFontSize: 12,
-          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Kanit'),
-          unselectedLabelStyle: const TextStyle(fontFamily: 'Kanit'),
+          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
+          unselectedLabelStyle: const TextStyle(),
           elevation: 0,
           items: [
             BottomNavigationBarItem(
               icon: Padding(
                 padding: const EdgeInsets.only(bottom: 6.0),
                 child: _currentIndex == 0
-                    ? const Text(
-                        'home',
-                        style: TextStyle(
-                          fontFamily: 'Kanit',
-                          fontSize: 24,
-                          fontWeight: FontWeight.w600,
-                          color: primaryColor,
-                          height: 1,
-                        ),
-                      )
+                    ? const Icon(Icons.home_rounded, size: 26, color: primaryColor)
                     : const Icon(Icons.home_outlined, size: 26),
               ),
               label: 'หน้าหลัก',
@@ -428,7 +443,6 @@ class _DormitoryHomePageState extends State<DormitoryHomePage> {
             Text(
               title,
               style: const TextStyle(
-                fontFamily: 'Kanit',
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF1F2937),
@@ -438,7 +452,6 @@ class _DormitoryHomePageState extends State<DormitoryHomePage> {
             Text(
               subtitle,
               style: TextStyle(
-                fontFamily: 'Kanit',
                 fontSize: 13,
                 color: Colors.grey.shade500,
               ),
@@ -514,7 +527,6 @@ class _DormitoryHomePageState extends State<DormitoryHomePage> {
                     Text(
                       dorm.name,
                       style: const TextStyle(
-                        fontFamily: 'Kanit',
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Color(0xFF1F2937),
@@ -526,7 +538,6 @@ class _DormitoryHomePageState extends State<DormitoryHomePage> {
                     Text(
                       'ID: #DORM-${dorm.id}',
                       style: TextStyle(
-                        fontFamily: 'Kanit',
                         fontSize: 13,
                         color: Colors.grey.shade500,
                       ),
@@ -543,7 +554,6 @@ class _DormitoryHomePageState extends State<DormitoryHomePage> {
                 child: Text(
                   statusText,
                   style: TextStyle(
-                    fontFamily: 'Kanit',
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                     color: statusColor,
@@ -654,13 +664,183 @@ class _DormitoryHomePageState extends State<DormitoryHomePage> {
         Text(
           label,
           style: TextStyle(
-            fontFamily: 'Kanit',
             fontSize: 12,
             fontWeight: isActive && !isCompleted ? FontWeight.bold : FontWeight.normal,
             color: isActive && !isCompleted ? activeColor : (isCompleted ? const Color(0xFF1F2937) : Colors.grey.shade500),
           ),
         ),
       ],
+    );
+  }
+
+  // --- TAB 1: NOTIFICATIONS ---
+  Widget _buildNotificationTab() {
+    const primaryColor = Color(0xFF3F6DE3);
+
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'การแจ้งเตือน (เจ้าของ)',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1F2937),
+                ),
+              ),
+              TextButton(
+                onPressed: () {},
+                child: const Text('อ่านทั้งหมด', style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: _currentUser == null
+                ? const Center(child: CircularProgressIndicator())
+                : StreamBuilder<QuerySnapshot>(
+                    stream: _notificationService.getUserNotifications(_currentUser!.id),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      if (snapshot.hasError) {
+                        return const Center(child: Text('เกิดข้อผิดพลาดในการโหลดแจ้งเตือน', style: TextStyle()));
+                      }
+                      final docs = snapshot.data?.docs ?? [];
+                      if (docs.isEmpty) {
+                        return const Center(
+                          child: Text('ไม่มีการแจ้งเตือน', style: TextStyle(color: Colors.grey)),
+                        );
+                      }
+
+                      return ListView.builder(
+                        physics: const BouncingScrollPhysics(),
+                        itemCount: docs.length,
+                        itemBuilder: (context, index) {
+                          final notifData = docs[index].data() as Map<String, dynamic>;
+                          final notifId = docs[index].id;
+                          
+                          final bool isRead = notifData['isRead'] ?? false;
+                          final String title = notifData['title'] ?? '';
+                          final String desc = notifData['desc'] ?? '';
+                          final timestamp = notifData['timestamp'] as Timestamp?;
+                          final DateTime time = timestamp?.toDate() ?? DateTime.now();
+                          
+                          String timeStr;
+                          final now = DateTime.now();
+                          if (now.difference(time).inDays == 0 && now.day == time.day) {
+                            timeStr = DateFormat('HH:mm').format(time);
+                          } else if (now.difference(time).inDays == 1 || (now.difference(time).inDays == 0 && now.day != time.day)) {
+                            timeStr = 'เมื่อวาน';
+                          } else {
+                            timeStr = DateFormat('d MMM').format(time);
+                          }
+                          
+                          // Determine icon
+                          IconData icon = Icons.notifications_rounded;
+                          Color iconColor = primaryColor;
+                          if (notifData['type'] == 'booking_success') {
+                            icon = Icons.check_circle_rounded;
+                            iconColor = const Color(0xFF34C759);
+                          } else if (notifData['type'] == 'new_booking') {
+                            icon = Icons.celebration_rounded;
+                            iconColor = primaryColor;
+                          }
+
+                          return GestureDetector(
+                            onTap: () {
+                              if (!isRead) {
+                                _notificationService.markAsRead(notifId);
+                              }
+                            },
+                            child: Container(
+                              margin: const EdgeInsets.only(bottom: 12),
+                              padding: const EdgeInsets.all(16.0),
+                              decoration: BoxDecoration(
+                                color: isRead ? Colors.transparent : Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: isRead
+                                    ? []
+                                    : [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.02),
+                                          blurRadius: 10,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ],
+                                border: Border.all(
+                                  color: isRead ? Colors.grey.shade200 : primaryColor.withOpacity(0.06),
+                                ),
+                              ),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: iconColor.withOpacity(0.1),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(icon, color: iconColor, size: 20),
+                                  ),
+                                  const SizedBox(width: 14),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                title,
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: isRead ? FontWeight.bold : FontWeight.w800,
+                                                  color: const Color(0xFF1F2937),
+                                                ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                            Text(
+                                              timeStr,
+                                              style: const TextStyle(
+                                                color: Colors.black38,
+                                                fontSize: 10,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Text(
+                                          desc,
+                                          style: TextStyle(
+                                            color: Colors.grey.shade600,
+                                            fontSize: 12.5,
+                                            height: 1.4,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
     );
   }
 }

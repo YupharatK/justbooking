@@ -25,15 +25,27 @@ class Review {
 
   factory Review.fromJson(Map<String, dynamic> json) {
     return Review(
-      id: json['id'],
-      dormitoryId: json['dormitoryId'],
-      userId: json['userId'],
-      rating: (json['rating'] as num).toDouble(),
-      comment: json['comment'],
-      ownerReply: json['ownerReply'],
+      id: json['id'] ?? 0,
+      dormitoryId: json['dormitoryId'] ?? json['dormitory_id'] ?? 0,
+      userId: json['userId'] ?? json['user_id'] ?? 0,
+      rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
+      comment: json['comment'] ?? '',
+      ownerReply: json['ownerReply'] ?? json['owner_reply'],
       status: json['status'] ?? 'active',
-      createdAt: json['createdAt'] ?? '',
-      user: json['user'] != null ? User.fromJson(json['user']) : null,
+      createdAt: json['createdAt'] ?? json['created_at'] ?? '',
+      user: json['user'] != null 
+          ? User.fromJson(json['user']) 
+          : (json['first_name'] != null || json['nickname'] != null)
+              ? User(
+                  id: json['userId'] ?? json['user_id'] ?? 0,
+                  email: '',
+                  role: 'user',
+                  firstName: json['firstName'] ?? json['first_name'],
+                  lastName: json['lastName'] ?? json['last_name'],
+                  nickname: json['nickname'],
+                  status: 'active',
+                )
+              : null,
     );
   }
 }

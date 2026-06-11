@@ -69,28 +69,28 @@ class ApiClient {
   Future<dynamic> get(String endpoint, {bool requireAuth = true}) async {
     final url = Uri.parse('${ApiConfig.baseUrl}$endpoint');
     final headers = await _getHeaders(requireAuth: requireAuth);
-    final response = await _client.get(url, headers: headers);
+    final response = await _client.get(url, headers: headers).timeout(const Duration(seconds: 15));
     return _handleResponse(response);
   }
 
   Future<dynamic> post(String endpoint, {Map<String, dynamic>? body, bool requireAuth = true}) async {
     final url = Uri.parse('${ApiConfig.baseUrl}$endpoint');
     final headers = await _getHeaders(requireAuth: requireAuth);
-    final response = await _client.post(url, headers: headers, body: body != null ? jsonEncode(body) : null);
+    final response = await _client.post(url, headers: headers, body: body != null ? jsonEncode(body) : null).timeout(const Duration(seconds: 45));
     return _handleResponse(response);
   }
 
   Future<dynamic> patch(String endpoint, {Map<String, dynamic>? body, bool requireAuth = true}) async {
     final url = Uri.parse('${ApiConfig.baseUrl}$endpoint');
     final headers = await _getHeaders(requireAuth: requireAuth);
-    final response = await _client.patch(url, headers: headers, body: body != null ? jsonEncode(body) : null);
+    final response = await _client.patch(url, headers: headers, body: body != null ? jsonEncode(body) : null).timeout(const Duration(seconds: 15));
     return _handleResponse(response);
   }
 
   Future<dynamic> delete(String endpoint, {bool requireAuth = true}) async {
     final url = Uri.parse('${ApiConfig.baseUrl}$endpoint');
     final headers = await _getHeaders(requireAuth: requireAuth);
-    final response = await _client.delete(url, headers: headers);
+    final response = await _client.delete(url, headers: headers).timeout(const Duration(seconds: 15));
     return _handleResponse(response);
   }
 
@@ -122,7 +122,7 @@ class ApiClient {
       contentType: mediaType,
     ));
 
-    final streamedResponse = await request.send();
+    final streamedResponse = await request.send().timeout(const Duration(seconds: 30));
     final response = await http.Response.fromStream(streamedResponse);
     return _handleResponse(response);
   }

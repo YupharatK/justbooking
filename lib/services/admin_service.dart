@@ -14,6 +14,7 @@ class AdminService {
         .toList();
   }
 
+    // ฟังก์ชันสำหรับอัปเดตสถานะของผู้ใช้งาน เช่น ระงับบัญชี หรือเปิดใช้งาน (สำหรับ Admin)
   Future<void> updateUserStatus(int userId, String status) async {
     await _api.patch('/api/admin/users/$userId/status', body: {
       'status': status,
@@ -28,10 +29,12 @@ class AdminService {
         .toList();
   }
 
+    // ฟังก์ชันสำหรับอนุมัติหอพักให้แสดงในระบบ (สำหรับ Admin)
   Future<void> approveDormitory(int id) async {
     await _api.patch('/api/admin/dormitories/$id/approve');
   }
 
+    // ฟังก์ชันสำหรับปฏิเสธการลงทะเบียนหอพักพร้อมระบุเหตุผล (สำหรับ Admin)
   Future<void> rejectDormitory(int id, String reason) async {
     await _api.patch('/api/admin/dormitories/$id/reject', body: {
       'reason': reason,
@@ -46,13 +49,14 @@ class AdminService {
         .toList();
   }
 
-  Future<void> verifyPayment(int bookingId, String status) async {
-    await _api.patch('/api/admin/bookings/$bookingId/payment', body: {
-      'status': status,
-    });
-  }
+  // Future<void> verifyPayment(int bookingId, String status) async {
+  //   await _api.patch('/api/admin/bookings/$bookingId/payment', body: {
+  //     'status': status,
+  //   });
+  // }
 
   // Reviews
+    // ฟังก์ชันสำหรับซ่อนรีวิวที่ไม่เหมาะสม (สำหรับ Admin)
   Future<void> hideReview(int reviewId) async {
     await _api.patch('/api/admin/reviews/$reviewId/hide');
   }

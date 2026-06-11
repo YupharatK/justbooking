@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
 import 'booking_detail_page.dart';
 import '../models/room.dart';
+import '../wellcome/login.dart';
+
+/// หน้าแสดงรายการประเภทห้องพักทั้งหมดที่มีในหอพักนี้ (เช่น ห้องพัดลม, ห้องแอร์)
 
 class RoomTypesPage extends StatefulWidget {
   final String dormName;
   final List<Room> rooms;
+  final bool isGuest;
+  final int? ownerId;
 
   const RoomTypesPage({
     super.key,
     required this.dormName,
     required this.rooms,
+    this.isGuest = false,
+    this.ownerId,
   });
 
   @override
@@ -19,7 +26,8 @@ class RoomTypesPage extends StatefulWidget {
 class _RoomTypesPageState extends State<RoomTypesPage> {
   int _currentIndex = 0; // Bottom Navigation Bar Index
 
-  @override
+    // ฟังก์ชัน build ทำหน้าที่วาดหน้าจอ (UI) และจัดวาง Widget ต่างๆ ภายในหน้านี้
+@override
   Widget build(BuildContext context) {
     const primaryColor = Color(0xFF6366F1); // Modern violet/purple color as in design screenshot
     const textDarkColor = Color(0xFF1F2937);
@@ -38,7 +46,6 @@ class _RoomTypesPageState extends State<RoomTypesPage> {
             const Text(
               'ประเภทห้องพักที่ว่าง',
               style: TextStyle(
-                fontFamily: 'Kanit',
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
                 color: textDarkColor,
@@ -48,7 +55,6 @@ class _RoomTypesPageState extends State<RoomTypesPage> {
             Text(
               widget.dormName,
               style: TextStyle(
-                fontFamily: 'Kanit',
                 fontSize: 12,
                 color: Colors.grey.shade500,
               ),
@@ -60,19 +66,21 @@ class _RoomTypesPageState extends State<RoomTypesPage> {
       body: Column(
         children: [
           Expanded(
-            child: widget.rooms.isEmpty
+            child: widget.rooms.where((r) => r.availableCount > 0).toList().isEmpty
                 ? Center(
                     child: Text(
-                      'ไม่มีข้อมูลห้องพัก',
-                      style: TextStyle(fontFamily: 'Kanit', color: Colors.grey.shade600),
+                      'ไม่มีข้อมูลห้องพักที่ว่าง',
+                      style: TextStyle(color: Colors.grey.shade600),
                     ),
                   )
-                : ListView.builder(
+                :                 // ใช้ ListView.builder สำหรับสร้างรายการข้อมูลแบบเลื่อนได้ (Scrollable List) ซึ่งจะวาด UI ตามจำนวนข้อมูลที่มี
+ListView.builder(
                     physics: const BouncingScrollPhysics(),
                     padding: const EdgeInsets.all(16.0),
-                    itemCount: widget.rooms.length,
+                    itemCount: widget.rooms.where((r) => r.availableCount > 0).toList().length,
                     itemBuilder: (context, index) {
-                      final room = widget.rooms[index];
+                      final availableRooms = widget.rooms.where((r) => r.availableCount > 0).toList();
+                      final room = availableRooms[index];
                       final isAvailable = room.availableCount > 0;
                       
                       String tagText = isAvailable ? 'ว่าง ${room.availableCount} ห้อง' : 'ไม่ว่าง';
@@ -98,16 +106,27 @@ class _RoomTypesPageState extends State<RoomTypesPage> {
                           amenities: room.facilities.isNotEmpty ? room.facilities : ['ไม่มีข้อมูลสิ่งอำนวยความสะดวก'],
                           amenityIcons: List.generate(room.facilities.isNotEmpty ? room.facilities.length : 1, (index) => Icons.check_circle_outline_rounded),
                           onSelect: () {
-                            Navigator.push(
+                            if (widget.isGuest) {
+                                                            // คำสั่ง Navigator.push ใช้สำหรับเปลี่ยนหน้าต่างไปยังหน้าจอใหม่
+Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+                              return;
+                            }
+                                                        // คำสั่ง Navigator.push ใช้สำหรับเปลี่ยนหน้าต่างไปยังหน้าจอใหม่
+Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => BookingDetailPage(
-                                  dormName: widget.dormName,
-                                  roomType: room.roomType,
-                                  price: '฿${room.price.toStringAsFixed(0)}',
-                                  imageUrl: imageUrl,
-                                  roomId: room.id,
-                                ),
+                                  builder: (_) => BookingDetailPage(
+                                    dormName: widget.dormName,
+                                    roomType: room.roomType,
+                                    monthlyPrice: '฿${room.price.toStringAsFixed(0)}',
+                                    securityDeposit: '฿${room.securityDeposit.toStringAsFixed(0)}',
+                                    bookingFee: '฿${room.bookingFee.toStringAsFixed(0)}',
+                                    imageUrl: imageUrl,
+                                    roomId: room.id,
+                                    facilities: room.facilities,
+                                    roomNumber: room.roomNumber,
+                                    ownerId: widget.ownerId,
+                                  ),
                               ),
                             );
                           },
@@ -128,7 +147,13 @@ class _RoomTypesPageState extends State<RoomTypesPage> {
             child: BottomNavigationBar(
               currentIndex: _currentIndex,
               onTap: (index) {
-                setState(() {
+                if (widget.isGuest && index != 0) {
+                                    // คำสั่ง Navigator.push ใช้สำหรับเปลี่ยนหน้าต่างไปยังหน้าจอใหม่
+Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+                  return;
+                }
+                                // คำสั่ง setState จะกระตุ้นให้ Flutter ทำการวาดหน้าจอ (build) ใหม่อีกครั้งเพื่ออัปเดตข้อมูลที่เปลี่ยนไป
+setState(() {
                   _currentIndex = index;
                 });
                 // Pop back to Homepage to switch tabs
@@ -142,8 +167,8 @@ class _RoomTypesPageState extends State<RoomTypesPage> {
               unselectedItemColor: Colors.grey.shade400,
               selectedFontSize: 11,
               unselectedFontSize: 11,
-              selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Kanit'),
-              unselectedLabelStyle: const TextStyle(fontFamily: 'Kanit'),
+              selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
+              unselectedLabelStyle: const TextStyle(),
               elevation: 0,
               items: const [
                 BottomNavigationBarItem(
@@ -245,7 +270,6 @@ class _RoomTypesPageState extends State<RoomTypesPage> {
                         child: const Text(
                           'เต็มแล้ว',
                           style: TextStyle(
-                            fontFamily: 'Kanit',
                             color: Colors.white,
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -274,7 +298,6 @@ class _RoomTypesPageState extends State<RoomTypesPage> {
                       child: Text(
                         title,
                         style: const TextStyle(
-                          fontFamily: 'Kanit',
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Color(0xFF1F2937),
@@ -288,7 +311,6 @@ class _RoomTypesPageState extends State<RoomTypesPage> {
                         Text(
                           price,
                           style: const TextStyle(
-                            fontFamily: 'Kanit',
                             fontSize: 18,
                             fontWeight: FontWeight.w900,
                             color: primaryColor,
@@ -297,7 +319,6 @@ class _RoomTypesPageState extends State<RoomTypesPage> {
                         Text(
                           'ต่อเดือน',
                           style: TextStyle(
-                            fontFamily: 'Kanit',
                             fontSize: 10,
                             color: Colors.grey.shade500,
                           ),
@@ -319,7 +340,6 @@ class _RoomTypesPageState extends State<RoomTypesPage> {
                       child: Text(
                         tagText,
                         style: TextStyle(
-                          fontFamily: 'Kanit',
                           color: tagColor,
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
@@ -330,7 +350,6 @@ class _RoomTypesPageState extends State<RoomTypesPage> {
                     Text(
                       'เลขห้อง $floorText',
                       style: TextStyle(
-                        fontFamily: 'Kanit',
                         fontSize: 12,
                         color: Colors.grey.shade500,
                         fontWeight: FontWeight.w600,
@@ -353,7 +372,6 @@ class _RoomTypesPageState extends State<RoomTypesPage> {
                             child: Text(
                               amenities[idx],
                               style: const TextStyle(
-                                fontFamily: 'Kanit',
                                 fontSize: 13.5,
                                 color: Color(0xFF4B5563),
                                 fontWeight: FontWeight.w500,
@@ -371,7 +389,8 @@ class _RoomTypesPageState extends State<RoomTypesPage> {
                 SizedBox(
                   width: double.infinity,
                   height: 48,
-                  child: ElevatedButton(
+                  child:                   // ปุ่มกดแบบมีพื้นหลัง (ElevatedButton) เมื่อกดแล้วจะเรียกคำสั่งใน onPressed
+ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: isAvailable ? primaryColor : Colors.grey.shade100,
                       foregroundColor: isAvailable ? Colors.white : Colors.grey.shade400,
@@ -387,7 +406,6 @@ class _RoomTypesPageState extends State<RoomTypesPage> {
                         Text(
                           isAvailable ? 'เลือกห้องนี้' : 'ห้องเต็ม',
                           style: const TextStyle(
-                            fontFamily: 'Kanit',
                             fontSize: 15,
                             fontWeight: FontWeight.bold,
                           ),

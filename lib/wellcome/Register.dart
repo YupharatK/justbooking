@@ -72,12 +72,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
 
     try {
-      // Split name into first and last name for API
+      
       final nameParts = name.split(' ');
       final firstName = nameParts[0];
       final lastName = nameParts.length > 1 && nameParts[1].isNotEmpty 
           ? nameParts.sublist(1).join(' ') 
-          : '-'; // ใส่ - เป็นค่าเริ่มต้นถ้านามสกุลว่าง
+          : '-'; 
 
       await _authService.register(
         email: email,
@@ -92,7 +92,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       if (!mounted) return;
       _showMessage('สมัครสมาชิกสำเร็จ กรุณาเข้าสู่ระบบ');
-      Navigator.pop(context); // Go back to login
+      Navigator.pop(context);
     } on ApiException catch (e) {
       _showMessage(e.message);
     } catch (_) {

@@ -5,14 +5,23 @@ import '../models/review.dart';
 import '../models/room.dart';
 import 'room_types_page.dart';
 import '../models/dormitory.dart';
+import '../utils/distance_calculator.dart';
 import '../services/dormitory_service.dart';
+import 'chat_screen.dart';
+import '../wellcome/login.dart';
+import '../core/localization/localization_extension.dart';
+import '../core/localization/mapper.dart';
+
+/// หน้าแสดงรายละเอียดแบบเจาะลึกของหอพัก 1 แห่ง รวมถึงรายการห้องพัก สิ่งอำนวยความสะดวก และรีวิว
 
 class DormDetailPage extends StatefulWidget {
   final int dormId;
+  final bool isGuest;
 
   const DormDetailPage({
     super.key,
     required this.dormId,
+    this.isGuest = false,
   });
 
   @override
@@ -27,25 +36,43 @@ class _DormDetailPageState extends State<DormDetailPage> {
   late Future<Dormitory> _dormFuture;
 
   void _loadDormDetail() {
-    setState(() {
+        // คำสั่ง setState จะกระตุ้นให้ Flutter ทำการวาดหน้าจอ (build) ใหม่อีกครั้งเพื่ออัปเดตข้อมูลที่เปลี่ยนไป
+setState(() {
       _dormFuture = _dormitoryService.getDormitoryDetail(widget.dormId);
     });
   }
 
   @override
-  void initState() {
+    // ฟังก์ชัน initState จะถูกเรียกใช้งานเป็นสิ่งแรกสุดเมื่อเปิดหน้านี้ขึ้นมา (มักใช้สำหรับดึงข้อมูลเตรียมไว้)
+void initState() {
     super.initState();
     _loadDormDetail();
   }
 
-  Future<void> _openMap(double lat, double lng) async {
-    final url = Uri.parse('https://www.google.com/maps/search/?api=1&query=$lat,$lng');
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url, mode: LaunchMode.externalApplication);
-    } else {
+    // ฟังก์ชันแบบ Asynchronous สำหรับติดต่อระบบหลังบ้าน (Backend) หรือประมวลผลข้อมูล: _openMap
+Future<void> _openMap(double lat, double lng) async {
+    if (lat == 0.0 && lng == 0.0) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('ไม่สามารถเปิดแผนที่ได้', style: TextStyle(fontFamily: 'Kanit'))),
+                // แสดงข้อความแจ้งเตือนป๊อปอัปเล็กๆ ที่ด้านล่างของจอ (SnackBar)
+ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.dormDetailMapNotFound, style: TextStyle())),
+        );
+      }
+      return;
+    }
+    
+    // ใช้ API นำทาง (Directions) แทนการค้นหา (Search) เพื่อใช้นำทางไปหอพัก
+    final url = Uri.parse('https://www.google.com/maps/dir/?api=1&destination=$lat,$lng');
+    try {
+      final launched = await launchUrl(url, mode: LaunchMode.externalApplication);
+      if (!launched) {
+        throw Exception('Could not launch map');
+      }
+    } catch (e) {
+      if (mounted) {
+                // แสดงข้อความแจ้งเตือนป๊อปอัปเล็กๆ ที่ด้านล่างของจอ (SnackBar)
+ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.dormDetailMapLaunchError, style: TextStyle())),
         );
       }
     }
@@ -77,7 +104,7 @@ class _DormDetailPageState extends State<DormDetailPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('เขียนรีวิว', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, fontFamily: 'Kanit')),
+                      Text(context.l10n.dormDetailWriteReview, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                       IconButton(
                         icon: const Icon(Icons.close_rounded),
                         onPressed: () => Navigator.pop(context),
@@ -85,7 +112,7 @@ class _DormDetailPageState extends State<DormDetailPage> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  const Text('ให้คะแนนหอพักนี้', style: TextStyle(fontFamily: 'Kanit', fontWeight: FontWeight.w600)),
+                  Text(context.l10n.dormDetailRateDorm, style: TextStyle(fontWeight: FontWeight.w600)),
                   const SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -105,14 +132,14 @@ class _DormDetailPageState extends State<DormDetailPage> {
                     }),
                   ),
                   const SizedBox(height: 16),
-                  const Text('ความคิดเห็น', style: TextStyle(fontFamily: 'Kanit', fontWeight: FontWeight.w600)),
+                  Text(context.l10n.dormDetailComment, style: TextStyle(fontWeight: FontWeight.w600)),
                   const SizedBox(height: 8),
                   TextField(
                     controller: commentController,
                     maxLines: 4,
                     decoration: InputDecoration(
-                      hintText: 'แบ่งปันประสบการณ์ของคุณกับหอพักนี้...',
-                      hintStyle: const TextStyle(fontFamily: 'Kanit', color: Colors.black26),
+                      hintText: context.l10n.dormDetailCommentHint,
+                      hintStyle: const TextStyle(color: Colors.black26),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                         borderSide: BorderSide(color: Colors.grey.shade300),
@@ -131,7 +158,8 @@ class _DormDetailPageState extends State<DormDetailPage> {
                   SizedBox(
                     width: double.infinity,
                     height: 50,
-                    child: ElevatedButton(
+                    child:                     // ปุ่มกดแบบมีพื้นหลัง (ElevatedButton) เมื่อกดแล้วจะเรียกคำสั่งใน onPressed
+ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF4274E6),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
@@ -140,8 +168,9 @@ class _DormDetailPageState extends State<DormDetailPage> {
                           ? null
                           : () async {
                               if (commentController.text.trim().isEmpty) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('กรุณากรอกความคิดเห็น', style: TextStyle(fontFamily: 'Kanit'))),
+                                                                // แสดงข้อความแจ้งเตือนป๊อปอัปเล็กๆ ที่ด้านล่างของจอ (SnackBar)
+ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(context.l10n.dormDetailCommentRequired, style: TextStyle())),
                                 );
                                 return;
                               }
@@ -150,23 +179,25 @@ class _DormDetailPageState extends State<DormDetailPage> {
                                 await _dormitoryService.createReview(widget.dormId, rating, commentController.text.trim());
                                 if (mounted) {
                                   Navigator.pop(context);
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('ส่งรีวิวเรียบร้อยแล้ว', style: TextStyle(fontFamily: 'Kanit'))),
+                                                                    // แสดงข้อความแจ้งเตือนป๊อปอัปเล็กๆ ที่ด้านล่างของจอ (SnackBar)
+ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text(context.l10n.dormDetailReviewSuccess, style: TextStyle())),
                                   );
                                   _loadDormDetail(); // Refresh data
                                 }
                               } catch (e) {
                                 setModalState(() => isSubmitting = false);
                                 if (mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('เกิดข้อผิดพลาด กรุณาลองใหม่', style: TextStyle(fontFamily: 'Kanit'))),
+                                                                    // แสดงข้อความแจ้งเตือนป๊อปอัปเล็กๆ ที่ด้านล่างของจอ (SnackBar)
+ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text(context.l10n.dormDetailReviewError, style: TextStyle())),
                                   );
                                 }
                               }
                             },
                       child: isSubmitting
                           ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                          : const Text('ส่งรีวิว', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Kanit')),
+                          : Text(context.l10n.dormDetailSubmitReview, style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
                     ),
                   ),
                 ],
@@ -178,14 +209,17 @@ class _DormDetailPageState extends State<DormDetailPage> {
     );
   }
 
-  @override
+    // ฟังก์ชัน build ทำหน้าที่วาดหน้าจอ (UI) และจัดวาง Widget ต่างๆ ภายในหน้านี้
+@override
   Widget build(BuildContext context) {
     const primaryColor = Color(0xFF4274E6);
     const textDarkColor = Color(0xFF1F2937);
 
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFC),
-      body: FutureBuilder<Dormitory>(
+
+      body:       // FutureBuilder ใช้สำหรับรอให้ข้อมูลแบบ Asynchronous (เช่น การดึง API) ทำงานเสร็จก่อนถึงจะวาดหน้าจอ
+FutureBuilder<Dormitory>(
         future: _dormFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -195,23 +229,24 @@ class _DormDetailPageState extends State<DormDetailPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('เกิดข้อผิดพลาดในการโหลดข้อมูล'),
+                  Text(context.l10n.dormDetailLoadingError),
                   TextButton(
                     onPressed: () {
                       Navigator.pop(context);
                     },
-                    child: const Text('กลับ'),
+                    child: Text(context.l10n.dormDetailBack),
                   ),
                 ],
               ),
             );
           } else if (!snapshot.hasData) {
-            return const Center(child: Text('ไม่พบข้อมูลหอพัก'));
+            return Center(child: Text(context.l10n.dormDetailNotFound));
           }
 
           final dorm = snapshot.data!;
           final isAvailable = dorm.rooms != null && dorm.rooms!.any((r) => r.availableCount > 0);
           final availableRoomsCount = dorm.rooms?.fold<int>(0, (sum, r) => sum + r.availableCount) ?? 0;
+          final double distanceKm = DistanceCalculator.calculateDistanceInKm(dorm.latitude, dorm.longitude);
           final lowestPrice = dorm.rooms != null && dorm.rooms!.isNotEmpty 
               ? dorm.rooms!.map((r) => r.price).reduce((a, b) => a < b ? a : b)
               : 0.0;
@@ -257,7 +292,8 @@ class _DormDetailPageState extends State<DormDetailPage> {
                             Positioned(
                               top: 16,
                               left: 16,
-                              child: GestureDetector(
+                              child:                               // GestureDetector ใช้ครอบ Widget อื่นๆ เพื่อให้สามารถรับการกด (Tap) หรือสัมผัสจากผู้ใช้ได้
+GestureDetector(
                                 onTap: () => Navigator.pop(context),
                                 child: Container(
                                   padding: const EdgeInsets.all(10),
@@ -277,25 +313,33 @@ class _DormDetailPageState extends State<DormDetailPage> {
                             Positioned(
                               top: 16,
                               right: 16,
-                              child: GestureDetector(
+                              child:                               // GestureDetector ใช้ครอบ Widget อื่นๆ เพื่อให้สามารถรับการกด (Tap) หรือสัมผัสจากผู้ใช้ได้
+GestureDetector(
                                 onTap: () async {
+                                  if (widget.isGuest) {
+                                                                        // คำสั่ง Navigator.push ใช้สำหรับเปลี่ยนหน้าต่างไปยังหน้าจอใหม่
+Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+                                    return;
+                                  }
                                   try {
                                     if (_isFavorite) {
                                       await _dormitoryService.removeFavorite(dorm.id);
                                     } else {
                                       await _dormitoryService.addFavorite(dorm.id);
                                     }
-                                    setState(() {
+                                                                        // คำสั่ง setState จะกระตุ้นให้ Flutter ทำการวาดหน้าจอ (build) ใหม่อีกครั้งเพื่ออัปเดตข้อมูลที่เปลี่ยนไป
+setState(() {
                                       _isFavorite = !_isFavorite;
                                     });
                                     if (mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
+                                                                            // แสดงข้อความแจ้งเตือนป๊อปอัปเล็กๆ ที่ด้านล่างของจอ (SnackBar)
+ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
                                           content: Text(
                                             _isFavorite
-                                                ? 'บันทึกหอพักนี้เรียบร้อยแล้ว'
-                                                : 'ยกเลิกการบันทึกหอพักเรียบร้อยแล้ว',
-                                            style: const TextStyle(fontFamily: 'Kanit'),
+                                                ? context.l10n.dormDetailSaveSuccess
+                                                : context.l10n.dormDetailUnsaveSuccess,
+                                            style: const TextStyle(),
                                           ),
                                           duration: const Duration(seconds: 1),
                                         ),
@@ -303,8 +347,9 @@ class _DormDetailPageState extends State<DormDetailPage> {
                                     }
                                   } catch (e) {
                                     if (mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(content: Text('เกิดข้อผิดพลาดในการบันทึก', style: TextStyle(fontFamily: 'Kanit'))),
+                                                                            // แสดงข้อความแจ้งเตือนป๊อปอัปเล็กๆ ที่ด้านล่างของจอ (SnackBar)
+ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text(context.l10n.dormDetailSaveError, style: TextStyle())),
                                       );
                                     }
                                   }
@@ -349,7 +394,6 @@ class _DormDetailPageState extends State<DormDetailPage> {
                                       child: Text(
                                         dorm.name,
                                         style: const TextStyle(
-                                          fontFamily: 'Kanit',
                                           fontSize: 24,
                                           fontWeight: FontWeight.bold,
                                           color: textDarkColor,
@@ -363,9 +407,8 @@ class _DormDetailPageState extends State<DormDetailPage> {
                                         borderRadius: BorderRadius.circular(20),
                                       ),
                                       child: Text(
-                                        isAvailable ? 'ว่าง' : 'เต็ม',
+                                        isAvailable ? context.l10n.searchAvailable : context.l10n.searchFull,
                                         style: TextStyle(
-                                          fontFamily: 'Kanit',
                                           color: isAvailable ? primaryColor : Colors.red,
                                           fontSize: 12,
                                           fontWeight: FontWeight.bold,
@@ -395,9 +438,8 @@ class _DormDetailPageState extends State<DormDetailPage> {
                                     ),
                                     const SizedBox(width: 6),
                                     Text(
-                                      '(${dorm.reviews?.length ?? 0} รีวิว)',
+                                      '(${dorm.reviews?.length ?? 0} ${context.l10n.dormManageReviewUnit.trim()})',
                                       style: TextStyle(
-                                        fontFamily: 'Kanit',
                                         color: Colors.grey.shade500,
                                         fontSize: 13,
                                       ),
@@ -415,7 +457,6 @@ class _DormDetailPageState extends State<DormDetailPage> {
                                       child: Text(
                                         dorm.address,
                                         style: const TextStyle(
-                                          fontFamily: 'Kanit',
                                           color: Colors.black54,
                                           fontSize: 14,
                                         ),
@@ -431,14 +472,13 @@ class _DormDetailPageState extends State<DormDetailPage> {
                                     RichText(
                                       text: TextSpan(
                                         style: const TextStyle(
-                                          fontFamily: 'Kanit',
                                           color: Colors.black54,
                                           fontSize: 14,
                                         ),
                                         children: [
-                                          const TextSpan(text: 'จำนวนห้องว่าง '),
+                                          TextSpan(text: context.l10n.dormDetailAvailableRooms),
                                           TextSpan(
-                                            text: '$availableRoomsCount ห้อง',
+                                            text: '$availableRoomsCount ${context.l10n.addDormRoomUnit}',
                                             style: const TextStyle(
                                               color: primaryColor,
                                               fontWeight: FontWeight.bold,
@@ -458,7 +498,6 @@ class _DormDetailPageState extends State<DormDetailPage> {
                                   Text(
                                     dorm.description,
                                     style: const TextStyle(
-                                      fontFamily: 'Kanit',
                                       color: Colors.black54,
                                       fontSize: 14,
                                       height: 1.5,
@@ -477,10 +516,9 @@ class _DormDetailPageState extends State<DormDetailPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  'ประเภทห้องพัก',
+                                Text(
+                                  context.l10n.dormDetailRoomTypes,
                                   style: TextStyle(
-                                    fontFamily: 'Kanit',
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                     color: textDarkColor,
@@ -489,7 +527,8 @@ class _DormDetailPageState extends State<DormDetailPage> {
                                 const SizedBox(height: 12),
                                 SizedBox(
                                   height: 190,
-                                  child: ListView.builder(
+                                  child:                                   // ใช้ ListView.builder สำหรับสร้างรายการข้อมูลแบบเลื่อนได้ (Scrollable List) ซึ่งจะวาด UI ตามจำนวนข้อมูลที่มี
+ListView.builder(
                                     scrollDirection: Axis.horizontal,
                                     physics: const BouncingScrollPhysics(),
                                     itemCount: dorm.rooms!.length,
@@ -499,14 +538,15 @@ class _DormDetailPageState extends State<DormDetailPage> {
                                         padding: EdgeInsets.only(right: index == dorm.rooms!.length - 1 ? 0 : 14.0),
                                         child: _buildRoomTypeCard(
                                           dormName: dorm.name,
+                                          ownerId: dorm.ownerId,
                                           rooms: dorm.rooms ?? [],
                                           imageUrl: room.images?.isNotEmpty == true 
                                               ? room.images!.first.url 
                                               : 'https://images.unsplash.com/photo-1616594039964-ae9021a400a0?q=80&w=400',
                                           title: room.roomType,
-                                          subtitle: room.facilities.isNotEmpty ? room.facilities.join(', ') : 'ไม่มีข้อมูล',
+                                          subtitle: room.facilities.isNotEmpty ? room.facilities.map((f) => DataMapper.getFacilityName(context, f)).join(', ') : context.l10n.dormDetailNoData,
                                           price: room.price.toStringAsFixed(0),
-                                          available: 'ว่าง ${room.availableCount} ห้อง',
+                                          available: context.l10n.homeRoomsLeft(room.availableCount),
                                           availableColor: room.availableCount > 0 ? const Color(0xFF34C759) : Colors.red,
                                         ),
                                       );
@@ -525,10 +565,9 @@ class _DormDetailPageState extends State<DormDetailPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  'สิ่งอำนวยความสะดวก',
+                                Text(
+                                  context.l10n.dormDetailAmenities,
                                   style: TextStyle(
-                                    fontFamily: 'Kanit',
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                     color: textDarkColor,
@@ -547,13 +586,52 @@ class _DormDetailPageState extends State<DormDetailPage> {
                                   itemCount: dorm.facilities.length,
                                   itemBuilder: (context, index) {
                                     // Use generic icon for now
-                                    return _buildAmenityItem(Icons.check_circle_outline_rounded, dorm.facilities[index]);
+                                    return _buildAmenityItem(Icons.check_circle_outline_rounded, DataMapper.getFacilityName(context, dorm.facilities[index]));
                                   },
                                 ),
                               ],
                             ),
                           ),
                         const SizedBox(height: 24),
+
+                        // Rules Section
+                        if (dorm.rules.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  context.l10n.dormDetailRules,
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: textDarkColor,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF9FAFB),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(color: Colors.grey.shade200),
+                                  ),
+                                  child: Text(
+                                    dorm.rules,
+                                    style: const TextStyle(
+                                      color: Colors.black87,
+                                      fontSize: 14,
+                                      height: 1.6,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        if (dorm.rules.isNotEmpty)
+                          const SizedBox(height: 24),
 
                         // 5. Location Section (Map)
                         Padding(
@@ -564,16 +642,16 @@ class _DormDetailPageState extends State<DormDetailPage> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  const Text(
-                                    'สถานที่ตั้ง',
+                                  Text(
+                                    context.l10n.dormDetailLocation,
                                     style: TextStyle(
-                                      fontFamily: 'Kanit',
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
                                       color: textDarkColor,
                                     ),
                                   ),
-                                  GestureDetector(
+                                                                    // GestureDetector ใช้ครอบ Widget อื่นๆ เพื่อให้สามารถรับการกด (Tap) หรือสัมผัสจากผู้ใช้ได้
+GestureDetector(
                                     onTap: () {
                                       _openMap(dorm.latitude, dorm.longitude);
                                     },
@@ -584,10 +662,9 @@ class _DormDetailPageState extends State<DormDetailPage> {
                                         borderRadius: BorderRadius.circular(20),
                                         border: Border.all(color: primaryColor.withOpacity(0.3)),
                                       ),
-                                      child: const Text(
-                                        'ดูเส้นทาง',
+                                      child: Text(
+                                        context.l10n.dormDetailDirections,
                                         style: TextStyle(
-                                          fontFamily: 'Kanit',
                                           color: primaryColor,
                                           fontSize: 12.5,
                                           fontWeight: FontWeight.bold,
@@ -599,7 +676,8 @@ class _DormDetailPageState extends State<DormDetailPage> {
                               ),
                               const SizedBox(height: 12),
                               // Map visual button
-                              GestureDetector(
+                                                            // GestureDetector ใช้ครอบ Widget อื่นๆ เพื่อให้สามารถรับการกด (Tap) หรือสัมผัสจากผู้ใช้ได้
+GestureDetector(
                                 onTap: () => _openMap(dorm.latitude, dorm.longitude),
                                 child: Container(
                                   height: 180,
@@ -664,11 +742,25 @@ class _DormDetailPageState extends State<DormDetailPage> {
                               Text(
                                 dorm.address,
                                 style: const TextStyle(
-                                  fontFamily: 'Kanit',
                                   color: Colors.black54,
                                   fontSize: 13,
                                   height: 1.5,
                                 ),
+                              ),
+                              const SizedBox(height: 6),
+                              Row(
+                                children: [
+                                  const Icon(Icons.route_rounded, color: primaryColor, size: 16),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    context.l10n.dormDetailDistanceFromUni(distanceKm.toStringAsFixed(1)),
+                                    style: const TextStyle(
+                                      color: primaryColor,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -684,29 +776,32 @@ class _DormDetailPageState extends State<DormDetailPage> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  const Text(
-                                    'รีวิวจากผู้เช่า',
+                                  Text(
+                                    context.l10n.dormDetailTenantReviews,
                                     style: TextStyle(
-                                      fontFamily: 'Kanit',
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
                                       color: textDarkColor,
                                     ),
                                   ),
                                   TextButton(
-                                    onPressed: _openWriteReviewSheet,
+                                    onPressed: widget.isGuest
+                                        ? () {
+                                                                                        // คำสั่ง Navigator.push ใช้สำหรับเปลี่ยนหน้าต่างไปยังหน้าจอใหม่
+Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+                                          }
+                                        : _openWriteReviewSheet,
                                     style: TextButton.styleFrom(
                                       padding: EdgeInsets.zero,
                                       minimumSize: const Size(50, 30),
                                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                     ),
-                                    child: const Text(
-                                      'เขียนรีวิว',
+                                    child: Text(
+                                      context.l10n.dormDetailWriteReview,
                                       style: TextStyle(
                                         color: primaryColor,
                                         fontWeight: FontWeight.w600,
-                                        fontSize: 14,
-                                        fontFamily: 'Kanit'
+                                        fontSize: 14
                                       ),
                                     ),
                                   ),
@@ -722,16 +817,17 @@ class _DormDetailPageState extends State<DormDetailPage> {
                                     borderRadius: BorderRadius.circular(16),
                                     border: Border.all(color: Colors.grey.shade200),
                                   ),
-                                  child: const Center(
+                                  child: Center(
                                     child: Text(
-                                      'ยังไม่มีรีวิวสำหรับหอพักนี้\nมาเป็นคนแรกที่รีวิวกันเถอะ!',
+                                      context.l10n.dormDetailNoReviews,
                                       textAlign: TextAlign.center,
-                                      style: TextStyle(fontFamily: 'Kanit', color: Colors.black45),
+                                      style: TextStyle(color: Colors.black45),
                                     ),
                                   ),
                                 )
                               else
-                                ListView.builder(
+                                                                // ใช้ ListView.builder สำหรับสร้างรายการข้อมูลแบบเลื่อนได้ (Scrollable List) ซึ่งจะวาด UI ตามจำนวนข้อมูลที่มี
+ListView.builder(
                                   shrinkWrap: true,
                                   physics: const NeverScrollableScrollPhysics(),
                                   itemCount: dorm.reviews!.length > 3 ? 3 : dorm.reviews!.length,
@@ -763,8 +859,8 @@ class _DormDetailPageState extends State<DormDetailPage> {
                                                   ),
                                                   const SizedBox(width: 8),
                                                   Text(
-                                                    '${review.user?.firstName ?? 'ผู้ใช้งาน'} ${review.user?.lastName ?? ''}',
-                                                    style: const TextStyle(fontFamily: 'Kanit', fontWeight: FontWeight.bold),
+                                                    '${review.user?.firstName ?? context.l10n.dormManageUserUnknown} ${review.user?.lastName ?? ''}',
+                                                    style: const TextStyle(fontWeight: FontWeight.bold),
                                                   ),
                                                 ],
                                               ),
@@ -774,7 +870,7 @@ class _DormDetailPageState extends State<DormDetailPage> {
                                                   const SizedBox(width: 4),
                                                   Text(
                                                     review.rating.toStringAsFixed(1),
-                                                    style: const TextStyle(fontFamily: 'Kanit', fontWeight: FontWeight.bold),
+                                                    style: const TextStyle(fontWeight: FontWeight.bold),
                                                   ),
                                                 ],
                                               ),
@@ -783,7 +879,7 @@ class _DormDetailPageState extends State<DormDetailPage> {
                                           const SizedBox(height: 12),
                                           Text(
                                             review.comment,
-                                            style: const TextStyle(fontFamily: 'Kanit', color: Colors.black87),
+                                            style: const TextStyle(color: Colors.black87),
                                           ),
                                           if (review.ownerReply != null && review.ownerReply!.isNotEmpty) ...[
                                             const SizedBox(height: 12),
@@ -797,14 +893,14 @@ class _DormDetailPageState extends State<DormDetailPage> {
                                               child: Column(
                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
-                                                  const Text(
-                                                    'การตอบกลับจากเจ้าของหอพัก',
-                                                    style: TextStyle(fontFamily: 'Kanit', fontWeight: FontWeight.bold, fontSize: 12, color: primaryColor),
+                                                  Text(
+                                                    context.l10n.dormDetailOwnerReply,
+                                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: primaryColor),
                                                   ),
                                                   const SizedBox(height: 4),
                                                   Text(
                                                     review.ownerReply!,
-                                                    style: const TextStyle(fontFamily: 'Kanit', color: Colors.black87, fontSize: 13),
+                                                    style: const TextStyle(color: Colors.black87, fontSize: 13),
                                                   ),
                                                 ],
                                               ),
@@ -844,10 +940,9 @@ class _DormDetailPageState extends State<DormDetailPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Text(
-                            'ราคาเริ่มต้น',
+                          Text(
+                            context.l10n.dormDetailStartingPrice,
                             style: TextStyle(
-                              fontFamily: 'Kanit',
                               color: Colors.black38,
                               fontSize: 11,
                             ),
@@ -860,17 +955,15 @@ class _DormDetailPageState extends State<DormDetailPage> {
                               Text(
                                 lowestPrice > 0 ? lowestPrice.toStringAsFixed(0) : '-',
                                 style: const TextStyle(
-                                  fontFamily: 'Kanit',
                                   color: primaryColor,
                                   fontWeight: FontWeight.w900,
                                   fontSize: 22,
                                 ),
                               ),
                               const SizedBox(width: 4),
-                              const Text(
-                                'บาท',
+                              Text(
+                                context.l10n.dormDetailCurrency,
                                 style: TextStyle(
-                                  fontFamily: 'Kanit',
                                   color: Colors.black54,
                                   fontSize: 13,
                                 ),
@@ -879,35 +972,70 @@ class _DormDetailPageState extends State<DormDetailPage> {
                           ),
                         ],
                       ),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: primaryColor,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
+                      Row(
+                        children: [
+                          Container(
+                            margin: const EdgeInsets.only(right: 12),
+                            decoration: BoxDecoration(
+                              color: primaryColor.withOpacity(0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: IconButton(
+                              icon: const Icon(Icons.chat_bubble_rounded, color: primaryColor, size: 22),
+                              tooltip: context.l10n.dormDetailChatTooltip,
+                              onPressed: () {
+                                if (widget.isGuest) {
+                                                                    // คำสั่ง Navigator.push ใช้สำหรับเปลี่ยนหน้าต่างไปยังหน้าจอใหม่
+Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+                                  return;
+                                }
+                                                                // คำสั่ง Navigator.push ใช้สำหรับเปลี่ยนหน้าต่างไปยังหน้าจอใหม่
+Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ChatScreen(
+                                      dormId: widget.dormId,
+                                      dormName: dorm.name,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
                           ),
-                          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
-                        ),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => RoomTypesPage(
-                                dormName: dorm.name,
-                                rooms: dorm.rooms ?? [],
+                                                    // ปุ่มกดแบบมีพื้นหลัง (ElevatedButton) เมื่อกดแล้วจะเรียกคำสั่งใน onPressed
+ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: primaryColor,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                            ),
+                            onPressed: () {
+                                                            // คำสั่ง Navigator.push ใช้สำหรับเปลี่ยนหน้าต่างไปยังหน้าจอใหม่
+Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => RoomTypesPage(
+                                    dormName: dorm.name,
+                                    rooms: dorm.rooms ?? [],
+                                    ownerId: dorm.ownerId,
+                                    isGuest: widget.isGuest,
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Text(
+                              context.l10n.dormDetailViewRooms,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
                               ),
                             ),
-                          );
-                        },
-                        child: const Text(
-                          'ดูห้องพักทั้งหมด',
-                          style: TextStyle(
-                            fontFamily: 'Kanit',
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
                           ),
-                        ),
+                        ],
                       ),
                     ],
                   ),
@@ -924,7 +1052,13 @@ class _DormDetailPageState extends State<DormDetailPage> {
                   child: BottomNavigationBar(
                     currentIndex: _currentIndex,
                     onTap: (index) {
-                      setState(() {
+                      if (widget.isGuest && index != 0) {
+                                                // คำสั่ง Navigator.push ใช้สำหรับเปลี่ยนหน้าต่างไปยังหน้าจอใหม่
+Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+                        return;
+                      }
+                                            // คำสั่ง setState จะกระตุ้นให้ Flutter ทำการวาดหน้าจอ (build) ใหม่อีกครั้งเพื่ออัปเดตข้อมูลที่เปลี่ยนไป
+setState(() {
                         _currentIndex = index;
                       });
                       Navigator.pop(context, index);
@@ -935,37 +1069,37 @@ class _DormDetailPageState extends State<DormDetailPage> {
                     unselectedItemColor: Colors.grey.shade400,
                     selectedFontSize: 11,
                     unselectedFontSize: 11,
-                    selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Kanit'),
-                    unselectedLabelStyle: const TextStyle(fontFamily: 'Kanit'),
+                    selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
+                    unselectedLabelStyle: const TextStyle(),
                     elevation: 0,
-                    items: const [
+                    items: [
                       BottomNavigationBarItem(
                         icon: Padding(
                           padding: EdgeInsets.only(bottom: 4.0),
                           child: Icon(Icons.home_rounded, size: 24),
                         ),
-                        label: 'หน้าหลัก',
+                        label: context.l10n.homeTab,
                       ),
                       BottomNavigationBarItem(
                         icon: Padding(
                           padding: EdgeInsets.only(bottom: 4.0),
                           child: Icon(Icons.assignment_turned_in_rounded, size: 24),
                         ),
-                        label: 'การจอง',
+                        label: context.l10n.bookingTab,
                       ),
                       BottomNavigationBarItem(
                         icon: Padding(
                           padding: EdgeInsets.only(bottom: 4.0),
                           child: Icon(Icons.chat_bubble_outline_rounded, size: 24),
                         ),
-                        label: 'ข้อความ',
+                        label: context.l10n.messageTab,
                       ),
                       BottomNavigationBarItem(
                         icon: Padding(
                           padding: EdgeInsets.only(bottom: 4.0),
                           child: Icon(Icons.notifications_rounded, size: 24),
                         ),
-                        label: 'แจ้งเตือน',
+                        label: context.l10n.notificationTab,
                       ),
                     ],
                   ),
@@ -981,6 +1115,7 @@ class _DormDetailPageState extends State<DormDetailPage> {
   // Helper builder for Room Type Card
   Widget _buildRoomTypeCard({
     required String dormName,
+    int? ownerId,
     required List<Room> rooms,
     required String imageUrl,
     required String title,
@@ -991,14 +1126,18 @@ class _DormDetailPageState extends State<DormDetailPage> {
   }) {
     const primaryColor = Color(0xFF4274E6);
 
-    return GestureDetector(
+    return     // GestureDetector ใช้ครอบ Widget อื่นๆ เพื่อให้สามารถรับการกด (Tap) หรือสัมผัสจากผู้ใช้ได้
+GestureDetector(
       onTap: () {
-        Navigator.push(
+                // คำสั่ง Navigator.push ใช้สำหรับเปลี่ยนหน้าต่างไปยังหน้าจอใหม่
+Navigator.push(
           context,
           MaterialPageRoute(
             builder: (_) => RoomTypesPage(
               dormName: dormName,
               rooms: rooms,
+              ownerId: ownerId,
+              isGuest: widget.isGuest,
             ),
           ),
         );
@@ -1046,7 +1185,6 @@ class _DormDetailPageState extends State<DormDetailPage> {
                         child: Text(
                           title,
                           style: const TextStyle(
-                            fontFamily: 'Kanit',
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
                             color: Color(0xFF1F2937),
@@ -1064,7 +1202,6 @@ class _DormDetailPageState extends State<DormDetailPage> {
                         child: Text(
                           available,
                           style: TextStyle(
-                            fontFamily: 'Kanit',
                             color: availableColor,
                             fontSize: 8.5,
                             fontWeight: FontWeight.bold,
@@ -1077,7 +1214,6 @@ class _DormDetailPageState extends State<DormDetailPage> {
                   Text(
                     subtitle,
                     style: const TextStyle(
-                      fontFamily: 'Kanit',
                       color: Colors.black38,
                       fontSize: 10,
                     ),
@@ -1092,17 +1228,15 @@ class _DormDetailPageState extends State<DormDetailPage> {
                       Text(
                         price,
                         style: const TextStyle(
-                          fontFamily: 'Kanit',
                           color: primaryColor,
                           fontWeight: FontWeight.w900,
                           fontSize: 15,
                         ),
                       ),
                       const SizedBox(width: 2),
-                      const Text(
-                        'บาท/เดือน',
+                      Text(
+                        context.l10n.dormDetailCurrencyPerMonth,
                         style: TextStyle(
-                          fontFamily: 'Kanit',
                           color: Colors.black38,
                           fontSize: 9,
                         ),
@@ -1137,7 +1271,6 @@ class _DormDetailPageState extends State<DormDetailPage> {
           child: Text(
             label,
             style: const TextStyle(
-              fontFamily: 'Kanit',
               color: Color(0xFF4B5563),
               fontSize: 13,
               fontWeight: FontWeight.w500,

@@ -1,12 +1,59 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
+import 'package:just_booking/services/chat_service.dart';
+import 'package:just_booking/services/auth_service.dart';
+import 'package:just_booking/models/user.dart';
+import 'package:just_booking/users/chat_screen.dart';
 
-class MessagePage extends StatelessWidget {
-  const MessagePage({super.key});
+/// หน้าจอรวมรายการห้องแชททั้งหมดของผู้ใช้งาน
+
+class MessagePage extends StatefulWidget {
+  final VoidCallback? onBack;
+  const MessagePage({super.key, this.onBack});
 
   @override
+  State<MessagePage> createState() => _MessagePageState();
+}
+
+class _MessagePageState extends State<MessagePage> {
+  final ChatService _chatService = ChatService();
+  final AuthService _authService = AuthService();
+  User? _currentUser;
+  bool _isLoading = true;
+
+  @override
+    // ฟังก์ชัน initState จะถูกเรียกใช้งานเป็นสิ่งแรกสุดเมื่อเปิดหน้านี้ขึ้นมา (มักใช้สำหรับดึงข้อมูลเตรียมไว้)
+void initState() {
+    super.initState();
+    _loadUser();
+  }
+
+    // ฟังก์ชันแบบ Asynchronous สำหรับติดต่อระบบหลังบ้าน (Backend) หรือประมวลผลข้อมูล: _loadUser
+Future<void> _loadUser() async {
+    try {
+      final user = await _authService.getCurrentUser();
+      if (mounted) {
+                // คำสั่ง setState จะกระตุ้นให้ Flutter ทำการวาดหน้าจอ (build) ใหม่อีกครั้งเพื่ออัปเดตข้อมูลที่เปลี่ยนไป
+setState(() {
+          _currentUser = user;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+                // คำสั่ง setState จะกระตุ้นให้ Flutter ทำการวาดหน้าจอ (build) ใหม่อีกครั้งเพื่ออัปเดตข้อมูลที่เปลี่ยนไป
+setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+    // ฟังก์ชัน build ทำหน้าที่วาดหน้าจอ (UI) และจัดวาง Widget ต่างๆ ภายในหน้านี้
+@override
   Widget build(BuildContext context) {
     const primaryColor = Color(0xFF3F6DE3);
-    const textDarkColor = Color(0xFF1F2937);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -16,7 +63,9 @@ class MessagePage extends StatelessWidget {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded, color: primaryColor, size: 24),
           onPressed: () {
-            if (Navigator.canPop(context)) {
+            if (widget.onBack != null) {
+              widget.onBack!();
+            } else if (Navigator.canPop(context)) {
               Navigator.pop(context);
             }
           },
@@ -24,7 +73,6 @@ class MessagePage extends StatelessWidget {
         title: const Text(
           'ข้อความ',
           style: TextStyle(
-            fontFamily: 'Kanit',
             fontSize: 22,
             fontWeight: FontWeight.w800,
             color: primaryColor,
@@ -40,55 +88,85 @@ class MessagePage extends StatelessWidget {
           const SizedBox(width: 8),
         ],
       ),
-      body: ListView(
-        physics: const BouncingScrollPhysics(),
-        children: [
-          _buildChatItem(
-            name: 'สมชาย',
-            message: 'สวัสดีครับ ห้องว่างไหมครับ?',
-            time: '10:45',
-            unreadCount: 2,
-            isOnline: true,
-            imageUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=200',
-          ),
-          _buildDivider(),
-          _buildChatItem(
-            name: 'อารยา',
-            message: 'ขอบคุณมากค่ะ เดี๋ยวจะเข้าไปดูนะคะ',
-            time: 'เมื่อวาน',
-            unreadCount: 0,
-            imageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200',
-          ),
-          _buildDivider(),
-          _buildChatItem(
-            name: 'วินัย',
-            message: 'สนใจหอพักโซน A ครับ ราคาเท่าไหร่ครับ',
-            time: 'จันทร์',
-            unreadCount: 0,
-            imageUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200',
-          ),
-          _buildDivider(),
-          _buildChatItem(
-            name: 'กานต์',
-            message: 'โอเคครับ เจอกันพรุ่งนี้ครับ',
-            time: '2 ส.ค.',
-            unreadCount: 0,
-            isInitial: true,
-            initialLetter: 'K',
-            bgColor: const Color(0xFFD0D7FF),
-            textColor: primaryColor,
-          ),
-          _buildDivider(),
-          _buildChatItem(
-            name: 'นิภา',
-            message: 'สอบถามเรื่องค่ามัดจำค่ะ',
-            time: '1 ส.ค.',
-            unreadCount: 0,
-            imageUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=200',
-          ),
-          _buildDivider(),
-        ],
-      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _currentUser == null
+              ? const Center(child: Text('กรุณาเข้าสู่ระบบเพื่อดูข้อความ', style: TextStyle()))
+              :               // StreamBuilder ใช้สำหรับรอรับข้อมูลแบบ Real-time ถ้ามีข้อมูลส่งมาใหม่ หน้าจอจะถูกอัปเดตอัตโนมัติโดยไม่ต้องกดรีเฟรช
+StreamBuilder<QuerySnapshot>(
+                  stream: _chatService.getUserChats(_currentUser!.id),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    if (snapshot.hasError) {
+                      return const Center(child: Text('เกิดข้อผิดพลาดในการโหลดข้อความ', style: TextStyle()));
+                    }
+
+                    final chats = snapshot.data?.docs ?? [];
+
+                    if (chats.isEmpty) {
+                      return const Center(
+                        child: Text(
+                          'ยังไม่มีข้อความ',
+                          style: TextStyle(color: Colors.grey, fontSize: 16),
+                        ),
+                      );
+                    }
+
+                    return ListView.separated(
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: chats.length,
+                      separatorBuilder: (context, index) => _buildDivider(),
+                      itemBuilder: (context, index) {
+                        final chatData = chats[index].data() as Map<String, dynamic>;
+                        final chatId = chats[index].id;
+                        
+                        final dormName = chatData['dormName'] ?? 'หอพัก';
+                        final lastMessage = chatData['lastMessage'] ?? '';
+                        final lastMessageTime = (chatData['lastMessageTime'] as Timestamp?)?.toDate() ?? DateTime.now();
+                        
+                        String timeStr;
+                        final now = DateTime.now();
+                        if (now.difference(lastMessageTime).inDays == 0 && now.day == lastMessageTime.day) {
+                          timeStr = DateFormat('HH:mm').format(lastMessageTime);
+                        } else if (now.difference(lastMessageTime).inDays == 1 || (now.difference(lastMessageTime).inDays == 0 && now.day != lastMessageTime.day)) {
+                          timeStr = 'เมื่อวาน';
+                        } else {
+                          timeStr = DateFormat('d MMM').format(lastMessageTime);
+                        }
+
+                        // Just an example logic for initial letter
+                        final initialLetter = dormName.isNotEmpty ? dormName[0].toUpperCase() : 'H';
+
+                        return _buildChatItem(
+                          name: dormName,
+                          message: lastMessage,
+                          time: timeStr,
+                          unreadCount: 0, // Implement real unread count if needed
+                          isInitial: true,
+                          initialLetter: initialLetter,
+                          bgColor: const Color(0xFFD0D7FF),
+                          textColor: primaryColor,
+                          onTap: () {
+                                                        // คำสั่ง Navigator.push ใช้สำหรับเปลี่ยนหน้าต่างไปยังหน้าจอใหม่
+Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ChatScreen(
+                                  dormId: int.tryParse(chatData['dormId'].toString()) ?? 0,
+                                  dormName: dormName,
+                                  chatIdOverride: chatId,
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    );
+                  },
+                ),
     );
   }
 
@@ -114,12 +192,13 @@ class MessagePage extends StatelessWidget {
     String? initialLetter,
     Color? bgColor,
     Color? textColor,
+    VoidCallback? onTap,
   }) {
     const textDarkColor = Color(0xFF1F2937);
     const primaryColor = Color(0xFF3F6DE3);
 
     return InkWell(
-      onTap: () {},
+      onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
         child: Row(
@@ -131,11 +210,10 @@ class MessagePage extends StatelessWidget {
                   radius: 28,
                   backgroundColor: bgColor ?? Colors.grey.shade200,
                   backgroundImage: imageUrl != null ? NetworkImage(imageUrl) : null,
-                  child: isInitial && initialLetter != null
+                  child: isInitial && initialLetter != null && imageUrl == null
                       ? Text(
                           initialLetter,
                           style: TextStyle(
-                            fontFamily: 'Kanit',
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                             color: textColor ?? Colors.white,
@@ -168,19 +246,22 @@ class MessagePage extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        name,
-                        style: const TextStyle(
-                          fontFamily: 'Kanit',
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: textDarkColor,
+                      Expanded(
+                        child: Text(
+                          name,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: textDarkColor,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
+                      const SizedBox(width: 8),
                       Text(
                         time,
                         style: TextStyle(
-                          fontFamily: 'Kanit',
                           fontSize: 13,
                           fontWeight: unreadCount > 0 ? FontWeight.bold : FontWeight.normal,
                           color: unreadCount > 0 ? primaryColor : Colors.grey.shade500,
@@ -198,7 +279,6 @@ class MessagePage extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontFamily: 'Kanit',
                             fontSize: 14,
                             color: unreadCount > 0 ? textDarkColor : Colors.grey.shade500,
                             fontWeight: unreadCount > 0 ? FontWeight.w500 : FontWeight.normal,
@@ -216,7 +296,6 @@ class MessagePage extends StatelessWidget {
                           child: Text(
                             unreadCount.toString(),
                             style: const TextStyle(
-                              fontFamily: 'Kanit',
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,

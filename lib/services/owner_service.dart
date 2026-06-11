@@ -15,15 +15,23 @@ class OwnerService {
         .toList();
   }
 
+    // ฟังก์ชันสำหรับลงทะเบียนเพิ่มหอพักใหม่เข้าสู่ระบบ
   Future<int> createDormitory(Map<String, dynamic> data) async {
     final response = await _api.post('/api/owner/dormitories', body: data);
     return response['id'];
   }
 
+    // ฟังก์ชันสำหรับแก้ไขข้อมูลหอพัก
   Future<void> updateDormitory(int id, Map<String, dynamic> data) async {
     await _api.patch('/api/owner/dormitories/$id', body: data);
   }
 
+    // ฟังก์ชันสำหรับลบข้อมูลหอพักออกจากระบบ
+  Future<void> deleteDormitory(int id) async {
+    await _api.delete('/api/owner/dormitories/$id');
+  }
+
+    // ฟังก์ชันสำหรับอัปโหลดรูปภาพหน้าปกของหอพัก
   Future<String> uploadDormitoryCoverImage(int dormitoryId, File imageFile) async {
     final response = await _api.multipartPost(
       '/api/owner/dormitories/$dormitoryId/cover-image',
@@ -34,15 +42,23 @@ class OwnerService {
   }
 
   // Rooms
+    // ฟังก์ชันสำหรับเพิ่มประเภทห้องพักใหม่ในหอพัก
   Future<int> createRoom(int dormitoryId, Map<String, dynamic> data) async {
     final response = await _api.post('/api/owner/dormitories/$dormitoryId/rooms', body: data);
     return response['id'];
   }
 
+    // ฟังก์ชันสำหรับแก้ไขข้อมูลและราคาห้องพัก
   Future<void> updateRoom(int roomId, Map<String, dynamic> data) async {
     await _api.patch('/api/owner/rooms/$roomId', body: data);
   }
 
+    // ฟังก์ชันสำหรับลบประเภทห้องพัก
+  Future<void> deleteRoom(int roomId) async {
+    await _api.delete('/api/owner/rooms/$roomId');
+  }
+
+    // ฟังก์ชันสำหรับอัปโหลดรูปภาพหลายๆ รูปของห้องพัก
   Future<void> uploadRoomImages(int roomId, List<File> imageFiles) async {
     await _api.multiMultipartPost(
       '/api/owner/rooms/$roomId/images',
@@ -59,13 +75,33 @@ class OwnerService {
         .toList();
   }
 
-  Future<void> updateBookingStatus(int bookingId, String status) async {
-    await _api.patch('/api/owner/bookings/$bookingId', body: {
-      'status': status,
+    // ฟังก์ชันสำหรับอนุมัติคำขอจองห้องพักของผู้เช่า
+  Future<void> approveBooking(int bookingId) async {
+    await _api.patch('/api/owner/bookings/$bookingId/approve');
+  }
+
+    // ฟังก์ชันสำหรับปฏิเสธคำขอจองห้องพัก
+  Future<void> rejectBooking(int bookingId) async {
+    await _api.patch('/api/owner/bookings/$bookingId/reject');
+  }
+
+  // Payment Slips
+    // ฟังก์ชันสำหรับตรวจสอบและยืนยันว่าได้รับเงินตามสลิปโอนเงินแล้ว
+  Future<void> confirmPaymentSlip(int bookingId) async {
+    await _api.patch('/api/owner/bookings/$bookingId/payment', body: {
+      'status': 'verified',
+    });
+  }
+
+    // ฟังก์ชันสำหรับปฏิเสธสลิปโอนเงิน (กรณีไม่ถูกต้อง)
+  Future<void> rejectPaymentSlip(int bookingId) async {
+    await _api.patch('/api/owner/bookings/$bookingId/payment', body: {
+      'status': 'rejected',
     });
   }
 
   // Reviews
+    // ฟังก์ชันสำหรับให้เจ้าของหอพักตอบกลับคอมเมนต์รีวิวของผู้เช่า
   Future<void> replyReview(int reviewId, String replyMessage) async {
     await _api.post('/api/owner/reviews/$reviewId/reply', body: {
       'reply': replyMessage,

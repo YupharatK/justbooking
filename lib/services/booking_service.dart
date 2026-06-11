@@ -1,9 +1,11 @@
+import 'dart:io';
 import '../core/api_client.dart';
 import '../models/booking.dart';
 
 class BookingService {
   final ApiClient _api = ApiClient();
 
+    // ฟังก์ชันสำหรับส่งคำขอจองห้องพักไปยังเจ้าของหอพัก
   Future<int> createBooking({
     required int roomId,
     required String moveInDate,
@@ -24,9 +26,12 @@ class BookingService {
         .toList();
   }
 
-  Future<void> submitPaymentSlip(int bookingId, String slipImageUrl) async {
-    await _api.post('/api/bookings/$bookingId/payment-slip', body: {
-      'slipImageUrl': slipImageUrl,
-    });
+  Future<Map<String, dynamic>> submitPaymentSlip(int bookingId, File imageFile) async {
+    final response = await _api.multipartPost(
+      '/api/bookings/$bookingId/payment-slip',
+      'slipImage',
+      imageFile,
+    );
+    return response;
   }
 }

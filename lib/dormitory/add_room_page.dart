@@ -4,6 +4,8 @@ import 'dart:ui';
 import 'package:image_picker/image_picker.dart';
 import '../core/api_client.dart';
 import '../services/owner_service.dart';
+import '../models/room.dart';
+import '../core/localization/localization_extension.dart';
 
 /// ----------------------------------------------------------------------
 /// [AddRoomPage]
@@ -16,9 +18,12 @@ import '../services/owner_service.dart';
 /// - OwnerService.uploadRoomImages() -> อัปโหลดไฟล์รูปภาพห้องพักทีละหลายรูป (Multi-Multipart)
 /// ----------------------------------------------------------------------
 
+/// หน้าฟอร์มสำหรับเพิ่มประเภทห้องพักใหม่ (เช่น ห้องมาตรฐาน, ห้อง VIP)
+
 class AddRoomPage extends StatefulWidget {
   final int dormitoryId;
-  const AddRoomPage({super.key, required this.dormitoryId});
+  final Room? roomToEdit;
+  const AddRoomPage({super.key, required this.dormitoryId, this.roomToEdit});
 
   @override
   State<AddRoomPage> createState() => _AddRoomPageState();
@@ -53,12 +58,32 @@ class _AddRoomPageState extends State<AddRoomPage> {
   };
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.roomToEdit != null) {
+      final r = widget.roomToEdit!;
+      _roomNumberController.text = r.roomNumber;
+      _priceController.text = r.price.toStringAsFixed(0);
+      _availableCountController.text = r.availableCount.toString();
+      if (r.roomType.contains('พัดลม')) _selectedAirType = 'พัดลม';
+      if (r.roomType.contains('เตียงคู่')) _selectedBedType = 'เตียงคู่';
+      for (var f in r.facilities) {
+        if (_amenities.containsKey(f)) {
+          _amenities[f] = true;
+        }
+      }
+    }
+  }
+
+  @override
   void dispose() {
     _roomNumberController.dispose();
     _availableCountController.dispose();
     _priceController.dispose();
     super.dispose();
   }
+
+  // ฟังก์ชันเลือกรูปภาพห้องพักจากเครื่องมือถือ
 
   Future<void> _pickImages() async {
     final pickedFiles = await _picker.pickMultiImage();
@@ -73,6 +98,8 @@ class _AddRoomPageState extends State<AddRoomPage> {
     }
   }
 
+  // ฟังก์ชันบันทึกข้อมูลประเภทห้องพักและอัปโหลดรูปภาพ
+
   Future<void> _saveRoom() async {
     final roomNumber = _roomNumberController.text.trim();
     final priceStr = _priceController.text.trim();
@@ -80,14 +107,14 @@ class _AddRoomPageState extends State<AddRoomPage> {
 
     if (priceStr.isEmpty || countStr.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('กรุณากรอกราคาและจำนวนห้องว่าง')),
+        SnackBar(content: Text(context.l10n.addRoomValidationPriceError)),
       );
       return;
     }
 
-    if (_roomImages.isEmpty) {
+    if (_roomImages.isEmpty && widget.roomToEdit == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('กรุณาเลือกรูปห้องตัวอย่างอย่างน้อย 1 รูป')),
+        SnackBar(content: Text(context.l10n.addRoomValidationImageError)),
       );
       return;
     }
@@ -110,13 +137,18 @@ class _AddRoomPageState extends State<AddRoomPage> {
         'facilities': selectedAmenities,
       };
 
-      final roomId = await _ownerService.createRoom(widget.dormitoryId, data);
-      await _ownerService.uploadRoomImages(roomId, _roomImages);
+      if (widget.roomToEdit == null) {
+        final roomId = await _ownerService.createRoom(widget.dormitoryId, data);
+        if (_roomImages.isNotEmpty) await _ownerService.uploadRoomImages(roomId, _roomImages);
+      } else {
+        await _ownerService.updateRoom(widget.roomToEdit!.id, data);
+        if (_roomImages.isNotEmpty) await _ownerService.uploadRoomImages(widget.roomToEdit!.id, _roomImages);
+      }
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('เพิ่มข้อมูลห้องพักสำเร็จ', style: TextStyle(fontFamily: 'Kanit')),
+        SnackBar(
+          content: Text(context.l10n.addRoomSuccess, style: const TextStyle()),
           backgroundColor: Colors.green,
         ),
       );
@@ -127,7 +159,7 @@ class _AddRoomPageState extends State<AddRoomPage> {
       );
     } catch (_) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง')),
+        SnackBar(content: Text(context.l10n.addRoomError)),
       );
     } finally {
       if (mounted) {
@@ -154,10 +186,9 @@ class _AddRoomPageState extends State<AddRoomPage> {
           icon: const Icon(Icons.arrow_back_rounded, color: primaryColor, size: 24),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'เพิ่มห้องพัก',
-          style: TextStyle(
-            fontFamily: 'Kanit',
+        title: Text(
+          widget.roomToEdit == null ? context.l10n.addRoomTitleAdd : context.l10n.addRoomTitleEdit,
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: textDarkColor,
@@ -185,11 +216,10 @@ class _AddRoomPageState extends State<AddRoomPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _buildSectionTitle('รูปถ่ายห้องพัก'),
+                      _buildSectionTitle(context.l10n.addRoomPhotos),
                       Text(
-                        '${_roomImages.length} / 5 รูป',
+                        '${_roomImages.length}${context.l10n.addRoomPhotoLimit}',
                         style: TextStyle(
-                          fontFamily: 'Kanit',
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
                           color: Colors.grey.shade500,
@@ -255,10 +285,9 @@ class _AddRoomPageState extends State<AddRoomPage> {
                             children: [
                               const Icon(Icons.add_a_photo_outlined, color: Color(0xFF3F6DE3), size: 28),
                               const SizedBox(height: 8),
-                              const Text(
-                                'เพิ่มรูปภาพ (สูงสุด 5 รูป)',
+                              Text(
+                                context.l10n.addRoomPhotoAdd,
                                 style: TextStyle(
-                                  fontFamily: 'Kanit',
                                   fontSize: 13,
                                   fontWeight: FontWeight.bold,
                                   color: Color(0xFF1F2937),
@@ -272,34 +301,34 @@ class _AddRoomPageState extends State<AddRoomPage> {
                   const SizedBox(height: 24),
 
                   // 2. Room Number / Name
-                  _buildSectionTitle('หมายเลขห้อง / ชื่อประเภทห้อง'),
+                  _buildSectionTitle(context.l10n.addRoomNumberTitle),
                   const SizedBox(height: 12),
                   _buildTextField(
                     controller: _roomNumberController,
-                    hintText: 'เช่น A101 หรือ ห้องสแตนดาร์ด',
+                    hintText: context.l10n.addRoomNumberHint,
                     bgColor: inputBgColor,
                   ),
                   const SizedBox(height: 24),
 
                   // NEW: Available Rooms Count
-                  _buildSectionTitle('จำนวนห้องที่ว่าง (ห้อง)'),
+                  _buildSectionTitle(context.l10n.addRoomAvailableTitle),
                   const SizedBox(height: 12),
                   _buildTextField(
                     controller: _availableCountController,
-                    hintText: 'ระบุจำนวนห้องว่าง เช่น 5',
+                    hintText: context.l10n.addRoomAvailableHint,
                     bgColor: inputBgColor,
                     keyboardType: TextInputType.number,
                   ),
                   const SizedBox(height: 24),
 
                   // 3. Room Type (Air/Fan)
-                  _buildSectionTitle('ประเภทระบบทำความเย็น'),
+                  _buildSectionTitle(context.l10n.addRoomCoolingTitle),
                   const SizedBox(height: 12),
                   Row(
                     children: [
                       Expanded(
                         child: _buildSelectableCard(
-                          title: 'ห้องแอร์',
+                          title: context.l10n.addRoomCoolingAc,
                           icon: Icons.ac_unit_rounded,
                           isSelected: _selectedAirType == 'แอร์',
                           onTap: () => setState(() => _selectedAirType = 'แอร์'),
@@ -308,7 +337,7 @@ class _AddRoomPageState extends State<AddRoomPage> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: _buildSelectableCard(
-                          title: 'ห้องพัดลม',
+                          title: context.l10n.addRoomCoolingFan,
                           icon: Icons.wind_power_rounded,
                           isSelected: _selectedAirType == 'พัดลม',
                           onTap: () => setState(() => _selectedAirType = 'พัดลม'),
@@ -319,13 +348,13 @@ class _AddRoomPageState extends State<AddRoomPage> {
                   const SizedBox(height: 24),
 
                   // 4. Bed Type (Single/Double)
-                  _buildSectionTitle('ประเภทเตียง'),
+                  _buildSectionTitle(context.l10n.addRoomBedTitle),
                   const SizedBox(height: 12),
                   Row(
                     children: [
                       Expanded(
                         child: _buildSelectableCard(
-                          title: 'เตียงเดี่ยว',
+                          title: context.l10n.addRoomSingleBed,
                           icon: Icons.single_bed_rounded,
                           isSelected: _selectedBedType == 'เตียงเดี่ยว',
                           onTap: () => setState(() => _selectedBedType = 'เตียงเดี่ยว'),
@@ -334,7 +363,7 @@ class _AddRoomPageState extends State<AddRoomPage> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: _buildSelectableCard(
-                          title: 'เตียงคู่',
+                          title: context.l10n.addRoomDoubleBed,
                           icon: Icons.bed_rounded,
                           isSelected: _selectedBedType == 'เตียงคู่',
                           onTap: () => setState(() => _selectedBedType = 'เตียงคู่'),
@@ -345,19 +374,19 @@ class _AddRoomPageState extends State<AddRoomPage> {
                   const SizedBox(height: 24),
 
                   // 5. Price
-                  _buildSectionTitle('ราคาเริ่มต้น (บาท/เดือน)'),
+                  _buildSectionTitle(context.l10n.addRoomPriceTitle),
                   const SizedBox(height: 12),
                   TextField(
                     controller: _priceController,
                     keyboardType: TextInputType.number,
-                    style: const TextStyle(fontFamily: 'Kanit', fontSize: 16, fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     decoration: InputDecoration(
-                      hintText: 'เช่น 4500',
-                      hintStyle: TextStyle(fontFamily: 'Kanit', fontSize: 16, color: Colors.grey.shade400, fontWeight: FontWeight.normal),
+                      hintText: context.l10n.addRoomPriceHint,
+                      hintStyle: TextStyle(fontSize: 16, color: Colors.grey.shade400, fontWeight: FontWeight.normal),
                       filled: true,
                       fillColor: inputBgColor,
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                      suffixIcon: const Center(widthFactor: 1, child: Text('฿ ', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Kanit'))),
+                      suffixIcon: const Center(widthFactor: 1, child: Text('฿ ', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
                       suffixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 40),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -368,7 +397,7 @@ class _AddRoomPageState extends State<AddRoomPage> {
                   const SizedBox(height: 24),
 
                   // 6. Amenities
-                  _buildSectionTitle('สิ่งอำนวยความสะดวก'),
+                  _buildSectionTitle(context.l10n.addRoomFacilitiesTitle),
                   const SizedBox(height: 12),
                   Wrap(
                     spacing: 12,
@@ -410,10 +439,9 @@ class _AddRoomPageState extends State<AddRoomPage> {
                 onPressed: _isLoading ? null : _saveRoom,
                 child: _isLoading
                     ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                    : const Text(
-                  'บันทึกข้อมูล',
+                    : Text(
+                  context.l10n.addRoomSaveBtn,
                   style: TextStyle(
-                    fontFamily: 'Kanit',
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
@@ -431,7 +459,6 @@ class _AddRoomPageState extends State<AddRoomPage> {
     return Text(
       title,
       style: const TextStyle(
-        fontFamily: 'Kanit',
         fontSize: 15,
         fontWeight: FontWeight.bold,
         color: Color(0xFF1F2937),
@@ -443,10 +470,10 @@ class _AddRoomPageState extends State<AddRoomPage> {
     return TextField(
       controller: controller,
       keyboardType: keyboardType,
-      style: const TextStyle(fontFamily: 'Kanit', fontSize: 14),
+      style: const TextStyle(fontSize: 14),
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle: TextStyle(fontFamily: 'Kanit', fontSize: 14, color: Colors.grey.shade500),
+        hintStyle: TextStyle(fontSize: 14, color: Colors.grey.shade500),
         filled: true,
         fillColor: bgColor,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -498,7 +525,6 @@ class _AddRoomPageState extends State<AddRoomPage> {
             Text(
               title,
               style: TextStyle(
-                fontFamily: 'Kanit',
                 fontSize: 14,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                 color: isSelected ? const Color(0xFF1F2937) : Colors.grey.shade600,
@@ -542,7 +568,6 @@ class _AddRoomPageState extends State<AddRoomPage> {
             Text(
               key,
               style: TextStyle(
-                fontFamily: 'Kanit',
                 fontSize: 14,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 color: isSelected ? primaryColor : const Color(0xFF1F2937),

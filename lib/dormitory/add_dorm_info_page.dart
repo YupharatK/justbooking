@@ -8,6 +8,8 @@ import '../core/api_client.dart';
 import 'package:http/http.dart' as http;
 import '../services/owner_service.dart';
 import 'map_picker_page.dart';
+import '../models/dormitory.dart';
+import '../core/localization/localization_extension.dart';
 
 /// ----------------------------------------------------------------------
 /// [AddDormInfoPage]
@@ -20,8 +22,12 @@ import 'map_picker_page.dart';
 /// - OwnerService.uploadDormitoryCoverImage() -> อัปโหลดไฟล์รูปภาพปกแบบ Multipart
 /// ----------------------------------------------------------------------
 
+/// หน้าฟอร์มสำหรับลงทะเบียนเพิ่มหอพักใหม่เข้าสู่ระบบ
+
 class AddDormInfoPage extends StatefulWidget {
-  const AddDormInfoPage({super.key});
+  final Dormitory? dormitoryToEdit;
+
+  const AddDormInfoPage({super.key, this.dormitoryToEdit});
 
   @override
   State<AddDormInfoPage> createState() => _AddDormInfoPageState();
@@ -33,6 +39,10 @@ class _AddDormInfoPageState extends State<AddDormInfoPage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _rulesController = TextEditingController();
+  final TextEditingController _bankNameController = TextEditingController();
+  final TextEditingController _accountNameController = TextEditingController();
+  final TextEditingController _accountNumberController = TextEditingController();
+  final TextEditingController _promptPayNumberController = TextEditingController();
 
   String _selectedDormType = 'หอพักรวม';
   int _statusSelection = 0; // 0 = พร้อมเข้าอยู่, 1 = ว่างภายใน 1 เดือน
@@ -62,10 +72,51 @@ class _AddDormInfoPageState extends State<AddDormInfoPage> {
   };
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.dormitoryToEdit != null) {
+      final dorm = widget.dormitoryToEdit!;
+      _nameController.text = dorm.name;
+      _addressController.text = dorm.address;
+      _rulesController.text = dorm.rules;
+      
+      if (dorm.bankName != null) _bankNameController.text = dorm.bankName!;
+      if (dorm.accountName != null) _accountNameController.text = dorm.accountName!;
+      if (dorm.accountNumber != null) _accountNumberController.text = dorm.accountNumber!;
+      if (dorm.promptPayNumber != null) _promptPayNumberController.text = dorm.promptPayNumber!;
+      
+      if (dorm.latitude != 0.0 && dorm.longitude != 0.0) {
+        _latitude = dorm.latitude;
+        _longitude = dorm.longitude;
+      }
+      
+      for (var facility in dorm.facilities) {
+        if (_amenities.containsKey(facility)) {
+          _amenities[facility] = true;
+        }
+      }
+
+      // Parse description for dormType, status, available rooms if available in mock data
+      if (dorm.description.contains('ว่างภายใน 1 เดือน')) {
+        _statusSelection = 1;
+      }
+      if (dorm.description.contains('หอพักชาย')) {
+        _selectedDormType = 'หอพักชาย';
+      } else if (dorm.description.contains('หอพักหญิง')) {
+        _selectedDormType = 'หอพักหญิง';
+      }
+    }
+  }
+
+  @override
   void dispose() {
     _nameController.dispose();
     _addressController.dispose();
     _rulesController.dispose();
+    _bankNameController.dispose();
+    _accountNameController.dispose();
+    _accountNumberController.dispose();
+    _promptPayNumberController.dispose();
     super.dispose();
   }
 
@@ -132,6 +183,8 @@ class _AddDormInfoPageState extends State<AddDormInfoPage> {
     }
   }
 
+  // ฟังก์ชันสำหรับบันทึกข้อมูลหอพักใหม่ส่งไปยัง Backend
+
   Future<void> _saveDormitory() async {
     final name = _nameController.text.trim();
     final address = _addressController.text.trim();
@@ -139,7 +192,7 @@ class _AddDormInfoPageState extends State<AddDormInfoPage> {
 
     if (name.isEmpty || address.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('กรุณากรอกชื่อและที่อยู่หอพัก')),
+        SnackBar(content: Text(context.l10n.addDormValidationError)),
       );
       return;
     }
@@ -164,18 +217,29 @@ class _AddDormInfoPageState extends State<AddDormInfoPage> {
         'description': description,
         'facilities': selectedAmenities,
         'rules': rules.isNotEmpty ? rules : null,
+        'bank_name': _bankNameController.text.trim().isNotEmpty ? _bankNameController.text.trim() : null,
+        'account_name': _accountNameController.text.trim().isNotEmpty ? _accountNameController.text.trim() : null,
+        'account_number': _accountNumberController.text.trim().isNotEmpty ? _accountNumberController.text.trim() : null,
+        'promptpay_number': _promptPayNumberController.text.trim().isNotEmpty ? _promptPayNumberController.text.trim() : null,
       };
 
-      final dormId = await _ownerService.createDormitory(data);
+      if (widget.dormitoryToEdit == null) {
+        final dormId = await _ownerService.createDormitory(data);
 
-      if (_coverImage != null) {
-        await _ownerService.uploadDormitoryCoverImage(dormId, _coverImage!);
+        if (_coverImage != null) {
+          await _ownerService.uploadDormitoryCoverImage(dormId, _coverImage!);
+        }
+      } else {
+        await _ownerService.updateDormitory(widget.dormitoryToEdit!.id, data);
+        if (_coverImage != null) {
+          await _ownerService.uploadDormitoryCoverImage(widget.dormitoryToEdit!.id, _coverImage!);
+        }
       }
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('เพิ่มข้อมูลหอพักสำเร็จ', style: TextStyle(fontFamily: 'Kanit')),
+        SnackBar(
+          content: Text(widget.dormitoryToEdit == null ? context.l10n.addDormAddSuccess : context.l10n.addDormEditSuccess, style: const TextStyle()),
           backgroundColor: Colors.green,
         ),
       );
@@ -186,7 +250,7 @@ class _AddDormInfoPageState extends State<AddDormInfoPage> {
       );
     } catch (_) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง')),
+        SnackBar(content: Text(context.l10n.addDormError)),
       );
     } finally {
       if (mounted) {
@@ -213,10 +277,9 @@ class _AddDormInfoPageState extends State<AddDormInfoPage> {
           icon: const Icon(Icons.arrow_back_rounded, color: primaryColor, size: 24),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'เพิ่มข้อมูลหอพัก',
-          style: TextStyle(
-            fontFamily: 'Kanit',
+        title: Text(
+          widget.dormitoryToEdit == null ? context.l10n.addDormTitleAdd : context.l10n.addDormTitleEdit,
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: primaryColor,
@@ -235,7 +298,7 @@ class _AddDormInfoPageState extends State<AddDormInfoPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // 1. Cover Image Upload
-                  _buildSectionTitle('รูปหน้าปกหอพัก'),
+                  _buildSectionTitle(context.l10n.addDormCoverImage),
                   const SizedBox(height: 12),
                   GestureDetector(
                     onTap: _pickImage,
@@ -250,15 +313,19 @@ class _AddDormInfoPageState extends State<AddDormInfoPage> {
                                 borderRadius: BorderRadius.circular(8),
                                 child: Image.file(_coverImage!, fit: BoxFit.cover, width: double.infinity),
                               )
-                            : Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
+                            : widget.dormitoryToEdit?.coverImageUrl != null
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.network(widget.dormitoryToEdit!.coverImageUrl!, fit: BoxFit.cover, width: double.infinity),
+                                  )
+                                : Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(Icons.add_a_photo_outlined, color: Colors.grey.shade500, size: 36),
                                   const SizedBox(height: 8),
                                   Text(
-                                    'แตะเพื่อเลือกรูปภาพ',
+                                    context.l10n.addDormImageHint,
                                     style: TextStyle(
-                                      fontFamily: 'Kanit',
                                       fontSize: 13,
                                       color: Colors.grey.shade500,
                                     ),
@@ -271,17 +338,17 @@ class _AddDormInfoPageState extends State<AddDormInfoPage> {
                   const SizedBox(height: 24),
 
                   // 2. Dorm Name
-                  _buildSectionTitle('ชื่อหอพัก'),
+                  _buildSectionTitle(context.l10n.addDormNameTitle),
                   const SizedBox(height: 12),
                   _buildTextField(
                     controller: _nameController,
-                    hintText: 'ระบุชื่อหอพักของคุณ',
+                    hintText: context.l10n.addDormNameHint,
                     bgColor: inputBgColor,
                   ),
                   const SizedBox(height: 24),
 
                   // 3. Dorm Type
-                  _buildSectionTitle('ประเภทหอพัก'),
+                  _buildSectionTitle(context.l10n.addDormTypeTitle),
                   const SizedBox(height: 12),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -295,7 +362,6 @@ class _AddDormInfoPageState extends State<AddDormInfoPage> {
                         isExpanded: true,
                         icon: Icon(Icons.keyboard_arrow_down_rounded, color: Colors.grey.shade600),
                         style: const TextStyle(
-                          fontFamily: 'Kanit',
                           fontSize: 15,
                           color: textDarkColor,
                         ),
@@ -308,7 +374,7 @@ class _AddDormInfoPageState extends State<AddDormInfoPage> {
                             .map<DropdownMenuItem<String>>((String value) {
                           return DropdownMenuItem<String>(
                             value: value,
-                            child: Text(value),
+                            child: Text(value == 'หอพักชาย' ? context.l10n.addDormTypeMale : value == 'หอพักหญิง' ? context.l10n.addDormTypeFemale : context.l10n.addDormTypeMixed),
                           );
                         }).toList(),
                       ),
@@ -317,11 +383,11 @@ class _AddDormInfoPageState extends State<AddDormInfoPage> {
                   const SizedBox(height: 24),
 
                   // 4. Address & Map
-                  _buildSectionTitle('ที่อยู่และพิกัด'),
+                  _buildSectionTitle(context.l10n.addDormAddressTitle),
                   const SizedBox(height: 12),
                   _buildTextField(
                     controller: _addressController,
-                    hintText: 'ระบุเลขที่บ้าน ถนน แขวง/ตำบล...',
+                    hintText: context.l10n.addDormAddressHint,
                     bgColor: inputBgColor,
                     maxLines: 3,
                   ),
@@ -359,9 +425,8 @@ class _AddDormInfoPageState extends State<AddDormInfoPage> {
                                 const Icon(Icons.location_on, color: primaryColor, size: 20),
                                 const SizedBox(width: 8),
                                 Text(
-                                  _latitude != null ? 'เปลี่ยนพิกัดบนแผนที่' : 'เลือกพิกัดจากแผนที่',
+                                  _latitude != null ? context.l10n.addDormMapChange : context.l10n.addDormMapSelect,
                                   style: const TextStyle(
-                                    fontFamily: 'Kanit',
                                     fontSize: 14,
                                     fontWeight: FontWeight.bold,
                                     color: primaryColor,
@@ -377,14 +442,14 @@ class _AddDormInfoPageState extends State<AddDormInfoPage> {
                   const SizedBox(height: 24),
 
                   // 5. Status & Readiness
-                  _buildSectionTitle('สถานะและความพร้อม'),
+                  _buildSectionTitle(context.l10n.addDormStatusTitle),
                   const SizedBox(height: 12),
                   Row(
                     children: [
                       Expanded(
                         child: _buildStatusToggle(
                           index: 0,
-                          title: 'พร้อมเข้าอยู่',
+                          title: context.l10n.addDormStatusReady,
                           icon: Icons.check_circle_rounded,
                         ),
                       ),
@@ -392,7 +457,7 @@ class _AddDormInfoPageState extends State<AddDormInfoPage> {
                       Expanded(
                         child: _buildStatusToggle(
                           index: 1,
-                          title: 'ว่างภายใน 1 เดือน',
+                          title: context.l10n.addDormStatusOneMonth,
                           icon: Icons.access_time_rounded,
                         ),
                       ),
@@ -401,7 +466,7 @@ class _AddDormInfoPageState extends State<AddDormInfoPage> {
                   const SizedBox(height: 24),
 
                   // 6. Available Rooms
-                  _buildSectionTitle('จำนวนห้องพักที่ว่าง'),
+                  _buildSectionTitle(context.l10n.addDormAvailableCountTitle),
                   const SizedBox(height: 12),
                   Row(
                     children: [
@@ -434,7 +499,6 @@ class _AddDormInfoPageState extends State<AddDormInfoPage> {
                           child: Text(
                             _availableRooms.toString(),
                             style: const TextStyle(
-                              fontFamily: 'Kanit',
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                               color: primaryColor,
@@ -459,10 +523,9 @@ class _AddDormInfoPageState extends State<AddDormInfoPage> {
                         ),
                       ),
                       const SizedBox(width: 16),
-                      const Text(
-                        'ห้อง',
+                      Text(
+                        context.l10n.addDormRoomUnit,
                         style: TextStyle(
-                          fontFamily: 'Kanit',
                           fontSize: 15,
                           fontWeight: FontWeight.w500,
                           color: textDarkColor,
@@ -473,7 +536,7 @@ class _AddDormInfoPageState extends State<AddDormInfoPage> {
                   const SizedBox(height: 24),
 
                   // 7. Amenities
-                  _buildSectionTitle('สิ่งอำนวยความสะดวก'),
+                  _buildSectionTitle(context.l10n.addRoomFacilitiesTitle),
                   const SizedBox(height: 12),
                   Wrap(
                     spacing: 12,
@@ -485,13 +548,41 @@ class _AddDormInfoPageState extends State<AddDormInfoPage> {
                   const SizedBox(height: 24),
 
                   // 8. Rules & Conditions
-                  _buildSectionTitle('เงื่อนไขในการเช่าและกฎระเบียบ'),
+                  _buildSectionTitle(context.l10n.addDormRulesTitle),
                   const SizedBox(height: 12),
                   _buildTextField(
                     controller: _rulesController,
-                    hintText: 'เช่น ค่ามัดจำ 2 เดือน, สัญญา 1 ปี, ห้ามเลี้ยงสัตว์...',
+                    hintText: context.l10n.addDormRulesHint,
                     bgColor: inputBgColor,
                     maxLines: 4,
+                  ),
+                  const SizedBox(height: 24),
+
+                  // 9. Payment Info
+                  _buildSectionTitle(context.l10n.addDormPaymentTitle),
+                  const SizedBox(height: 12),
+                  _buildTextField(
+                    controller: _bankNameController,
+                    hintText: context.l10n.addDormBankHint,
+                    bgColor: inputBgColor,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildTextField(
+                    controller: _accountNameController,
+                    hintText: context.l10n.addDormAccountNameHint,
+                    bgColor: inputBgColor,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildTextField(
+                    controller: _accountNumberController,
+                    hintText: context.l10n.addDormAccountNumberHint,
+                    bgColor: inputBgColor,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildTextField(
+                    controller: _promptPayNumberController,
+                    hintText: context.l10n.addDormPromptPayHint,
+                    bgColor: inputBgColor,
                   ),
                   const SizedBox(height: 40),
                 ],
@@ -526,10 +617,9 @@ class _AddDormInfoPageState extends State<AddDormInfoPage> {
                 onPressed: _isLoading ? null : _saveDormitory,
                 child: _isLoading 
                     ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                    : const Text(
-                  'บันทึกข้อมูล',
+                    : Text(
+                  context.l10n.addDormSaveBtn,
                   style: TextStyle(
-                    fontFamily: 'Kanit',
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
@@ -547,7 +637,6 @@ class _AddDormInfoPageState extends State<AddDormInfoPage> {
     return Text(
       title,
       style: const TextStyle(
-        fontFamily: 'Kanit',
         fontSize: 15,
         fontWeight: FontWeight.bold,
         color: Color(0xFF1F2937),
@@ -559,10 +648,10 @@ class _AddDormInfoPageState extends State<AddDormInfoPage> {
     return TextField(
       controller: controller,
       maxLines: maxLines,
-      style: const TextStyle(fontFamily: 'Kanit', fontSize: 14),
+      style: const TextStyle(fontSize: 14),
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle: TextStyle(fontFamily: 'Kanit', fontSize: 14, color: Colors.grey.shade500),
+        hintStyle: TextStyle(fontSize: 14, color: Colors.grey.shade500),
         filled: true,
         fillColor: bgColor,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -608,7 +697,6 @@ class _AddDormInfoPageState extends State<AddDormInfoPage> {
                 title,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontFamily: 'Kanit',
                   fontSize: 13,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                   color: isSelected ? primaryColor : Colors.grey.shade700,
@@ -660,7 +748,6 @@ class _AddDormInfoPageState extends State<AddDormInfoPage> {
               child: Text(
                 key,
                 style: const TextStyle(
-                  fontFamily: 'Kanit',
                   fontSize: 13,
                   color: Color(0xFF1F2937),
                 ),

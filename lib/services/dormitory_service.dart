@@ -27,9 +27,17 @@ class DormitoryService {
         .toList();
   }
 
+    // ฟังก์ชันสำหรับดึงรายละเอียดแบบเจาะลึกของหอพักและห้องพักทั้งหมด
   Future<Dormitory> getDormitoryDetail(int id) async {
     final response = await _api.get('/api/dormitories/$id', requireAuth: false);
-    return Dormitory.fromJson(response['dormitory']);
+    final dormJson = response['dormitory'] as Map<String, dynamic>;
+    if (response['rooms'] != null) {
+      dormJson['rooms'] = response['rooms'];
+    }
+    if (response['reviews'] != null) {
+      dormJson['reviews'] = response['reviews'];
+    }
+    return Dormitory.fromJson(dormJson);
   }
 
   // Favorites
@@ -40,15 +48,18 @@ class DormitoryService {
         .toList();
   }
 
+    // ฟังก์ชันสำหรับกดหัวใจ (บันทึก) หอพักลงในรายการโปรด
   Future<void> addFavorite(int dormitoryId) async {
     await _api.post('/api/favorites/$dormitoryId');
   }
 
+    // ฟังก์ชันสำหรับยกเลิกการบันทึกหอพักออกจากรายการโปรด
   Future<void> removeFavorite(int dormitoryId) async {
     await _api.delete('/api/favorites/$dormitoryId');
   }
 
   // Reviews
+    // ฟังก์ชันสำหรับเขียนรีวิวและให้คะแนนหอพัก
   Future<void> createReview(int dormitoryId, double rating, String comment) async {
     await _api.post('/api/dormitories/$dormitoryId/reviews', body: {
       'rating': rating,

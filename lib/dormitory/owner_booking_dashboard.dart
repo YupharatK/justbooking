@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../services/owner_service.dart';
 import '../models/booking.dart';
+import '../services/notification_service.dart';
+import '../core/localization/localization_extension.dart';
 
 /// ----------------------------------------------------------------------
 /// [OwnerBookingDashboard]
@@ -12,8 +14,10 @@ import '../models/booking.dart';
 /// 
 /// การเชื่อมต่อ API หลักในหน้านี้:
 /// - OwnerService.getOwnerBookings() -> ดึงรายการคำขอจองทั้งหมดของเจ้าของหอพักคนนี้
-/// - OwnerService.updateBookingStatus() -> ยิง API เพื่ออัปเดตสถานะเป็น 'approved' หรือ 'rejected'
+/// - OwnerService.approveBooking() / rejectBooking() -> ยิง API เพื่ออัปเดตสถานะเป็น 'pending_payment' หรือ 'rejected'
 /// ----------------------------------------------------------------------
+
+/// หน้าแสดงรายการคำขอจองห้องพักทั้งหมด เพื่อให้เจ้าของหอพักพิจารณาอนุมัติหรือปฏิเสธ
 
 class OwnerBookingDashboard extends StatefulWidget {
   const OwnerBookingDashboard({super.key});
@@ -33,6 +37,8 @@ class _OwnerBookingDashboardState extends State<OwnerBookingDashboard> {
     _fetchBookings();
   }
 
+  // ฟังก์ชันดึงรายการคำขอจองห้องพักทั้งหมดของหอพักตนเอง
+
   Future<void> _fetchBookings() async {
     try {
       final bookings = await _ownerService.getOwnerBookings();
@@ -48,25 +54,32 @@ class _OwnerBookingDashboardState extends State<OwnerBookingDashboard> {
           _isLoading = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('เกิดข้อผิดพลาดในการดึงข้อมูลการจอง')),
+          SnackBar(content: Text(context.l10n.ownerBookingFetchError)),
         );
       }
     }
   }
 
-  Future<void> _updateStatus(int bookingId, String status) async {
+  Future<void> _updateStatus(int bookingId, int userId, String status) async {
     try {
-      await _ownerService.updateBookingStatus(bookingId, status);
+      if (status == 'approved') {
+        await _ownerService.approveBooking(bookingId);
+        try {
+          await NotificationService().createApprovalNotification(userId);
+        } catch (e) {
+          debugPrint('Notification Error: $e');
+        }
+      } else {
+        await _ownerService.rejectBooking(bookingId);
+      }
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('อัปเดตสถานะสำเร็จ', style: const TextStyle(fontFamily: 'Kanit')),
-          backgroundColor: Colors.green,
-        ),
+        SnackBar(content: Text(context.l10n.ownerBookingUpdateSuccess, style: TextStyle()), backgroundColor: Colors.green),
       );
       _fetchBookings(); // Refresh
     } catch (e) {
+      debugPrint('Error updateStatus: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง')),
+        SnackBar(content: Text('${context.l10n.ownerBookingUpdateError}${e.toString()}')),
       );
     }
   }
@@ -82,13 +95,12 @@ class _OwnerBookingDashboardState extends State<OwnerBookingDashboard> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: primaryColor),
+          icon: Icon(Icons.arrow_back_rounded, color: primaryColor),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'จัดการคำขอจอง',
+        title: Text(
+          context.l10n.ownerBookingTitle,
           style: TextStyle(
-            fontFamily: 'Kanit',
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: Color(0xFF1F2937),
@@ -97,12 +109,12 @@ class _OwnerBookingDashboardState extends State<OwnerBookingDashboard> {
         centerTitle: true,
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: primaryColor))
+          ? Center(child: CircularProgressIndicator(color: primaryColor))
           : _bookings.isEmpty
-              ? const Center(
+              ? Center(
                   child: Text(
-                    'ยังไม่มีคำขอจอง',
-                    style: TextStyle(fontFamily: 'Kanit', color: Colors.grey),
+                    context.l10n.ownerBookingEmpty,
+                    style: TextStyle(color: Colors.grey),
                   ),
                 )
               : RefreshIndicator(
@@ -120,7 +132,7 @@ class _OwnerBookingDashboardState extends State<OwnerBookingDashboard> {
   }
 
   Widget _buildBookingCard(Booking booking, Color primaryColor) {
-    final bool isPending = booking.status == 'pending';
+    final bool isPending = booking.status == 'pending_owner_approval';
     final user = booking.user;
     final room = booking.room;
     final dorm = booking.dormitory;
@@ -148,7 +160,6 @@ class _OwnerBookingDashboardState extends State<OwnerBookingDashboard> {
               Text(
                 'รหัสการจอง #${booking.id}',
                 style: TextStyle(
-                  fontFamily: 'Kanit',
                   fontSize: 12,
                   color: Colors.grey.shade500,
                   fontWeight: FontWeight.bold,
@@ -161,9 +172,8 @@ class _OwnerBookingDashboardState extends State<OwnerBookingDashboard> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  _getStatusText(booking.status),
+                  booking.status.translateBookingStatus(context),
                   style: TextStyle(
-                    fontFamily: 'Kanit',
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                     color: _getStatusColor(booking.status),
@@ -173,47 +183,121 @@ class _OwnerBookingDashboardState extends State<OwnerBookingDashboard> {
             ],
           ),
           const SizedBox(height: 12),
-          Text(
-            'ผู้จอง: ${user?.firstName ?? ''} ${user?.lastName ?? ''}',
-            style: const TextStyle(
-              fontFamily: 'Kanit',
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF1F2937),
-            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (user?.profileImageUrl != null && user!.profileImageUrl!.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(right: 12.0),
+                  child: CircleAvatar(
+                    radius: 24,
+                    backgroundImage: NetworkImage(user.profileImageUrl!),
+                    onBackgroundImageError: (_, __) {},
+                  ),
+                )
+              else
+                Padding(
+                  padding: const EdgeInsets.only(right: 12.0),
+                  child: CircleAvatar(
+                    radius: 24,
+                    backgroundColor: Colors.grey.shade200,
+                    child: const Icon(Icons.person, color: Colors.grey),
+                  ),
+                ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${context.l10n.ownerBookingTenant}${user?.firstName ?? ''} ${user?.lastName ?? ''}',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1F2937),
+                      ),
+                    ),
+                    if (user?.nickname != null && user!.nickname!.isNotEmpty)
+                      Text('ชื่อเล่น: ${user.nickname}', style: TextStyle(fontSize: 14, color: Colors.grey.shade700))
+                    else
+                      Text('ชื่อเล่น: -', style: TextStyle(fontSize: 14, color: Colors.grey.shade400)),
+                    const SizedBox(height: 4),
+                    
+                    if (user?.phone != null && user!.phone!.isNotEmpty)
+                      Text('${context.l10n.ownerBookingPhone}${user.phone}', style: TextStyle(fontSize: 14, color: Colors.grey.shade700))
+                    else
+                      Text('${context.l10n.ownerBookingPhone}-', style: TextStyle(fontSize: 14, color: Colors.grey.shade400)),
+                    const SizedBox(height: 2),
+                    
+                    if (user?.address != null && user!.address!.isNotEmpty)
+                      Text('${context.l10n.ownerBookingAddress}${user.address}', style: TextStyle(fontSize: 14, color: Colors.grey.shade700))
+                    else
+                      Text('${context.l10n.ownerBookingAddress}-', style: TextStyle(fontSize: 14, color: Colors.grey.shade400)),
+                    const SizedBox(height: 2),
+                    
+                    if (user?.email != null && user!.email.isNotEmpty)
+                      Text('${context.l10n.ownerBookingEmail}${user.email}', style: TextStyle(fontSize: 14, color: Colors.grey.shade700))
+                    else
+                      Text('${context.l10n.ownerBookingEmail}-', style: TextStyle(fontSize: 14, color: Colors.grey.shade400)),
+                    const SizedBox(height: 2),
+                    
+                    if (user?.promptpayId != null && user!.promptpayId!.isNotEmpty)
+                      Text('พร้อมเพย์: ${user.promptpayId}', style: TextStyle(fontSize: 14, color: Colors.grey.shade700))
+                    else
+                      Text('พร้อมเพย์: -', style: TextStyle(fontSize: 14, color: Colors.grey.shade400)),
+                  ],
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 4),
           Text(
-            'หอพัก: ${dorm?.name ?? ''} | ห้อง: ${room?.roomNumber ?? ''}',
+            '${context.l10n.ownerBookingDorm}${dorm?.name ?? ''} | ${context.l10n.ownerBookingRoom}${room?.roomNumber ?? ''}',
             style: TextStyle(
-              fontFamily: 'Kanit',
               fontSize: 14,
               color: Colors.grey.shade600,
             ),
           ),
           const SizedBox(height: 4),
           Text(
-            'วันที่เข้าอยู่: ${booking.moveInDate}',
+            '${context.l10n.ownerBookingMoveIn}${booking.moveInDate}',
             style: TextStyle(
-              fontFamily: 'Kanit',
+              fontSize: 14,
+              color: Colors.grey.shade600,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '${context.l10n.ownerBookingDate}${booking.createdAt}',
+            style: TextStyle(
               fontSize: 14,
               color: Colors.grey.shade600,
             ),
           ),
           if (booking.paymentSlipUrl != null) ...[
             const SizedBox(height: 12),
+            Text(context.l10n.ownerBookingSlip, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
             GestureDetector(
               onTap: () {
-                // Could show full image dialogue
+                _showImageDialog(booking.paymentSlipUrl!);
               },
-              child: Row(
-                children: [
-                  const Icon(Icons.receipt_long, color: Colors.blue, size: 16),
-                  const SizedBox(width: 4),
-                  const Text('แนบหลักฐานการโอนแล้ว', style: TextStyle(fontFamily: 'Kanit', fontSize: 12, color: Colors.blue)),
-                ],
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(
+                  booking.paymentSlipUrl!,
+                  height: 180,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    height: 150,
+                    width: double.infinity,
+                    color: Colors.grey.shade200,
+                    child: const Icon(Icons.broken_image, color: Colors.grey, size: 40),
+                  ),
+                ),
               ),
             ),
+            const SizedBox(height: 8),
           ],
           if (isPending) ...[
             const SizedBox(height: 16),
@@ -228,8 +312,8 @@ class _OwnerBookingDashboardState extends State<OwnerBookingDashboard> {
                       side: const BorderSide(color: Colors.red),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
-                    onPressed: () => _showConfirmDialog(booking.id, 'rejected'),
-                    child: const Text('ปฏิเสธ', style: TextStyle(fontFamily: 'Kanit', fontWeight: FontWeight.bold)),
+                    onPressed: () => _showConfirmDialog(booking.id, booking.userId, 'rejected'),
+                    child: Text(context.l10n.ownerBookingReject, style: const TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -241,8 +325,40 @@ class _OwnerBookingDashboardState extends State<OwnerBookingDashboard> {
                       elevation: 0,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
-                    onPressed: () => _showConfirmDialog(booking.id, 'approved'),
-                    child: const Text('อนุมัติ', style: TextStyle(fontFamily: 'Kanit', fontWeight: FontWeight.bold)),
+                    onPressed: () => _showConfirmDialog(booking.id, booking.userId, 'approved'),
+                    child: Text(context.l10n.ownerBookingApprove, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                ),
+              ],
+            ),
+          ] else if (booking.status == 'pending_payment_verification' || (booking.status == 'pending_payment' && (booking.paymentStatus == 'submitted' || booking.paymentSlipUrl != null))) ...[
+            const SizedBox(height: 16),
+            const Divider(),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.red,
+                      side: const BorderSide(color: Colors.red),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    onPressed: () => _showConfirmSlipDialog(booking.id, 'rejected'),
+                    child: Text(context.l10n.ownerBookingRejectSlip, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    onPressed: () => _showConfirmSlipDialog(booking.id, 'verified'),
+                    child: Text(context.l10n.ownerBookingVerifySlip, style: const TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ),
               ],
@@ -253,30 +369,29 @@ class _OwnerBookingDashboardState extends State<OwnerBookingDashboard> {
     );
   }
 
-  void _showConfirmDialog(int bookingId, String status) {
+  void _showConfirmDialog(int bookingId, int userId, String status) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('ยืนยัน', style: TextStyle(fontFamily: 'Kanit', fontWeight: FontWeight.bold)),
+        title: Text(context.l10n.ownerBookingConfirmTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
         content: Text(
-          status == 'approved' ? 'คุณต้องการอนุมัติการจองนี้ใช่หรือไม่?' : 'คุณต้องการปฏิเสธการจองนี้ใช่หรือไม่?',
-          style: const TextStyle(fontFamily: 'Kanit'),
+          status == 'approved' ? context.l10n.ownerBookingConfirmApprove : context.l10n.ownerBookingConfirmReject,
+          style: const TextStyle(),
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('ยกเลิก', style: TextStyle(fontFamily: 'Kanit', color: Colors.grey)),
+            child: Text(context.l10n.ownerBookingCancel, style: const TextStyle(color: Colors.grey)),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              _updateStatus(bookingId, status);
+              _updateStatus(bookingId, userId, status);
             },
             child: Text(
-              'ยืนยัน',
+              context.l10n.ownerBookingConfirmTitle,
               style: TextStyle(
-                fontFamily: 'Kanit',
                 color: status == 'approved' ? Colors.green : Colors.red,
                 fontWeight: FontWeight.bold,
               ),
@@ -287,27 +402,115 @@ class _OwnerBookingDashboardState extends State<OwnerBookingDashboard> {
     );
   }
 
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'approved':
-        return Colors.green;
-      case 'rejected':
-        return Colors.red;
-      case 'pending':
-      default:
-        return const Color(0xFFF97316);
+  void _showConfirmSlipDialog(int bookingId, String action) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(context.l10n.ownerBookingConfirmSlipTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
+        content: Text(
+          action == 'verified' ? context.l10n.ownerBookingConfirmSlipVerify : context.l10n.ownerBookingConfirmSlipReject,
+          style: const TextStyle(),
+        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(context.l10n.ownerBookingCancel, style: const TextStyle(color: Colors.grey)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _updateSlipStatus(bookingId, action);
+            },
+            child: Text(
+              context.l10n.ownerBookingConfirmTitle,
+              style: TextStyle(
+                color: action == 'verified' ? Colors.green : Colors.red,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _updateSlipStatus(int bookingId, String action) async {
+    try {
+      if (action == 'verified') {
+        await _ownerService.confirmPaymentSlip(bookingId);
+      } else {
+        await _ownerService.rejectPaymentSlip(bookingId);
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.ownerBookingSlipUpdateSuccess, style: TextStyle()),
+          backgroundColor: Colors.green,
+        ),
+      );
+      _fetchBookings(); // Refresh
+    } catch (e) {
+      debugPrint('Error updateSlipStatus: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${context.l10n.ownerBookingUpdateError}${e.toString()}')),
+      );
     }
   }
 
-  String _getStatusText(String status) {
+  void _showImageDialog(String imageUrl) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(16),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            InteractiveViewer(
+              panEnabled: true,
+              minScale: 1.0,
+              maxScale: 4.0,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.network(
+                  imageUrl,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    height: 300,
+                    color: Colors.white,
+                    child: const Center(child: Icon(Icons.broken_image, size: 50, color: Colors.grey)),
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              top: 0,
+              right: 0,
+              child: IconButton(
+                icon: const Icon(Icons.close, color: Colors.white, size: 30),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Color _getStatusColor(String status) {
     switch (status) {
-      case 'approved':
-        return 'อนุมัติแล้ว';
+      case 'completed':
+      case 'confirmed':
+        return Colors.green;
       case 'rejected':
-        return 'ถูกปฏิเสธ';
-      case 'pending':
+      case 'cancelled':
+        return Colors.red;
+      case 'pending_payment':
+      case 'pending_payment_verification':
+        return Colors.blue;
+      case 'pending_owner_approval':
       default:
-        return 'รอตรวจสอบ';
+        return const Color(0xFFF97316);
     }
   }
 }

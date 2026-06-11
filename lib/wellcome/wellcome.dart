@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'login.dart';
-import '../services/auth_service.dart';
-import '../users/home_page.dart';
-import '../dormitory/dormitory_home_page.dart';
+import 'Register.dart';
 
 class WellcomePage extends StatefulWidget {
   const WellcomePage({super.key});
@@ -12,59 +9,8 @@ class WellcomePage extends StatefulWidget {
 }
 
 class _WellcomePageState extends State<WellcomePage> {
-  final AuthService _authService = AuthService();
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _checkAuthStatus();
-  }
-
-  Future<void> _checkAuthStatus() async {
-    try {
-      final isLoggedIn = await _authService.isLoggedIn();
-      if (isLoggedIn) {
-        final user = await _authService.getCurrentUser();
-        if (!mounted) return;
-        
-        if (user.role == 'owner') {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const DormitoryHomePage()),
-          );
-        } else {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const UserHomePage()),
-          );
-        }
-      } else {
-        if (mounted) {
-          setState(() {
-            _isLoading = false;
-          });
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Scaffold(
-        backgroundColor: Color(0xFF5A84ED),
-        body: Center(
-          child: CircularProgressIndicator(color: Colors.white),
-        ),
-      );
-    }
 
     return Scaffold(
       backgroundColor: const Color(0xFFF7F8FA), // Light background color
@@ -128,7 +74,7 @@ class _WellcomePageState extends State<WellcomePage> {
                           const Padding(
                             padding: EdgeInsets.only(left: 16, bottom: 12),
                             child: Text(
-                              'ลงชื่อเข้าใช้สำหรับผู้ใช้งานทั่วไป',
+                              'สมัครสมาชิกสำหรับผู้ใช้งานทั่วไป',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w600,
@@ -144,7 +90,7 @@ class _WellcomePageState extends State<WellcomePage> {
                             onTap: () {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => const LoginScreen(isOwner: false)),
+                                MaterialPageRoute(builder: (context) => const RegisterScreen(isOwner: false)),
                               );
                             },
                           ),
@@ -155,7 +101,7 @@ class _WellcomePageState extends State<WellcomePage> {
                           const Padding(
                             padding: EdgeInsets.only(left: 16, bottom: 12),
                             child: Text(
-                              'ลงชื่อเข้าใช้สำหรับเจ้าของหอพัก',
+                              'สมัครสมาชิกสำหรับเจ้าของหอพัก',
                               style: TextStyle(
                                 color: Color(0xFF6B7280),
                                 fontWeight: FontWeight.w600,
@@ -171,7 +117,7 @@ class _WellcomePageState extends State<WellcomePage> {
                             onTap: () {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => const LoginScreen(isOwner: true)),
+                                MaterialPageRoute(builder: (context) => const RegisterScreen(isOwner: true)),
                               );
                             },
                           ),

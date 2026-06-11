@@ -3,6 +3,8 @@ import 'dorm_detail_page.dart';
 import '../models/dormitory.dart';
 import '../services/dormitory_service.dart';
 
+/// หน้าแสดงรายการหอพักทั้งหมดที่ผู้ใช้เคยกดหัวใจบันทึกเป็นรายการโปรดไว้
+
 class FavoritesPage extends StatefulWidget {
   const FavoritesPage({super.key});
 
@@ -15,36 +17,42 @@ class _FavoritesPageState extends State<FavoritesPage> {
   late Future<List<Dormitory>> _favoritesFuture;
 
   @override
-  void initState() {
+    // ฟังก์ชัน initState จะถูกเรียกใช้งานเป็นสิ่งแรกสุดเมื่อเปิดหน้านี้ขึ้นมา (มักใช้สำหรับดึงข้อมูลเตรียมไว้)
+void initState() {
     super.initState();
     _loadFavorites();
   }
 
   void _loadFavorites() {
-    setState(() {
+        // คำสั่ง setState จะกระตุ้นให้ Flutter ทำการวาดหน้าจอ (build) ใหม่อีกครั้งเพื่ออัปเดตข้อมูลที่เปลี่ยนไป
+setState(() {
       _favoritesFuture = _dormitoryService.getFavorites();
     });
   }
 
-  Future<void> _removeFavorite(int dormId) async {
+    // ฟังก์ชันแบบ Asynchronous สำหรับติดต่อระบบหลังบ้าน (Backend) หรือประมวลผลข้อมูล: _removeFavorite
+Future<void> _removeFavorite(int dormId) async {
     try {
       await _dormitoryService.removeFavorite(dormId);
       _loadFavorites();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('ลบออกจากรายการโปรดแล้ว', style: TextStyle(fontFamily: 'Kanit'))),
+                // แสดงข้อความแจ้งเตือนป๊อปอัปเล็กๆ ที่ด้านล่างของจอ (SnackBar)
+ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('ลบออกจากรายการโปรดแล้ว', style: TextStyle())),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('เกิดข้อผิดพลาดในการลบรายการโปรด', style: TextStyle(fontFamily: 'Kanit'))),
+                // แสดงข้อความแจ้งเตือนป๊อปอัปเล็กๆ ที่ด้านล่างของจอ (SnackBar)
+ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('เกิดข้อผิดพลาดในการลบรายการโปรด', style: TextStyle())),
         );
       }
     }
   }
 
-  @override
+    // ฟังก์ชัน build ทำหน้าที่วาดหน้าจอ (UI) และจัดวาง Widget ต่างๆ ภายในหน้านี้
+@override
   Widget build(BuildContext context) {
     const primaryColor = Color(0xFF3F6DE3);
     const textDarkColor = Color(0xFF1F2937);
@@ -62,7 +70,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
         title: const Text(
           'รายการโปรด',
           style: TextStyle(
-            fontFamily: 'Kanit',
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: textDarkColor,
@@ -71,13 +78,14 @@ class _FavoritesPageState extends State<FavoritesPage> {
         centerTitle: false,
         titleSpacing: 0,
       ),
-      body: FutureBuilder<List<Dormitory>>(
+      body:       // FutureBuilder ใช้สำหรับรอให้ข้อมูลแบบ Asynchronous (เช่น การดึง API) ทำงานเสร็จก่อนถึงจะวาดหน้าจอ
+FutureBuilder<List<Dormitory>>(
         future: _favoritesFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return const Center(child: Text('เกิดข้อผิดพลาดในการโหลดข้อมูล', style: TextStyle(fontFamily: 'Kanit')));
+            return const Center(child: Text('เกิดข้อผิดพลาดในการโหลดข้อมูล', style: TextStyle()));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(
               child: Column(
@@ -88,7 +96,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
                   Text(
                     'ยังไม่มีหอพักที่ถูกใจ',
                     style: TextStyle(
-                      fontFamily: 'Kanit',
                       fontSize: 16,
                       color: Colors.grey.shade600,
                     ),
@@ -109,13 +116,13 @@ class _FavoritesPageState extends State<FavoritesPage> {
                 Text(
                   'หอพักที่คุณบันทึกไว้เพื่อการตัดสินใจที่ง่ายขึ้น',
                   style: TextStyle(
-                    fontFamily: 'Kanit',
                     fontSize: 15,
                     color: Colors.grey.shade700,
                   ),
                 ),
                 const SizedBox(height: 24),
-                ListView.builder(
+                                // ใช้ ListView.builder สำหรับสร้างรายการข้อมูลแบบเลื่อนได้ (Scrollable List) ซึ่งจะวาด UI ตามจำนวนข้อมูลที่มี
+ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: favorites.length,
@@ -129,9 +136,11 @@ class _FavoritesPageState extends State<FavoritesPage> {
 
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 20.0),
-                      child: GestureDetector(
+                      child:                       // GestureDetector ใช้ครอบ Widget อื่นๆ เพื่อให้สามารถรับการกด (Tap) หรือสัมผัสจากผู้ใช้ได้
+GestureDetector(
                         onTap: () {
-                          Navigator.push(
+                                                    // คำสั่ง Navigator.push ใช้สำหรับเปลี่ยนหน้าต่างไปยังหน้าจอใหม่
+Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (_) => DormDetailPage(
@@ -176,7 +185,8 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                   Positioned(
                                     top: 16,
                                     right: 16,
-                                    child: GestureDetector(
+                                    child:                                     // GestureDetector ใช้ครอบ Widget อื่นๆ เพื่อให้สามารถรับการกด (Tap) หรือสัมผัสจากผู้ใช้ได้
+GestureDetector(
                                       onTap: () => _removeFavorite(dorm.id),
                                       child: Container(
                                         padding: const EdgeInsets.all(8),
@@ -209,7 +219,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                         child: const Text(
                                           'พร้อมเข้าอยู่',
                                           style: TextStyle(
-                                            fontFamily: 'Kanit',
                                             color: Colors.white,
                                             fontSize: 12,
                                             fontWeight: FontWeight.bold,
@@ -232,7 +241,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                           child: Text(
                                             dorm.name,
                                             style: const TextStyle(
-                                              fontFamily: 'Kanit',
                                               fontSize: 20,
                                               fontWeight: FontWeight.bold,
                                               color: textDarkColor,
@@ -248,7 +256,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                             Text(
                                               dorm.rating != null ? dorm.rating!.toStringAsFixed(1) : '-',
                                               style: TextStyle(
-                                                fontFamily: 'Kanit',
                                                 fontSize: 15,
                                                 fontWeight: FontWeight.bold,
                                                 color: Colors.grey.shade800,
@@ -267,7 +274,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                           child: Text(
                                             dorm.address,
                                             style: TextStyle(
-                                              fontFamily: 'Kanit',
                                               fontSize: 14,
                                               color: Colors.grey.shade600,
                                             ),
@@ -290,7 +296,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                             Text(
                                               'เริ่มต้น',
                                               style: TextStyle(
-                                                fontFamily: 'Kanit',
                                                 fontSize: 13,
                                                 color: Colors.grey.shade600,
                                               ),
@@ -302,7 +307,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                                 Text(
                                                   lowestPrice.toStringAsFixed(0),
                                                   style: const TextStyle(
-                                                    fontFamily: 'Kanit',
                                                     fontSize: 20,
                                                     fontWeight: FontWeight.bold,
                                                     color: primaryColor,
@@ -312,7 +316,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                                 Text(
                                                   'บาท/เดือน',
                                                   style: TextStyle(
-                                                    fontFamily: 'Kanit',
                                                     fontSize: 13,
                                                     color: Colors.grey.shade600,
                                                   ),
@@ -321,7 +324,8 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                             ),
                                           ],
                                         ),
-                                        ElevatedButton(
+                                                                                // ปุ่มกดแบบมีพื้นหลัง (ElevatedButton) เมื่อกดแล้วจะเรียกคำสั่งใน onPressed
+ElevatedButton(
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: primaryColor,
                                             shape: RoundedRectangleBorder(
@@ -331,7 +335,8 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                             elevation: 0,
                                           ),
                                           onPressed: () {
-                                            Navigator.push(
+                                                                                        // คำสั่ง Navigator.push ใช้สำหรับเปลี่ยนหน้าต่างไปยังหน้าจอใหม่
+Navigator.push(
                                               context,
                                               MaterialPageRoute(
                                                 builder: (_) => DormDetailPage(
@@ -343,7 +348,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
                                           child: const Text(
                                             'ดูรายละเอียด',
                                             style: TextStyle(
-                                              fontFamily: 'Kanit',
                                               fontSize: 14,
                                               fontWeight: FontWeight.bold,
                                               color: Colors.white,

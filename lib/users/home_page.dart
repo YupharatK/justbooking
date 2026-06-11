@@ -1,3 +1,5 @@
+import '../services/auth_service.dart';
+import '../wellcome/login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'search_page.dart';
@@ -11,7 +13,8 @@ import '../models/dormitory.dart';
 import 'booking_history_tab.dart';
 
 class UserHomePage extends StatefulWidget {
-  const UserHomePage({super.key});
+  final bool isGuest;
+  const UserHomePage({super.key, this.isGuest = false});
 
   @override
   State<UserHomePage> createState() => _UserHomePageState();
@@ -42,18 +45,37 @@ class _UserHomePageState extends State<UserHomePage> {
 
   Future<void> _fetchDorms() async {
     try {
-      final dorms = await _dormitoryService.searchDormitories();
+      final baseDorms = await _dormitoryService.searchDormitories();
+      // Fetch details for all dorms to get room availability data
+      final dormsWithDetails = await Future.wait(
+        baseDorms.map((d) => _dormitoryService.getDormitoryDetail(d.id))
+      );
       if (mounted) {
         setState(() {
-          _dorms = dorms;
+          _dorms = dormsWithDetails;
           _isLoadingDorms = false;
         });
       }
     } catch (e) {
+      debugPrint('Error fetching dorms: $e');
       if (mounted) {
         setState(() {
           _isLoadingDorms = false;
         });
+      }
+    }
+
+    if (!widget.isGuest) {
+      try {
+        final AuthService authService = AuthService();
+        final user = await authService.getCurrentUser();
+        if (mounted) {
+          setState(() {
+            // we could store currentUser here if needed, but not heavily used yet
+          });
+        }
+      } catch (e) {
+        // ignore user fetch error
       }
     }
   }
@@ -73,7 +95,13 @@ class _UserHomePageState extends State<UserHomePage> {
     final List<Widget> tabs = [
       _buildHomeTab(),
       const BookingHistoryTab(),
-      const MessagePage(),
+      MessagePage(
+        onBack: () {
+          setState(() {
+            _currentIndex = 0;
+          });
+        },
+      ),
       _buildNotificationTab(),
     ];
 
@@ -101,6 +129,10 @@ class _UserHomePageState extends State<UserHomePage> {
         child: BottomNavigationBar(
           currentIndex: _currentIndex,
           onTap: (index) {
+            if (widget.isGuest && index != 0) {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+              return;
+            }
             setState(() {
               _currentIndex = index;
             });
@@ -159,7 +191,7 @@ class _UserHomePageState extends State<UserHomePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. Header (DormFinder Logo & Profile Avatar)
+          // 1. Header (Justbooking Logo & Profile Avatar)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
             child: Row(
@@ -181,7 +213,7 @@ class _UserHomePageState extends State<UserHomePage> {
                     ),
                     const SizedBox(width: 10),
                     const Text(
-                      'DormFinder',
+                      'Justbooking',
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
@@ -193,6 +225,10 @@ class _UserHomePageState extends State<UserHomePage> {
                 ),
                 GestureDetector(
                   onTap: () {
+                    if (widget.isGuest) {
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+                      return;
+                    }
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -221,9 +257,11 @@ class _UserHomePageState extends State<UserHomePage> {
                       CircleAvatar(
                         radius: 22,
                         backgroundColor: primaryColor.withOpacity(0.1),
-                        backgroundImage: NetworkImage(_profileImageUrl),
+                        backgroundImage: widget.isGuest ? null : NetworkImage(_profileImageUrl),
+                        child: widget.isGuest ? const Icon(Icons.person_rounded, color: primaryColor) : null,
                       ),
-                      Positioned(
+                      if (!widget.isGuest)
+                        Positioned(
                         right: 0,
                         bottom: 0,
                         child: Container(
@@ -357,7 +395,7 @@ class _UserHomePageState extends State<UserHomePage> {
                           dorm: dorm,
                           imageUrl: dorm.coverImageUrl ?? 'https://images.unsplash.com/photo-1554995207-c18c203602cb?q=80&w=400',
                           name: dorm.name,
-                          isAvailable: true, // Mock availability for now
+                          isAvailable: (dorm.rooms?.fold<int>(0, (sum, room) => sum + room.availableCount) ?? 0) > 0,
                           location: dorm.address,
                           price: dorm.rooms != null && dorm.rooms!.isNotEmpty 
                               ? '฿${dorm.rooms!.first.price.toStringAsFixed(0)}' 
@@ -405,7 +443,7 @@ class _UserHomePageState extends State<UserHomePage> {
                           price: dorm.rooms != null && dorm.rooms!.isNotEmpty 
                               ? '฿${dorm.rooms!.first.price.toStringAsFixed(0)}/เดือน' 
                               : '฿3,500/เดือน',
-                          roomsLeft: 3, // Mock rooms left
+                          roomsLeft: dorm.rooms?.fold<int>(0, (sum, room) => sum + room.availableCount) ?? 0,
                         );
                       },
                     ),
@@ -444,7 +482,8 @@ class _UserHomePageState extends State<UserHomePage> {
                               ? '฿${dorm.rooms!.first.price.toStringAsFixed(0)}' 
                               : '฿3,200',
                     tag: dorm.facilities.isNotEmpty ? dorm.facilities.first : 'แอร์/พัดลม',
-                    isFull: false, // Mock
+                    isFull: (dorm.rooms?.fold<int>(0, (sum, room) => sum + room.availableCount) ?? 0) == 0,
+                    availableRooms: dorm.rooms?.fold<int>(0, (sum, room) => sum + room.availableCount) ?? 0,
                   );
                 },
               ),
@@ -552,22 +591,21 @@ class _UserHomePageState extends State<UserHomePage> {
                         ),
                       ),
                       const SizedBox(width: 6),
-                      if (isAvailable)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFE8F1FF),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: const Text(
-                            'ว่าง',
-                            style: TextStyle(
-                              color: primaryColor,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: isAvailable ? const Color(0xFFE8F1FF) : const Color(0xFFFEF2F2),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          isAvailable ? 'ว่าง' : 'เต็ม',
+                          style: TextStyle(
+                            color: isAvailable ? primaryColor : const Color(0xFFEF4444),
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 6),
@@ -798,6 +836,7 @@ class _UserHomePageState extends State<UserHomePage> {
     required String price,
     required String tag,
     required bool isFull,
+    int availableRooms = 0,
   }) {
     final isFav = _favorites.contains(name);
     const primaryColor = Color(0xFF4274E6);
@@ -986,7 +1025,7 @@ class _UserHomePageState extends State<UserHomePage> {
         'isRead': false,
       },
       {
-        'title': 'ยินดีต้อนรับสู่ DormFinder',
+        'title': 'ยินดีต้อนรับสู่ Justbooking',
         'desc': 'ยินดีต้อนรับเข้าใช้งาน Just Booking! ค้นหาและจองห้องพักในฝันของคุณได้ง่ายๆ ในสัมผัสเดียว',
         'time': '3 วันที่แล้ว',
         'icon': Icons.celebration_rounded,

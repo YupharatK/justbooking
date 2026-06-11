@@ -1,20 +1,40 @@
 import 'package:flutter/material.dart';
 import '../services/booking_service.dart';
+import '../services/notification_service.dart';
+import '../services/auth_service.dart';
+import '../models/user.dart';
+import '../models/booking.dart';
+import 'payment_section_widget.dart';
+import '../core/localization/localization_extension.dart';
+
+/// หน้าแสดงรายละเอียดของคำขอจอง 1 รายการ และเป็นหน้าสำหรับอัปโหลดสลิปชำระเงิน
 
 class BookingDetailPage extends StatefulWidget {
   final String dormName;
   final String roomType;
-  final String price;
+  final String monthlyPrice;
+  final String securityDeposit;
+  final String bookingFee;
   final String imageUrl;
   final int roomId;
+  final List<String> facilities;
+  final String roomNumber;
+  final int? ownerId;
+  final Booking? existingBooking;
 
   const BookingDetailPage({
     super.key,
     required this.dormName,
     required this.roomType,
-    required this.price,
+    required this.monthlyPrice,
+    required this.securityDeposit,
+    required this.bookingFee,
     required this.imageUrl,
     required this.roomId,
+    required this.facilities,
+    required this.roomNumber,
+    this.ownerId,
+    this.existingBooking,
   });
 
   @override
@@ -27,58 +47,78 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
   String _slipFileName = '';
   bool _isSubmitting = false;
 
-  // Mock tenant data (can eventually come from a database/auth)
-  final String _tenantName = 'สมชาย ใจดี';
-  final String _tenantPhone = '081-234-5678';
-  final String _tenantAddress = '123 ถ.สุขุมวิท กทม.';
-  final String _contractDate = '01/06/2567';
+  User? _currentUser;
+  bool _isLoadingUser = true;
 
-  // Perform booking confirmation
-  Future<void> _confirmBooking() async {
-    if (!_isSlipAttached) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Row(
-            children: [
-              Icon(Icons.warning_amber_rounded, color: Colors.white),
-              SizedBox(width: 10),
-              Text(
-                'กรุณาแนบสลิปการชำระเงินก่อนกดยืนยันการจอง',
-                style: TextStyle(fontFamily: 'Kanit'),
-              ),
-            ],
-          ),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
-      return;
+  @override
+  void initState() {
+    super.initState();
+    _fetchUser();
+  }
+
+  // ฟังก์ชันสำหรับดึงข้อมูลโปรไฟล์ของผู้ใช้งานปัจจุบัน (เพื่อเอาชื่อและเบอร์โทรมาแสดงในฟอร์ม)
+  Future<void> _fetchUser() async {
+    try {
+      // เรียก API ดึงข้อมูล User จากระบบ Authentication
+      final user = await AuthService().getCurrentUser();
+      if (mounted) {
+        setState(() {
+          _currentUser = user;
+          _isLoadingUser = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingUser = false;
+        });
+      }
     }
+  }
 
+  // ฟังก์ชันสำหรับกดยืนยันการจองห้องพัก
+  // จะทำงานเมื่อผู้ใช้กดปุ่ม 'ยืนยันการจอง' ด้านล่างจอ
+  Future<void> _confirmBooking() async {
     setState(() {
       _isSubmitting = true;
     });
 
     try {
-      // 1. Create booking
+      // 1. เรียก API ส่งคำขอจองห้องพัก (createBooking) พร้อมแนบ ID ห้องและวันที่ย้ายเข้า
       final bookingId = await _bookingService.createBooking(
         roomId: widget.roomId,
-        moveInDate: '2024-06-01', // Example date
-        note: 'Mock Note',
+        moveInDate: DateTime.now().toIso8601String().split('T')[0],
+        note: '',
       );
 
-      // 2. Submit payment slip (using mock url for now)
-      await _bookingService.submitPaymentSlip(
-        bookingId, 
-        'https://example.com/mock_slip.jpg'
-      );
+      // 2. ส่งการแจ้งเตือน (Push Notification) ไปหาเจ้าของหอพัก
+      // (ทำงานแบบเบื้องหลัง fire and forget เพื่อไม่ให้แอปค้างระหว่างรอ)
+      try {
+        if (_currentUser != null && widget.ownerId != null) {
+          // Send notification to the actual owner without awaiting
+          NotificationService().createBookingNotification(
+            _currentUser!.id, 
+            widget.ownerId!, 
+            widget.dormName, 
+            widget.roomType
+          ).catchError((e) {
+            debugPrint('Notification Error: $e');
+          });
+        } else {
+          debugPrint('Notification Skipped: Missing ownerId or _currentUser');
+        }
+      } catch (e) {
+        debugPrint('Notification Error: $e');
+      }
 
       setState(() {
         _isSubmitting = false;
       });
 
       if (!mounted) return;
+      final l10n = context.l10n;
 
-      // Show booking success dialog
+      // 3. แสดงหน้าต่าง Popup (Dialog) แจ้งเตือนว่า 'ส่งคำขอจองสำเร็จ'
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -92,7 +132,7 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Animated green check circle
+                  // สร้างแอนิเมชันไอคอนเครื่องหมายถูก (Check Circle) สีเขียว
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: const BoxDecoration(
@@ -106,10 +146,9 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  const Text(
-                    'ยืนยันการจองสำเร็จ!',
-                    style: TextStyle(
-                      fontFamily: 'Kanit',
+                  Text(
+                    l10n.bookingConfirmSuccessTitle,
+                    style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                       color: Color(0xFF1F2937),
@@ -117,17 +156,16 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    'ทางเราได้รับสลิปการชำระเงินและรายละเอียดการจองของคุณเรียบร้อยแล้ว เจ้าของหอพักจะตรวจสอบสัญญาภายใน 24 ชม.',
+                    l10n.bookingConfirmSuccessDesc,
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontFamily: 'Kanit',
                       fontSize: 13.5,
                       color: Colors.grey.shade600,
                       height: 1.5,
                     ),
                   ),
                   const SizedBox(height: 24),
-                  // Summary card
+                  // กล่องสรุปรายละเอียดการจอง (ชื่อหอพัก, ประเภทห้อง, ยอดเงิน)
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
@@ -140,24 +178,24 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('หอพัก', style: TextStyle(fontFamily: 'Kanit', color: Colors.grey)),
-                            Text(widget.dormName, style: const TextStyle(fontFamily: 'Kanit', fontWeight: FontWeight.bold)),
+                            Text(l10n.bookingDormitory, style: const TextStyle(color: Colors.grey)),
+                            Text(widget.dormName, style: const TextStyle(fontWeight: FontWeight.bold)),
                           ],
                         ),
                         const SizedBox(height: 8),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('ประเภทห้อง', style: TextStyle(fontFamily: 'Kanit', color: Colors.grey)),
-                            Text(widget.roomType, style: const TextStyle(fontFamily: 'Kanit', fontWeight: FontWeight.bold)),
+                            Text(l10n.bookingRoomType, style: const TextStyle(color: Colors.grey)),
+                            Text(widget.roomType, style: const TextStyle(fontWeight: FontWeight.bold)),
                           ],
                         ),
                         const SizedBox(height: 8),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('ราคารวมสัญญา', style: TextStyle(fontFamily: 'Kanit', color: Colors.grey)),
-                            const Text('฿3,000', style: TextStyle(fontFamily: 'Kanit', color: Color(0xFFE0A926), fontWeight: FontWeight.w900)),
+                            Text(l10n.bookingPaymentAmount, style: const TextStyle(color: Colors.grey)),
+                            Text(widget.bookingFee, style: const TextStyle(color: Color(0xFFE0A926), fontWeight: FontWeight.w900)),
                           ],
                         ),
                       ],
@@ -181,9 +219,9 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
                           ..pop() // Pop RoomTypesPage
                           ..pop(1); // Pop DormDetailPage with index 1 (การจอง tab)
                       },
-                      child: const Text(
-                        'ตกลง (ดูรายการจอง)',
-                        style: TextStyle(fontFamily: 'Kanit', color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+                      child: Text(
+                        l10n.bookingOkViewList,
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
                       ),
                     ),
                   ),
@@ -198,9 +236,10 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
         _isSubmitting = false;
       });
       if (mounted) {
+        final l10n = context.l10n;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('เกิดข้อผิดพลาดในการจอง กรุณาลองใหม่', style: TextStyle(fontFamily: 'Kanit')),
+          SnackBar(
+            content: Text(l10n.bookingCreateError, style: const TextStyle()),
             backgroundColor: Colors.redAccent,
           ),
         );
@@ -208,33 +247,13 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
     }
   }
 
-  // Pick/Attach Mock Slip
-  void _attachMockSlip() {
-    setState(() {
-      _isSlipAttached = true;
-      _slipFileName = 'PaySlip_ref_${DateTime.now().millisecondsSinceEpoch.toString().substring(8)}.png';
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.check_circle_rounded, color: Colors.white),
-            const SizedBox(width: 10),
-            Text(
-              'แนบสลิป "$_slipFileName" สำเร็จ',
-              style: const TextStyle(fontFamily: 'Kanit'),
-            ),
-          ],
-        ),
-        backgroundColor: const Color(0xFF2ECC71),
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
+  // Pick/Attach Mock Slip removed
 
   @override
+  // ฟังก์ชันสร้างหน้าจอ UI สำหรับแสดงรายละเอียดการจอง และอัปโหลดสลิป
+  @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     const primaryColor = Color(0xFF4274E6);
     const textDarkColor = Color(0xFF1F2937);
 
@@ -247,10 +266,9 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black87, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'รายละเอียดการจอง',
-          style: TextStyle(
-            fontFamily: 'Kanit',
+        title: Text(
+          l10n.bookingDetailTitle,
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: textDarkColor,
@@ -266,7 +284,7 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
               child: Column(
                 children: [
-                  // CARD 1: Dorm Summary Card
+                  // กล่องการ์ดที่ 1: สรุปข้อมูลหอพักและห้องพักที่กำลังจอง รวมถึงราคาและค่ามัดจำ
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
@@ -307,7 +325,6 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
                               Text(
                                 widget.dormName,
                                 style: const TextStyle(
-                                  fontFamily: 'Kanit',
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                   color: textDarkColor,
@@ -315,41 +332,40 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                '1 ห้อง • ${widget.roomType}',
+                                '${l10n.bookingRoom} ${widget.roomNumber} • ${widget.roomType}',
                                 style: TextStyle(
-                                  fontFamily: 'Kanit',
                                   fontSize: 13,
                                   color: Colors.grey.shade600,
                                 ),
                               ),
                               Text(
-                                'เราท์เตอร์ไวไฟ • เฟอร์นิเจอร์บิวอิน',
+                                widget.facilities.isNotEmpty ? widget.facilities.join(' • ') : l10n.bookingNoFacilities,
                                 style: TextStyle(
-                                  fontFamily: 'Kanit',
                                   fontSize: 11,
                                   color: Colors.grey.shade500,
                                 ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                               ),
                               const SizedBox(height: 8),
                               RichText(
                                 text: TextSpan(
                                   style: TextStyle(
-                                    fontFamily: 'Kanit',
                                     fontSize: 11,
                                     color: Colors.grey.shade600,
                                   ),
                                   children: [
-                                    const TextSpan(text: 'ราคา '),
+                                    TextSpan(text: l10n.bookingPriceLabel),
                                     TextSpan(
-                                      text: widget.price.replaceAll('฿', '').replaceAll('/เดือน', ''),
+                                      text: widget.monthlyPrice.replaceAll('฿', '').replaceAll('/เดือน', ''),
                                       style: const TextStyle(fontWeight: FontWeight.bold, color: textDarkColor),
                                     ),
-                                    const TextSpan(text: ' ต่อเดือน • ค่าประกัน '),
-                                    const TextSpan(
-                                      text: '6,000',
-                                      style: TextStyle(fontWeight: FontWeight.bold, color: textDarkColor),
+                                    TextSpan(text: l10n.bookingPerMonthDeposit),
+                                    TextSpan(
+                                      text: widget.securityDeposit.replaceAll('฿', ''),
+                                      style: const TextStyle(fontWeight: FontWeight.bold, color: textDarkColor),
                                     ),
-                                    const TextSpan(text: '\nสัญญา 1 ปี'),
+                                    TextSpan(text: l10n.bookingOneYearContract),
                                   ],
                                 ),
                               ),
@@ -361,7 +377,7 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
                   ),
                   const SizedBox(height: 16),
 
-                  // CARD 2: Tenant Info Card ("ข้อมูลผู้จอง")
+                  // กล่องการ์ดที่ 2: ข้อมูลส่วนตัวของผู้เช่าที่จะถูกส่งไปให้เจ้าของหอพิจารณา
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
@@ -379,14 +395,13 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Row(
+                        Row(
                           children: [
-                            Icon(Icons.badge_rounded, color: primaryColor, size: 20),
-                            SizedBox(width: 8),
+                            const Icon(Icons.badge_rounded, color: primaryColor, size: 20),
+                            const SizedBox(width: 8),
                             Text(
-                              'ข้อมูลผู้จอง',
-                              style: TextStyle(
-                                fontFamily: 'Kanit',
+                              l10n.bookingTenantInfo,
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                                 color: textDarkColor,
@@ -395,282 +410,131 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
                           ],
                         ),
                         const SizedBox(height: 16),
-                        _buildTenantRow('ชื่อ-นามสกุล', _tenantName),
-                        _buildTenantRow('เบอร์โทรศัพท์', _tenantPhone),
-                        _buildTenantRow('ที่อยู่', _tenantAddress),
-                        _buildTenantRow(
-                          'วันทำสัญญา',
-                          _contractDate,
-                          isPill: true,
-                        ),
+                        _isLoadingUser 
+                          ? const Center(child: CircularProgressIndicator())
+                          : Column(
+                              children: [
+                                _buildTenantRow(l10n.bookingTenantName, _currentUser != null ? '${_currentUser!.firstName} ${_currentUser!.lastName}' : l10n.commonLoading),
+                                _buildTenantRow(l10n.bookingTenantPhone, _currentUser?.phone ?? '-'),
+                                _buildTenantRow(l10n.bookingTenantAddress, _currentUser?.address ?? '-'),
+                                _buildTenantRow(
+                                  l10n.bookingStartDate,
+                                  DateTime.now().day.toString().padLeft(2, '0') + '/' +
+                                  DateTime.now().month.toString().padLeft(2, '0') + '/' +
+                                  (DateTime.now().year + 543).toString(),
+                                  isPill: true,
+                                ),
+                              ],
+                            ),
                       ],
                     ),
                   ),
                   const SizedBox(height: 16),
 
-                  // CARD 3: Payment Channel Card ("ช่องทางชำระเงิน")
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.03),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                      border: Border.all(color: Colors.black.withOpacity(0.02)),
+                  // Payment channel card removed as it's not needed at creation stage
+                  if (widget.existingBooking != null && widget.existingBooking!.status == 'pending_payment') ...[
+                    const SizedBox(height: 16),
+                    PaymentSectionWidget(
+                      booking: widget.existingBooking!,
+                      price: widget.bookingFee,
+                      onPaymentSuccess: () {
+                        // Refresh or close page
+                        Navigator.pop(context, true);
+                      },
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Row(
-                          children: [
-                            Icon(Icons.qr_code_scanner_rounded, color: primaryColor, size: 20),
-                            SizedBox(width: 8),
-                            Text(
-                              'ช่องทางชำระเงิน',
-                              style: TextStyle(
-                                fontFamily: 'Kanit',
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: textDarkColor,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        
-                        // QR Code Mockup (Aesthetic centered card image)
-                        Center(
-                          child: Container(
-                            width: 200,
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF9FAFB),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: Colors.black.withOpacity(0.05)),
-                            ),
-                            child: Column(
-                              children: [
-                                // PromtPay Mockup header
-                                const Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.account_balance_wallet_rounded, color: primaryColor, size: 16),
-                                    SizedBox(width: 6),
-                                    Text(
-                                      'Prompt Pay',
-                                      style: TextStyle(
-                                        fontFamily: 'Kanit',
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 12,
-                                        color: primaryColor,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 12),
-                                // QR code image mockup (Aesthetic minimalist room with QR)
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Image.network(
-                                    'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=400',
-                                    height: 150,
-                                    width: 150,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) => Container(
-                                      height: 150,
-                                      width: 150,
-                                      color: Colors.grey.shade200,
-                                      child: const Center(
-                                        child: Icon(Icons.qr_code_2_rounded, size: 64, color: Colors.black45),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Error/Warning Text
-                        const Text(
-                          '*หากผู้ใช้งานทำการชำระเงินไปแล้ว ทางระบบจะไม่มีการคืนเงินทุกกรณี',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: 'Kanit',
-                            color: Colors.redAccent,
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const Divider(height: 28),
-
-                        // Attachment Section
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              'ยืนยันการชำระเงิน',
-                              style: TextStyle(
-                                fontFamily: 'Kanit',
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: textDarkColor,
-                              ),
-                            ),
-                            
-                            // Slip upload button
-                            ElevatedButton.icon(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: _isSlipAttached ? const Color(0xFF2ECC71) : primaryColor,
-                                foregroundColor: Colors.white,
-                                elevation: 0,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                              ),
-                              onPressed: _attachMockSlip,
-                              icon: Icon(_isSlipAttached ? Icons.check_circle_outline_rounded : Icons.attach_file_rounded, size: 16),
-                              label: Text(
-                                _isSlipAttached ? 'แนบแล้ว' : 'แนบสลิป',
-                                style: const TextStyle(fontFamily: 'Kanit', fontSize: 13, fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        // If slip attached, display its name
-                        if (_isSlipAttached) ...[
-                          const SizedBox(height: 10),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFE8F8F5),
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: const Color(0xFF2ECC71).withOpacity(0.2)),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.insert_drive_file_outlined, color: Color(0xFF2ECC71), size: 16),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    _slipFileName,
-                                    style: const TextStyle(
-                                      fontFamily: 'Kanit',
-                                      fontSize: 12,
-                                      color: Color(0xFF27AE60),
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20),
+                  ],
                 ],
               ),
             ),
           ),
 
-          // BOTTOM CONTROL BAR: Price summary & Booking button
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, -4),
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text(
-                      'ราคารวมทั้งสิ้น',
-                      style: TextStyle(
-                        fontFamily: 'Kanit',
-                        color: Colors.black45,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        Text(
-                          widget.roomType.contains('พัดลม') ? '2,800' : '3,500', // dynamic based on selection
-                          style: const TextStyle(
-                            fontFamily: 'Kanit',
-                            color: Color(0xFFE0A926), // Orange-Gold color as in screenshot
-                            fontWeight: FontWeight.w900,
-                            fontSize: 24,
-                          ),
+          // แถบเมนูด้านล่างสุด (Bottom Bar): แสดงยอดรวมที่ต้องจ่าย และปุ่มกดยืนยันการจอง (Only show if creating new)
+          if (widget.existingBooking == null)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, -4),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        l10n.bookingPaymentAmount,
+                        style: const TextStyle(
+                          color: Colors.black45,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
                         ),
-                        const SizedBox(width: 4),
-                        const Text(
-                          '฿',
-                          style: TextStyle(
-                            fontFamily: 'Kanit',
-                            color: Color(0xFFE0A926),
+                      ),
+                      const SizedBox(height: 2),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        textBaseline: TextBaseline.alphabetic,
+                        children: [
+                          Text(
+                            widget.bookingFee.replaceAll(RegExp(r'[^0-9]'), ''),
+                            style: const TextStyle(
+                              color: Color(0xFFE0A926), // Orange-Gold color as in screenshot
+                              fontWeight: FontWeight.w900,
+                              fontSize: 24,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          const Text(
+                            '฿',
+                            style: TextStyle(
+                              color: Color(0xFFE0A926),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF4274E6),
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
+                    ),
+                    onPressed: _isSubmitting ? null : _confirmBooking,
+                    child: _isSubmitting 
+                      ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                      : Text(
+                          l10n.bookingConfirmButton,
+                          style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                           ),
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryColor,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
                   ),
-                  onPressed: _isSubmitting ? null : _confirmBooking,
-                  child: _isSubmitting 
-                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                    : const Text(
-                        'ยืนยันการจอง',
-                        style: TextStyle(
-                          fontFamily: 'Kanit',
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
         ],
       ),
     );
   }
 
-  // Builder helper for tenant rows
+  // ฟังก์ชันตัวช่วย (Helper) สำหรับวาดบรรทัดข้อมูลผู้เช่าแต่ละแถว (เช่น ชื่อ, เบอร์โทร)
+  // label คือหัวข้อ (เช่น 'ชื่อ-นามสกุล'), value คือค่าที่จะแสดง
+  // ถ้า isPill = true จะตีกรอบพื้นหลังสีเทาอ่อนให้ค่า value (เช่น กรอบใส่วันที่)
   Widget _buildTenantRow(String label, String value, {bool isPill = false}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
@@ -681,7 +545,6 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
           Text(
             label,
             style: const TextStyle(
-              fontFamily: 'Kanit',
               color: Colors.black45,
               fontSize: 14,
               fontWeight: FontWeight.w500,
@@ -701,7 +564,6 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
                       child: Text(
                         value,
                         style: const TextStyle(
-                          fontFamily: 'Kanit',
                           color: Colors.black87,
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
@@ -711,7 +573,6 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
                   : Text(
                       value,
                       style: const TextStyle(
-                        fontFamily: 'Kanit',
                         color: Color(0xFF1F2937),
                         fontSize: 14,
                         fontWeight: FontWeight.bold,

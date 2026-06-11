@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/dormitory_service.dart';
 import '../models/dormitory.dart';
 import 'dorm_detail_page.dart';
+import '../core/localization/localization_extension.dart';
 
 class SearchDormPage extends StatefulWidget {
   const SearchDormPage({super.key});
@@ -26,7 +27,8 @@ class _SearchDormPageState extends State<SearchDormPage> {
   final TextEditingController _searchController = TextEditingController();
 
   @override
-  void initState() {
+    // ฟังก์ชัน initState จะถูกเรียกใช้งานเป็นสิ่งแรกสุดเมื่อเปิดหน้านี้ขึ้นมา (มักใช้สำหรับดึงข้อมูลเตรียมไว้)
+void initState() {
     super.initState();
     _performSearch();
   }
@@ -37,38 +39,80 @@ class _SearchDormPageState extends State<SearchDormPage> {
     super.dispose();
   }
 
-  Future<void> _performSearch() async {
-    setState(() {
+    // ฟังก์ชันแบบ Asynchronous สำหรับติดต่อระบบหลังบ้าน (Backend) หรือประมวลผลข้อมูล: _performSearch
+Future<void> _performSearch() async {
+        // คำสั่ง setState จะกระตุ้นให้ Flutter ทำการวาดหน้าจอ (build) ใหม่อีกครั้งเพื่ออัปเดตข้อมูลที่เปลี่ยนไป
+setState(() {
       _isLoading = true;
     });
 
     try {
-      final results = await _dormitoryService.searchDormitories(
+      final baseResults = await _dormitoryService.searchDormitories(
         search: _searchQuery.isNotEmpty ? _searchQuery : null,
-        maxDistance: _maxDistance,
-        minPrice: _minPrice,
-        maxPrice: _maxPrice,
       );
+      
+      // Fetch details for all dorms to get room availability data
+      var results = await Future.wait(
+        baseResults.map((d) => _dormitoryService.getDormitoryDetail(d.id))
+      );
+
+      // Local filtering for distance and price
+      results = results.where((dorm) {
+        // Distance Filter
+        if (_maxDistance != null) {
+          if (dorm.distanceFromUniversityKm > _maxDistance!) {
+            return false;
+          }
+        }
+        
+        // Price Filter
+        if (_maxPrice != null || _minPrice != null) {
+          if (dorm.rooms == null || dorm.rooms!.isEmpty) {
+            return false;
+          }
+          
+          bool hasRoomInPriceRange = false;
+          for (var room in dorm.rooms!) {
+            bool matches = true;
+            if (_minPrice != null && room.price < _minPrice!) matches = false;
+            if (_maxPrice != null && room.price > _maxPrice!) matches = false;
+            if (matches) {
+              hasRoomInPriceRange = true;
+              break;
+            }
+          }
+          if (!hasRoomInPriceRange) {
+            return false;
+          }
+        }
+        
+        return true;
+      }).toList();
+
       if (mounted) {
-        setState(() {
+                // คำสั่ง setState จะกระตุ้นให้ Flutter ทำการวาดหน้าจอ (build) ใหม่อีกครั้งเพื่ออัปเดตข้อมูลที่เปลี่ยนไป
+setState(() {
           _searchResults = results;
           _isLoading = false;
         });
       }
     } catch (e) {
       if (mounted) {
-        setState(() {
+                // คำสั่ง setState จะกระตุ้นให้ Flutter ทำการวาดหน้าจอ (build) ใหม่อีกครั้งเพื่ออัปเดตข้อมูลที่เปลี่ยนไป
+setState(() {
           _isLoading = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('เกิดข้อผิดพลาดในการค้นหา')),
+                // แสดงข้อความแจ้งเตือนป๊อปอัปเล็กๆ ที่ด้านล่างของจอ (SnackBar)
+ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.searchError)),
         );
       }
     }
   }
 
   void _toggleFavorite(String name) {
-    setState(() {
+        // คำสั่ง setState จะกระตุ้นให้ Flutter ทำการวาดหน้าจอ (build) ใหม่อีกครั้งเพื่ออัปเดตข้อมูลที่เปลี่ยนไป
+setState(() {
       if (_favorites.contains(name)) {
         _favorites.remove(name);
       } else {
@@ -78,6 +122,8 @@ class _SearchDormPageState extends State<SearchDormPage> {
   }
 
   void _openFilterSheet() {
+    bool enableDistance = _maxDistance != null;
+    bool enablePrice = _maxPrice != null;
     double tempMaxDistance = _maxDistance ?? 5.0; // Default 5km
     double tempMaxPrice = _maxPrice ?? 10000.0;
     
@@ -99,56 +145,95 @@ class _SearchDormPageState extends State<SearchDormPage> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('ตัวกรองการค้นหา', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 24),
-                  
-                  // Price Filter
-                  Text('ราคา (ไม่เกิน ฿${tempMaxPrice.toInt()}/เดือน)', style: const TextStyle(fontWeight: FontWeight.w600)),
-                  Slider(
-                    value: tempMaxPrice,
-                    min: 1000,
-                    max: 20000,
-                    divisions: 19,
-                    label: '฿${tempMaxPrice.toInt()}',
-                    activeColor: const Color(0xFF4274E6),
-                    onChanged: (val) {
-                      setModalState(() => tempMaxPrice = val);
-                    },
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(context.l10n.searchFilterTitle, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                      if (enableDistance || enablePrice)
+                        TextButton(
+                          onPressed: () {
+                            setModalState(() {
+                              enableDistance = false;
+                              enablePrice = false;
+                            });
+                          },
+                          child: Text(context.l10n.searchFilterClear),
+                        ),
+                    ],
                   ),
                   const SizedBox(height: 16),
                   
-                  // Distance Filter
-                  Text('ระยะห่างจาก ม. (ไม่เกิน ${tempMaxDistance.toStringAsFixed(1)} กม.)', style: const TextStyle(fontWeight: FontWeight.w600)),
-                  Slider(
-                    value: tempMaxDistance,
-                    min: 0.5,
-                    max: 15.0,
-                    divisions: 29,
-                    label: '${tempMaxDistance.toStringAsFixed(1)} กม.',
-                    activeColor: const Color(0xFF4274E6),
-                    onChanged: (val) {
-                      setModalState(() => tempMaxDistance = val);
-                    },
+                  // Price Filter
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('${context.l10n.searchFilterPrice}${tempMaxPrice.toInt()}${context.l10n.searchFilterPricePerMonth}', style: TextStyle(fontWeight: FontWeight.w600, color: enablePrice ? Colors.black87 : Colors.black38)),
+                      Switch(
+                        value: enablePrice,
+                        activeColor: const Color(0xFF4274E6),
+                        onChanged: (val) => setModalState(() => enablePrice = val),
+                      ),
+                    ],
                   ),
+                  if (enablePrice)
+                    Slider(
+                      value: tempMaxPrice,
+                      min: 1000,
+                      max: 20000,
+                      divisions: 19,
+                      label: '฿${tempMaxPrice.toInt()}',
+                      activeColor: const Color(0xFF4274E6),
+                      onChanged: (val) {
+                        setModalState(() => tempMaxPrice = val);
+                      },
+                    ),
+                  const SizedBox(height: 16),
+                  
+                  // Distance Filter
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('${context.l10n.searchFilterDistance}${tempMaxDistance.toStringAsFixed(1)}${context.l10n.searchFilterDistanceKm}', style: TextStyle(fontWeight: FontWeight.w600, color: enableDistance ? Colors.black87 : Colors.black38)),
+                      Switch(
+                        value: enableDistance,
+                        activeColor: const Color(0xFF4274E6),
+                        onChanged: (val) => setModalState(() => enableDistance = val),
+                      ),
+                    ],
+                  ),
+                  if (enableDistance)
+                    Slider(
+                      value: tempMaxDistance,
+                      min: 0.5,
+                      max: 15.0,
+                      divisions: 29,
+                      label: '${tempMaxDistance.toStringAsFixed(1)} กม.',
+                      activeColor: const Color(0xFF4274E6),
+                      onChanged: (val) {
+                        setModalState(() => tempMaxDistance = val);
+                      },
+                    ),
                   const SizedBox(height: 32),
                   
                   SizedBox(
                     width: double.infinity,
                     height: 50,
-                    child: ElevatedButton(
+                    child:                     // ปุ่มกดแบบมีพื้นหลัง (ElevatedButton) เมื่อกดแล้วจะเรียกคำสั่งใน onPressed
+ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF4274E6),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
                       ),
                       onPressed: () {
                         Navigator.pop(context);
-                        setState(() {
-                          _maxPrice = tempMaxPrice;
-                          _maxDistance = tempMaxDistance;
+                                                // คำสั่ง setState จะกระตุ้นให้ Flutter ทำการวาดหน้าจอ (build) ใหม่อีกครั้งเพื่ออัปเดตข้อมูลที่เปลี่ยนไป
+setState(() {
+                          _maxPrice = enablePrice ? tempMaxPrice : null;
+                          _maxDistance = enableDistance ? tempMaxDistance : null;
                         });
                         _performSearch();
                       },
-                      child: const Text('ตกลง', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                      child: Text(context.l10n.searchFilterApply, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
                     ),
                   ),
                 ],
@@ -160,7 +245,8 @@ class _SearchDormPageState extends State<SearchDormPage> {
     );
   }
 
-  @override
+    // ฟังก์ชัน build ทำหน้าที่วาดหน้าจอ (UI) และจัดวาง Widget ต่างๆ ภายในหน้านี้
+@override
   Widget build(BuildContext context) {
     const primaryColor = Color(0xFF4274E6);
 
@@ -181,9 +267,9 @@ class _SearchDormPageState extends State<SearchDormPage> {
                       Navigator.pop(context);
                     },
                   ),
-                  const Text(
-                    'ค้นหาหอพักที่ใช่',
-                    style: TextStyle(
+                  Text(
+                    context.l10n.searchPageTitle,
+                    style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                       color: primaryColor,
@@ -221,13 +307,17 @@ class _SearchDormPageState extends State<SearchDormPage> {
                           Expanded(
                             child: TextField(
                               controller: _searchController,
+                              onChanged: (val) {
+                                _searchQuery = val;
+                                _performSearch();
+                              },
                               onSubmitted: (val) {
                                 _searchQuery = val;
                                 _performSearch();
                               },
-                              decoration: const InputDecoration(
-                                hintText: 'ค้นหาชื่อหอพัก...',
-                                hintStyle: TextStyle(
+                              decoration: InputDecoration(
+                                hintText: context.l10n.searchHint,
+                                hintStyle: const TextStyle(
                                   color: Colors.black26,
                                   fontSize: 14,
                                 ),
@@ -238,7 +328,8 @@ class _SearchDormPageState extends State<SearchDormPage> {
                             ),
                           ),
                           // Blue circular search button inside input
-                          GestureDetector(
+                                                    // GestureDetector ใช้ครอบ Widget อื่นๆ เพื่อให้สามารถรับการกด (Tap) หรือสัมผัสจากผู้ใช้ได้
+GestureDetector(
                             onTap: () {
                               _searchQuery = _searchController.text;
                               _performSearch();
@@ -263,7 +354,8 @@ class _SearchDormPageState extends State<SearchDormPage> {
                   ),
                   const SizedBox(width: 14),
                   // Outer Filter Button
-                  GestureDetector(
+                                    // GestureDetector ใช้ครอบ Widget อื่นๆ เพื่อให้สามารถรับการกด (Tap) หรือสัมผัสจากผู้ใช้ได้
+GestureDetector(
                     onTap: _openFilterSheet,
                     child: Container(
                       width: 52,
@@ -297,7 +389,7 @@ class _SearchDormPageState extends State<SearchDormPage> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: Text(
-                'ผลการค้นหา (${_searchResults.length})',
+                '${context.l10n.searchResultCountTitle}${_searchResults.length})',
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -313,8 +405,9 @@ class _SearchDormPageState extends State<SearchDormPage> {
               child: _isLoading 
                 ? const Center(child: CircularProgressIndicator())
                 : _searchResults.isEmpty
-                  ? const Center(child: Text('ไม่พบหอพักที่ตรงกับเงื่อนไข', style: TextStyle(fontSize: 16, color: Colors.grey)))
-                  : ListView.builder(
+                  ? Center(child: Text(context.l10n.searchNoResults, style: const TextStyle(fontSize: 16, color: Colors.grey)))
+                  :                   // ใช้ ListView.builder สำหรับสร้างรายการข้อมูลแบบเลื่อนได้ (Scrollable List) ซึ่งจะวาด UI ตามจำนวนข้อมูลที่มี
+ListView.builder(
                       physics: const BouncingScrollPhysics(),
                       padding: const EdgeInsets.only(left: 24.0, right: 24.0, bottom: 24.0),
                       itemCount: _searchResults.length,
@@ -325,11 +418,13 @@ class _SearchDormPageState extends State<SearchDormPage> {
                         final priceText = dorm.rooms != null && dorm.rooms!.isNotEmpty 
                                 ? dorm.rooms!.first.price.toStringAsFixed(0)
                                 : '3,000';
-                        final isAvailable = true; // Mock availability
+                        final isAvailable = dorm.rooms != null && dorm.rooms!.any((r) => r.availableCount > 0);
 
-                        return GestureDetector(
+                        return                         // GestureDetector ใช้ครอบ Widget อื่นๆ เพื่อให้สามารถรับการกด (Tap) หรือสัมผัสจากผู้ใช้ได้
+GestureDetector(
                           onTap: () {
-                            Navigator.push(
+                                                        // คำสั่ง Navigator.push ใช้สำหรับเปลี่ยนหน้าต่างไปยังหน้าจอใหม่
+Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (_) => DormDetailPage(
@@ -438,7 +533,7 @@ class _SearchDormPageState extends State<SearchDormPage> {
                                             const SizedBox(width: 4),
                                             Expanded(
                                               child: Text(
-                                                '${dorm.address} • ห่าง ม. ${dorm.distanceFromUniversityKm} กม.',
+                                                '${dorm.address} • ${context.l10n.searchDistanceLabel}${dorm.distanceFromUniversityKm} กม.',
                                                 style: const TextStyle(color: Colors.white70, fontSize: 12),
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
@@ -460,9 +555,9 @@ class _SearchDormPageState extends State<SearchDormPage> {
                                             RichText(
                                               text: TextSpan(
                                                 children: [
-                                                  const TextSpan(text: 'ราคา ', style: TextStyle(color: Colors.white70, fontSize: 14)),
+                                                  TextSpan(text: context.l10n.searchPriceLabel, style: const TextStyle(color: Colors.white70, fontSize: 14)),
                                                   TextSpan(text: priceText, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900)),
-                                                  const TextSpan(text: ' /เดือน', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                                                  TextSpan(text: context.l10n.dormManagePerMonth, style: const TextStyle(color: Colors.white70, fontSize: 12)),
                                                 ],
                                               ),
                                             ),
@@ -482,7 +577,7 @@ class _SearchDormPageState extends State<SearchDormPage> {
                                                 ),
                                               ),
                                               child: Text(
-                                                isAvailable ? 'ว่าง' : 'เต็ม',
+                                                isAvailable ? context.l10n.searchAvailable : context.l10n.searchFull,
                                                 style: TextStyle(
                                                   color: isAvailable ? Colors.white : const Color(0xFFFF453A),
                                                   fontSize: 11,
@@ -499,7 +594,8 @@ class _SearchDormPageState extends State<SearchDormPage> {
                                   Positioned(
                                     bottom: 84,
                                     right: 20,
-                                    child: GestureDetector(
+                                    child:                                     // GestureDetector ใช้ครอบ Widget อื่นๆ เพื่อให้สามารถรับการกด (Tap) หรือสัมผัสจากผู้ใช้ได้
+GestureDetector(
                                       onTap: () => _toggleFavorite(dorm.name),
                                       child: Container(
                                         padding: const EdgeInsets.all(8),

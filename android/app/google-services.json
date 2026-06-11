@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "881484063197",
+    "project_id": "just-booking-5cd68",
+    "storage_bucket": "just-booking-5cd68.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:881484063197:android:2bbd30440fb6ade719d634",
+        "android_client_info": {
+          "package_name": "com.example.just_booking"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAvmUp8MJnMhJMLx9wdLxHV5u6Y-g87iRs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -5,6 +5,7 @@ import '../wellcome/login.dart';
 import 'edit_profile_page.dart';
 import 'language_page.dart';
 import 'favorites_page.dart';
+import '../core/localization/localization_extension.dart';
 
 class UserProfilePage extends StatefulWidget {
   const UserProfilePage({
@@ -23,25 +24,30 @@ class _UserProfilePageState extends State<UserProfilePage> {
   bool _isLoading = true;
 
   @override
-  void initState() {
+    // ฟังก์ชัน initState จะถูกเรียกใช้งานเป็นสิ่งแรกสุดเมื่อเปิดหน้านี้ขึ้นมา (มักใช้สำหรับดึงข้อมูลเตรียมไว้)
+void initState() {
     super.initState();
     _loadUser();
   }
 
-  Future<void> _loadUser() async {
+    // ฟังก์ชันแบบ Asynchronous สำหรับติดต่อระบบหลังบ้าน (Backend) หรือประมวลผลข้อมูล: _loadUser
+Future<void> _loadUser() async {
     try {
       final user = await _authService.getCurrentUser();
-      setState(() {
+            // คำสั่ง setState จะกระตุ้นให้ Flutter ทำการวาดหน้าจอ (build) ใหม่อีกครั้งเพื่ออัปเดตข้อมูลที่เปลี่ยนไป
+setState(() {
         _currentUser = user;
         _isLoading = false;
       });
     } catch (e) {
-      setState(() {
+            // คำสั่ง setState จะกระตุ้นให้ Flutter ทำการวาดหน้าจอ (build) ใหม่อีกครั้งเพื่ออัปเดตข้อมูลที่เปลี่ยนไป
+setState(() {
         _isLoading = false;
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('เกิดข้อผิดพลาดในการโหลดข้อมูลผู้ใช้', style: TextStyle(fontFamily: 'Kanit'))),
+                // แสดงข้อความแจ้งเตือนป๊อปอัปเล็กๆ ที่ด้านล่างของจอ (SnackBar)
+ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.profileLoadError, style: const TextStyle())),
         );
       }
     }
@@ -73,10 +79,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
               const SizedBox(height: 24),
               const Icon(Icons.logout_rounded, color: Colors.redAccent, size: 54),
               const SizedBox(height: 16),
-              const Text(
-                'ออกจากระบบ',
-                style: TextStyle(
-                  fontFamily: 'Kanit',
+              Text(
+                context.l10n.profileLogoutConfirmTitle,
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF1F2937),
@@ -84,10 +89,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
               ),
               const SizedBox(height: 8),
               Text(
-                'คุณแน่ใจหรือไม่ว่าต้องการออกจากระบบบัญชีผู้ใช้นี้?',
+                context.l10n.profileLogoutConfirmDesc,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontFamily: 'Kanit',
                   fontSize: 14,
                   color: Colors.grey.shade600,
                 ),
@@ -104,9 +108,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
                       ),
                       onPressed: () => Navigator.pop(context),
                       child: Text(
-                        'ยกเลิก',
+                        context.l10n.profileLogoutCancel,
                         style: TextStyle(
-                          fontFamily: 'Kanit',
                           color: Colors.grey.shade700,
                           fontWeight: FontWeight.bold,
                         ),
@@ -115,7 +118,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: ElevatedButton(
+                    child:                     // ปุ่มกดแบบมีพื้นหลัง (ElevatedButton) เมื่อกดแล้วจะเรียกคำสั่งใน onPressed
+ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.redAccent,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
@@ -130,15 +134,14 @@ class _UserProfilePageState extends State<UserProfilePage> {
                         if (context.mounted) {
                           Navigator.pushAndRemoveUntil(
                             context,
-                            MaterialPageRoute(builder: (_) => const LoginScreen(isOwner: false)),
+                            MaterialPageRoute(builder: (_) => const LoginScreen()),
                             (route) => false,
                           );
                         }
                       },
-                      child: const Text(
-                        'ยืนยันการออกจากระบบ',
-                        style: TextStyle(
-                          fontFamily: 'Kanit',
+                      child: Text(
+                        context.l10n.profileLogoutConfirmBtn,
+                        style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                         ),
@@ -154,7 +157,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
     );
   }
 
-  @override
+    // ฟังก์ชัน build ทำหน้าที่วาดหน้าจอ (UI) และจัดวาง Widget ต่างๆ ภายในหน้านี้
+@override
   Widget build(BuildContext context) {
     const primaryColor = Color(0xFF4274E6);
     const brandColor = Color(0xFF3F6DE3); // Aesthetic blue color for the brand title
@@ -178,7 +182,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
         title: const Text(
           'The Modern Sanctuary',
           style: TextStyle(
-            fontFamily: 'Kanit',
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: brandColor,
@@ -190,7 +193,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
       body: _isLoading 
         ? const Center(child: CircularProgressIndicator(color: primaryColor))
         : _currentUser == null
-          ? const Center(child: Text('ไม่พบข้อมูลผู้ใช้งาน', style: TextStyle(fontFamily: 'Kanit')))
+          ? const Center(child: Text('ไม่พบข้อมูลผู้ใช้งาน', style: TextStyle()))
           : Column(
         children: [
           Expanded(
@@ -226,12 +229,14 @@ class _UserProfilePageState extends State<UserProfilePage> {
                             Positioned(
                               bottom: 2,
                               right: 2,
-                              child: GestureDetector(
+                              child:                               // GestureDetector ใช้ครอบ Widget อื่นๆ เพื่อให้สามารถรับการกด (Tap) หรือสัมผัสจากผู้ใช้ได้
+GestureDetector(
                                 onTap: () {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('กำลังเปิดกล้องถ่ายรูปเพื่อเปลี่ยนโปรไฟล์...', style: TextStyle(fontFamily: 'Kanit')),
-                                      duration: Duration(seconds: 1),
+                                                                    // แสดงข้อความแจ้งเตือนป๊อปอัปเล็กๆ ที่ด้านล่างของจอ (SnackBar)
+ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(context.l10n.profileCameraToast, style: const TextStyle()),
+                                      duration: const Duration(seconds: 1),
                                     ),
                                   );
                                 },
@@ -263,9 +268,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
                         Text(
                           _currentUser != null 
                             ? '${_currentUser!.firstName} ${_currentUser!.lastName}' 
-                            : 'ผู้ใช้งานระบบ',
+                            : context.l10n.profileUnknownUser,
                           style: const TextStyle(
-                            fontFamily: 'Kanit',
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
                             color: textDarkColor,
@@ -276,7 +280,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
                         Text(
                           _currentUser!.email,
                           style: TextStyle(
-                            fontFamily: 'Kanit',
                             fontSize: 13.5,
                             color: Colors.grey.shade500,
                             fontWeight: FontWeight.w500,
@@ -292,9 +295,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     icon: Icons.edit_outlined,
                     iconBgColor: const Color(0xFFEEF2FF),
                     iconColor: primaryColor,
-                    title: 'แก้ไขโปรไฟล์',
+                    title: context.l10n.profileEdit,
                     onTap: () {
-                      Navigator.push(
+                                            // คำสั่ง Navigator.push ใช้สำหรับเปลี่ยนหน้าต่างไปยังหน้าจอใหม่
+Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (_) => EditProfilePage(
@@ -315,9 +319,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     icon: Icons.favorite_border_rounded,
                     iconBgColor: const Color(0xFFF3E8FF),
                     iconColor: Colors.purple.shade500,
-                    title: 'รายการโปรด',
+                    title: context.l10n.profileFavorites,
                     onTap: () {
-                      Navigator.push(
+                                            // คำสั่ง Navigator.push ใช้สำหรับเปลี่ยนหน้าต่างไปยังหน้าจอใหม่
+Navigator.push(
                         context,
                         MaterialPageRoute(builder: (_) => const FavoritesPage()),
                       );
@@ -327,9 +332,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     icon: Icons.translate_rounded,
                     iconBgColor: const Color(0xFFF3F4F6),
                     iconColor: Colors.grey.shade600,
-                    title: 'เปลี่ยนภาษา',
+                    title: context.l10n.profileChangeLanguage,
                     onTap: () {
-                      Navigator.push(
+                                            // คำสั่ง Navigator.push ใช้สำหรับเปลี่ยนหน้าต่างไปยังหน้าจอใหม่
+Navigator.push(
                         context,
                         MaterialPageRoute(builder: (_) => const LanguagePage()),
                       );
@@ -365,9 +371,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
                         child: const Icon(Icons.logout_rounded, color: Colors.white, size: 20),
                       ),
                       title: Text(
-                        'ออกจากระบบ',
+                        context.l10n.profileLogout,
                         style: TextStyle(
-                          fontFamily: 'Kanit',
                           color: Colors.red.shade600,
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -391,7 +396,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
             child: BottomNavigationBar(
               currentIndex: _currentIndex,
               onTap: (index) {
-                setState(() {
+                                // คำสั่ง setState จะกระตุ้นให้ Flutter ทำการวาดหน้าจอ (build) ใหม่อีกครั้งเพื่ออัปเดตข้อมูลที่เปลี่ยนไป
+setState(() {
                   _currentIndex = index;
                 });
                 // Pop back to Homepage to switch tabs
@@ -405,8 +411,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
               unselectedItemColor: Colors.grey.shade400,
               selectedFontSize: 11,
               unselectedFontSize: 11,
-              selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Kanit'),
-              unselectedLabelStyle: const TextStyle(fontFamily: 'Kanit'),
+              selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
+              unselectedLabelStyle: const TextStyle(),
               elevation: 0,
               items: const [
                 BottomNavigationBarItem(
@@ -482,7 +488,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
         title: Text(
           title,
           style: const TextStyle(
-            fontFamily: 'Kanit',
             color: Color(0xFF1F2937),
             fontWeight: FontWeight.bold,
             fontSize: 16,

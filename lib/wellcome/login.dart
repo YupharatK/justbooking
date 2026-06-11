@@ -2,13 +2,12 @@ import '../core/api_client.dart';
 import 'package:flutter/material.dart';
 
 import '../services/auth_service.dart';
-import 'Register.dart';
 import '../users/home_page.dart';
 import '../dormitory/dormitory_home_page.dart';
+import '../wellcome/wellcome.dart';
 
 class LoginScreen extends StatefulWidget {
-  final bool isOwner;
-  const LoginScreen({super.key, required this.isOwner});
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -54,7 +53,11 @@ class _LoginScreenState extends State<LoginScreen> {
       _showMessage('เข้าสู่ระบบสำเร็จ');
       
       // Navigate based on role
-      if (!widget.isOwner) {
+      final user = await _authService.getCurrentUser();
+      
+      if (!mounted) return;
+      
+      if (user.role != 'owner') {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const UserHomePage()),
@@ -76,10 +79,6 @@ class _LoginScreenState extends State<LoginScreen> {
         });
       }
     }
-  }
-
-  Future<void> _loginWithGoogle() async {
-    _showMessage('เข้าสู่ระบบด้วย Google กำลังพัฒนา');
   }
 
   void _showMessage(String message) {
@@ -303,49 +302,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 32),
                         Row(
-                          children: [
-                            const Expanded(child: Divider(color: Colors.black12, thickness: 1)),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
-                              child: Text(
-                                'เข้าสู่ระบบด้วยบัญชีอื่น',
-                                style: TextStyle(
-                                  color: Colors.grey.shade600,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ),
-                            const Expanded(child: Divider(color: Colors.black12, thickness: 1)),
-                          ],
-                        ),
-                        const SizedBox(height: 32),
-                        OutlinedButton.icon(
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            side: const BorderSide(color: Colors.black12),
-                            backgroundColor: Colors.white,
-                          ),
-                          onPressed: _isLoading ? null : _loginWithGoogle,
-                          icon: Image.network(
-                            'https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-512.png',
-                            height: 24,
-                            errorBuilder: (context, error, stackTrace) =>
-                                const Icon(Icons.g_mobiledata, size: 32, color: Colors.blue),
-                          ),
-                          label: const Text(
-                            'เข้าสู่ระบบด้วย Google',
-                            style: TextStyle(
-                              color: Colors.black87,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 32),
-                        Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
@@ -359,7 +315,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               onTap: () {
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(builder: (_) => RegisterScreen(isOwner: widget.isOwner)),
+                                  MaterialPageRoute(builder: (_) => const WellcomePage()),
                                 );
                               },
                               child: const Text(
