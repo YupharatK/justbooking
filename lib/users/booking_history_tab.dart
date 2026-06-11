@@ -280,7 +280,7 @@ class _BookingHistoryTabState extends State<BookingHistoryTab> {
                     if (booking.moveInDate != null && booking.moveInDate!.isNotEmpty) ...[
                       const SizedBox(height: 4),
                       Text(
-                        'วันที่เข้าอยู่: ${booking.moveInDate}',
+                        '✨ พร้อมเข้าอยู่วันที่: ${booking.moveInDate!.split('T')[0]}',
                         style: TextStyle(
                           color: primaryColor,
                           fontSize: 12,

@@ -13,6 +13,7 @@ class Booking {
   final String? qrCodeUrl;
   final String? paymentSlipUrl;
   final String createdAt;
+  final String updatedAt;
   
   // Relations
   final User? user;
@@ -30,6 +31,7 @@ class Booking {
     this.qrCodeUrl,
     this.paymentSlipUrl,
     required this.createdAt,
+    required this.updatedAt,
     this.user,
     this.room,
     this.dormitory,
@@ -107,6 +109,7 @@ class Booking {
       qrCodeUrl: json['qrCodeUrl'] ?? json['qr_code_url'],
       paymentSlipUrl: json['paymentSlipUrl'] ?? json['payment_slip_url'] ?? json['slip_image_url'] ?? json['slipImageUrl'],
       createdAt: json['createdAt'] ?? json['created_at'] ?? '',
+      updatedAt: json['updatedAt'] ?? json['updated_at'] ?? json['createdAt'] ?? json['created_at'] ?? '',
       user: parsedUser,
       room: parsedRoom,
       dormitory: parsedDormitory,

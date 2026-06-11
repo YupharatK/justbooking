@@ -78,7 +78,28 @@ ScaffoldMessenger.of(context).showSnackBar(
     }
   }
 
-  void _openWriteReviewSheet() {
+  Future<void> _openWriteReviewSheet() async {
+    final isEligible = await _dormitoryService.checkReviewEligibility(widget.dormId);
+    if (!isEligible) {
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            title: const Text('ไม่สามารถรีวิวได้'),
+            content: const Text('คุณต้องเป็นผู้เช่าที่เข้าพักหอพักนี้แล้วเท่านั้น (สถานะการจองเสร็จสิ้น) จึงจะสามารถรีวิวได้ เพื่อป้องกันรีวิวปลอมค่ะ'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('ตกลง'),
+              ),
+            ],
+          ),
+        );
+      }
+      return;
+    }
+
     double rating = 5.0;
     final TextEditingController commentController = TextEditingController();
     bool isSubmitting = false;
@@ -540,9 +561,9 @@ ListView.builder(
                                           dormName: dorm.name,
                                           ownerId: dorm.ownerId,
                                           rooms: dorm.rooms ?? [],
-                                          imageUrl: room.images?.isNotEmpty == true 
-                                              ? room.images!.first.url 
-                                              : 'https://images.unsplash.com/photo-1616594039964-ae9021a400a0?q=80&w=400',
+                                          imageUrls: room.images?.isNotEmpty == true 
+                                              ? room.images!.map((e) => e.url).toList()
+                                              : ['https://images.unsplash.com/photo-1616594039964-ae9021a400a0?q=80&w=400'],
                                           title: room.roomType,
                                           subtitle: room.facilities.isNotEmpty ? room.facilities.map((f) => DataMapper.getFacilityName(context, f)).join(', ') : context.l10n.dormDetailNoData,
                                           price: room.price.toStringAsFixed(0),
@@ -1117,7 +1138,7 @@ setState(() {
     required String dormName,
     int? ownerId,
     required List<Room> rooms,
-    required String imageUrl,
+    required List<String> imageUrls,
     required String title,
     required String subtitle,
     required String price,
@@ -1159,18 +1180,12 @@ Navigator.push(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-              child: Image.network(
-                imageUrl,
-                height: 90,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  height: 90,
-                  color: Colors.grey.shade100,
-                  child: const Icon(Icons.image, color: Colors.black26),
-                ),
+            SizedBox(
+              height: 90,
+              width: double.infinity,
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                child: _RoomImageCarousel(imageUrls: imageUrls),
               ),
             ),
             Padding(
@@ -1279,6 +1294,64 @@ Navigator.push(
             overflow: TextOverflow.ellipsis,
           ),
         ),
+      ],
+    );
+  }
+}
+
+class _RoomImageCarousel extends StatefulWidget {
+  final List<String> imageUrls;
+  const _RoomImageCarousel({required this.imageUrls});
+
+  @override
+  State<_RoomImageCarousel> createState() => _RoomImageCarouselState();
+}
+
+class _RoomImageCarouselState extends State<_RoomImageCarousel> {
+  int _currentIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        PageView.builder(
+          itemCount: widget.imageUrls.length,
+          onPageChanged: (index) {
+            setState(() {
+              _currentIndex = index;
+            });
+          },
+          itemBuilder: (context, index) {
+            return Image.network(
+              widget.imageUrls[index],
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Container(
+                color: Colors.grey.shade100,
+                child: const Icon(Icons.image, color: Colors.black26),
+              ),
+            );
+          },
+        ),
+        if (widget.imageUrls.length > 1)
+          Positioned(
+            bottom: 4,
+            left: 0,
+            right: 0,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(widget.imageUrls.length, (index) {
+                return Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 2),
+                  width: _currentIndex == index ? 6 : 4,
+                  height: _currentIndex == index ? 6 : 4,
+                  decoration: BoxDecoration(
+                    color: _currentIndex == index ? Colors.white : Colors.white.withOpacity(0.5),
+                    shape: BoxShape.circle,
+                  ),
+                );
+              }),
+            ),
+          ),
       ],
     );
   }

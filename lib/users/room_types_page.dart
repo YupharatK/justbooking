@@ -87,15 +87,15 @@ ListView.builder(
                       Color tagColor = isAvailable ? const Color(0xFF10B981) : Colors.grey.shade600;
                       Color tagBgColor = isAvailable ? const Color(0xFFECFDF5) : Colors.grey.shade200;
 
-                      final imageUrl = room.images?.isNotEmpty == true 
-                          ? room.images!.first.url 
-                          : 'https://images.unsplash.com/photo-1616594039964-ae9021a400a0?q=80&w=600';
+                      final imageUrls = room.images?.isNotEmpty == true 
+                          ? room.images!.map((e) => e.url).toList()
+                          : ['https://images.unsplash.com/photo-1616594039964-ae9021a400a0?q=80&w=600'];
 
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 18.0),
                         child: _buildAvailableRoomCard(
                           context: context,
-                          imageUrl: imageUrl,
+                          imageUrls: imageUrls,
                           title: room.roomType,
                           price: '฿${room.price.toStringAsFixed(0)}',
                           isAvailable: isAvailable,
@@ -121,7 +121,7 @@ Navigator.push(
                                     monthlyPrice: '฿${room.price.toStringAsFixed(0)}',
                                     securityDeposit: '฿${room.securityDeposit.toStringAsFixed(0)}',
                                     bookingFee: '฿${room.bookingFee.toStringAsFixed(0)}',
-                                    imageUrl: imageUrl,
+                                    imageUrl: imageUrls.isNotEmpty ? imageUrls.first : '',
                                     roomId: room.id,
                                     facilities: room.facilities,
                                     roomNumber: room.roomNumber,
@@ -203,7 +203,7 @@ setState(() {
   // Builder for Room Card as in the design
   Widget _buildAvailableRoomCard({
     required BuildContext context,
-    required String imageUrl,
+    required List<String> imageUrls,
     required String title,
     required String price,
     required bool isAvailable,
@@ -241,13 +241,7 @@ setState(() {
                   height: 240,
                   width: double.infinity,
                   color: Colors.grey.shade100,
-                  child: Image.network(
-                    imageUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => const Center(
-                      child: Icon(Icons.image, size: 60, color: Colors.black26),
-                    ),
-                  ),
+                  child: _RoomImageCarousel(imageUrls: imageUrls),
                 ),
               ),
               
@@ -423,6 +417,63 @@ ElevatedButton(
           ),
         ],
       ),
+    );
+  }
+}
+
+class _RoomImageCarousel extends StatefulWidget {
+  final List<String> imageUrls;
+  const _RoomImageCarousel({required this.imageUrls});
+
+  @override
+  State<_RoomImageCarousel> createState() => _RoomImageCarouselState();
+}
+
+class _RoomImageCarouselState extends State<_RoomImageCarousel> {
+  int _currentIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        PageView.builder(
+          itemCount: widget.imageUrls.length,
+          onPageChanged: (index) {
+            setState(() {
+              _currentIndex = index;
+            });
+          },
+          itemBuilder: (context, index) {
+            return Image.network(
+              widget.imageUrls[index],
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => const Center(
+                child: Icon(Icons.image, size: 60, color: Colors.black26),
+              ),
+            );
+          },
+        ),
+        if (widget.imageUrls.length > 1)
+          Positioned(
+            bottom: 8,
+            left: 0,
+            right: 0,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(widget.imageUrls.length, (index) {
+                return Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  width: _currentIndex == index ? 8 : 6,
+                  height: _currentIndex == index ? 8 : 6,
+                  decoration: BoxDecoration(
+                    color: _currentIndex == index ? Colors.white : Colors.white.withOpacity(0.5),
+                    shape: BoxShape.circle,
+                  ),
+                );
+              }),
+            ),
+          ),
+      ],
     );
   }
 }

@@ -16,7 +16,8 @@ extension BookingStatusExt on String {
       case 'pending_payment_verification':
         return l10n.bookingStatusPendingPaymentVerification;
       case 'completed':
-        return l10n.bookingStatusCompleted;
+      case 'confirmed':
+        return 'อนุมัติการเช่าแล้ว';
       case 'rejected':
         return l10n.bookingStatusRejected;
       case 'cancelled':

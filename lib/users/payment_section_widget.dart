@@ -51,7 +51,8 @@ class _PaymentSectionWidgetState extends State<PaymentSectionWidget> {
     
     DateTime createdAt;
     try {
-      createdAt = DateTime.parse(widget.booking.createdAt).toLocal();
+      // Use current time to guarantee a fresh 15-minute countdown for the user
+      createdAt = DateTime.now();
     } catch (e) {
       createdAt = DateTime.now();
     }

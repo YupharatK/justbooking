@@ -66,4 +66,13 @@ class DormitoryService {
       'comment': comment,
     });
   }
+
+  Future<bool> checkReviewEligibility(int dormitoryId) async {
+    try {
+      final response = await _api.get('/api/dormitories/$dormitoryId/reviews/eligibility');
+      return response['eligible'] == true;
+    } catch (e) {
+      return false;
+    }
+  }
 }

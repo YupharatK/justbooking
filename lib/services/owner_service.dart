@@ -111,4 +111,19 @@ class OwnerService {
       'reply': replyMessage,
     });
   }
+
+  // ฟังก์ชันสำหรับรีวิวผู้เช่า
+  Future<void> reviewTenant(int tenantId, int dormitoryId, double rating, String comment) async {
+    await _api.post('/api/owner/tenants/$tenantId/reviews', body: {
+      'dormitoryId': dormitoryId,
+      'rating': rating,
+      'comment': comment,
+    });
+  }
+
+  // ดึงข้อมูลรีวิวของผู้เช่า
+  Future<List<Map<String, dynamic>>> getTenantReviews(int tenantId) async {
+    final response = await _api.get('/api/owner/tenants/$tenantId/reviews');
+    return List<Map<String, dynamic>>.from(response['reviews'] ?? []);
+  }
 }
