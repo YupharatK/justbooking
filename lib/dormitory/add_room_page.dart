@@ -42,6 +42,10 @@ class _AddRoomPageState extends State<AddRoomPage> {
   String _selectedAirType = 'แอร์'; // แอร์ หรือ พัดลม
   String _selectedBedType = 'เตียงเดี่ยว'; // เตียงเดี่ยว หรือ เตียงคู่
   
+  // Availability
+  bool _isAvailableFuture = false;
+  DateTime? _availableFrom;
+  
   // Amenities
   final Map<String, bool> _amenities = {
     'Wi-Fi': false,
@@ -67,6 +71,10 @@ class _AddRoomPageState extends State<AddRoomPage> {
       _availableCountController.text = r.availableCount.toString();
       if (r.roomType.contains('พัดลม')) _selectedAirType = 'พัดลม';
       if (r.roomType.contains('เตียงคู่')) _selectedBedType = 'เตียงคู่';
+      if (r.availableFrom != null) {
+        _isAvailableFuture = true;
+        _availableFrom = r.availableFrom;
+      }
       for (var f in r.facilities) {
         if (_amenities.containsKey(f)) {
           _amenities[f] = true;
@@ -129,12 +137,22 @@ class _AddRoomPageState extends State<AddRoomPage> {
           .map((e) => e.key)
           .toList();
 
+      int parsedAvailableCount = int.tryParse(countStr) ?? 1;
+      
+      // Auto-correct availableCount to 1 if it is 0 but the owner sets a future availability date
+      if (_isAvailableFuture && _availableFrom != null && parsedAvailableCount == 0) {
+        parsedAvailableCount = 1;
+      }
+
       final data = {
         'roomNumber': roomNumber.isNotEmpty ? roomNumber : null,
         'roomType': '$_selectedAirType - $_selectedBedType',
         'price': double.tryParse(priceStr) ?? 0,
-        'availableCount': int.tryParse(countStr) ?? 1,
+        'availableCount': parsedAvailableCount,
         'facilities': selectedAmenities,
+        'availableFrom': _isAvailableFuture && _availableFrom != null 
+            ? _availableFrom!.toIso8601String() 
+            : null,
       };
 
       if (widget.roomToEdit == null) {
@@ -319,6 +337,96 @@ class _AddRoomPageState extends State<AddRoomPage> {
                     bgColor: inputBgColor,
                     keyboardType: TextInputType.number,
                   ),
+                  const Padding(
+                    padding: EdgeInsets.only(top: 8.0, left: 4.0),
+                    child: Text(
+                      '* โควตาสำหรับจอง หากเลือก "ว่างในวันที่กำหนด" ระบบจะบังคับให้เป็น 1 ห้องอัตโนมัติหากใส่ค่า 0',
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // NEW: Availability Status
+                  _buildSectionTitle('สถานะความพร้อมของห้องพัก'),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildSelectableCard(
+                          title: 'พร้อมเข้าอยู่',
+                          icon: Icons.check_circle_outline_rounded,
+                          isSelected: !_isAvailableFuture,
+                          onTap: () => setState(() => _isAvailableFuture = false),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildSelectableCard(
+                          title: 'ว่างในวันที่กำหนด',
+                          icon: Icons.calendar_today_rounded,
+                          isSelected: _isAvailableFuture,
+                          onTap: () {
+                            setState(() {
+                              _isAvailableFuture = true;
+                              if (_availableFrom == null) {
+                                _availableFrom = DateTime.now().add(const Duration(days: 30));
+                              }
+                            });
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (_isAvailableFuture) ...[
+                    const SizedBox(height: 12),
+                    GestureDetector(
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: _availableFrom ?? DateTime.now().add(const Duration(days: 30)),
+                          firstDate: DateTime.now(),
+                          lastDate: DateTime.now().add(const Duration(days: 365)),
+                          builder: (context, child) {
+                            return Theme(
+                              data: Theme.of(context).copyWith(
+                                colorScheme: const ColorScheme.light(
+                                  primary: Color(0xFF3F6DE3),
+                                ),
+                              ),
+                              child: child!,
+                            );
+                          },
+                        );
+                        if (picked != null) {
+                          setState(() {
+                            _availableFrom = picked;
+                          });
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        decoration: BoxDecoration(
+                          color: inputBgColor,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              _availableFrom != null 
+                                ? 'วันที่พร้อมเข้าอยู่: ${_availableFrom!.day.toString().padLeft(2, '0')}/${_availableFrom!.month.toString().padLeft(2, '0')}/${_availableFrom!.year}'
+                                : 'เลือกวันที่พร้อมเข้าอยู่',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: _availableFrom != null ? const Color(0xFF1F2937) : Colors.grey.shade500,
+                              ),
+                            ),
+                            Icon(Icons.calendar_month_rounded, color: Colors.grey.shade500, size: 20),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 24),
 
                   // 3. Room Type (Air/Fan)

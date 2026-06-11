@@ -20,6 +20,7 @@ class BookingDetailPage extends StatefulWidget {
   final List<String> facilities;
   final String roomNumber;
   final int? ownerId;
+  final DateTime? availableFrom;
   final Booking? existingBooking;
 
   const BookingDetailPage({
@@ -34,6 +35,7 @@ class BookingDetailPage extends StatefulWidget {
     required this.facilities,
     required this.roomNumber,
     this.ownerId,
+    this.availableFrom,
     this.existingBooking,
   });
 
@@ -87,7 +89,9 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
       // 1. เรียก API ส่งคำขอจองห้องพัก (createBooking) พร้อมแนบ ID ห้องและวันที่ย้ายเข้า
       final bookingId = await _bookingService.createBooking(
         roomId: widget.roomId,
-        moveInDate: DateTime.now().toIso8601String().split('T')[0],
+        moveInDate: widget.availableFrom != null 
+          ? widget.availableFrom!.toIso8601String().split('T')[0] 
+          : DateTime.now().toIso8601String().split('T')[0],
         note: '',
       );
 
@@ -421,7 +425,9 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
                                   l10n.bookingStartDate,
                                   (widget.existingBooking != null && widget.existingBooking!.moveInDate.isNotEmpty) 
                                       ? widget.existingBooking!.moveInDate.split('T')[0] 
-                                      : 'รอเจ้าของหอกำหนด',
+                                      : (widget.availableFrom != null 
+                                          ? '${widget.availableFrom!.day.toString().padLeft(2, '0')}/${widget.availableFrom!.month.toString().padLeft(2, '0')}/${widget.availableFrom!.year}'
+                                          : 'รอเจ้าของหอกำหนด'),
                                   isPill: true,
                                 ),
                               ],

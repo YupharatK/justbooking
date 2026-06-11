@@ -82,9 +82,23 @@ ListView.builder(
                       final room = widget.rooms[index];
                       final isAvailable = room.availableCount > 0;
                       
-                      String tagText = isAvailable ? 'ว่าง ${room.availableCount} ห้อง' : 'ไม่ว่าง';
-                      Color tagColor = isAvailable ? const Color(0xFF10B981) : Colors.grey.shade600;
-                      Color tagBgColor = isAvailable ? const Color(0xFFECFDF5) : Colors.grey.shade200;
+                      String tagText;
+                      Color tagColor;
+                      Color tagBgColor;
+
+                      if (!isAvailable) {
+                        tagText = 'เต็มแล้ว';
+                        tagColor = Colors.grey.shade600;
+                        tagBgColor = Colors.grey.shade200;
+                      } else if (room.availableFrom != null && room.availableFrom!.isAfter(DateTime.now())) {
+                        tagText = 'ว่างพร้อมเข้าอยู่: ${room.availableFrom!.day.toString().padLeft(2, '0')}/${room.availableFrom!.month.toString().padLeft(2, '0')}/${room.availableFrom!.year}';
+                        tagColor = const Color(0xFF3F6DE3); // Use primary color to highlight advance booking
+                        tagBgColor = const Color(0xFFEEF2FF);
+                      } else {
+                        tagText = 'ว่าง ${room.availableCount} ห้อง';
+                        tagColor = const Color(0xFF10B981);
+                        tagBgColor = const Color(0xFFECFDF5);
+                      }
 
                       final imageUrls = room.images?.isNotEmpty == true 
                           ? room.images!.map((e) => e.url).toList()
@@ -131,6 +145,7 @@ Navigator.push(
                                     facilities: room.facilities,
                                     roomNumber: room.roomNumber,
                                     ownerId: widget.ownerId,
+                                    availableFrom: room.availableFrom,
                                   ),
                               ),
                             );

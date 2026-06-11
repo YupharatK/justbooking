@@ -21,7 +21,7 @@ class Room {
   final double securityDeposit;
   final int availableCount;
   final String status;
-  final String? availableFrom;
+  final DateTime? availableFrom;
   final List<String> facilities;
   final List<RoomImage>? images;
 
@@ -47,6 +47,12 @@ class Room {
     // Fallback: If security_deposit is not provided by backend, use price as security deposit
     final parsedSecurityDeposit = double.tryParse(json['security_deposit']?.toString() ?? '') ?? parsedPrice;
 
+    DateTime? parsedAvailableFrom;
+    final availableFromStr = json['availableFrom'] ?? json['available_from'];
+    if (availableFromStr != null) {
+      parsedAvailableFrom = DateTime.tryParse(availableFromStr.toString());
+    }
+
     return Room(
       id: json['id'] ?? 0,
       dormitoryId: json['dormitoryId'] ?? json['dormitory_id'] ?? 0,
@@ -56,7 +62,7 @@ class Room {
       securityDeposit: parsedSecurityDeposit,
       availableCount: json['availableCount'] ?? json['available_count'] ?? 0,
       status: json['status'] ?? 'available',
-      availableFrom: json['availableFrom'] ?? json['available_from'],
+      availableFrom: parsedAvailableFrom,
       facilities: List<String>.from(json['facilities'] ?? []),
       images: json['images'] != null 
           ? (json['images'] as List).map((i) => RoomImage.fromJson(i)).toList() 
