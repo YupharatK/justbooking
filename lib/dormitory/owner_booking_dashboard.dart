@@ -238,12 +238,6 @@ class _OwnerBookingDashboardState extends State<OwnerBookingDashboard> {
                       Text('${context.l10n.ownerBookingEmail}${user.email}', style: TextStyle(fontSize: 14, color: Colors.grey.shade700))
                     else
                       Text('${context.l10n.ownerBookingEmail}-', style: TextStyle(fontSize: 14, color: Colors.grey.shade400)),
-                    const SizedBox(height: 2),
-                    
-                    if (user?.promptpayId != null && user!.promptpayId!.isNotEmpty)
-                      Text('พร้อมเพย์: ${user.promptpayId}', style: TextStyle(fontSize: 14, color: Colors.grey.shade700))
-                    else
-                      Text('พร้อมเพย์: -', style: TextStyle(fontSize: 14, color: Colors.grey.shade400)),
                   ],
                 ),
               ),
@@ -252,14 +246,6 @@ class _OwnerBookingDashboardState extends State<OwnerBookingDashboard> {
           const SizedBox(height: 4),
           Text(
             '${context.l10n.ownerBookingDorm}${dorm?.name ?? ''} | ${context.l10n.ownerBookingRoom}${room?.roomNumber ?? ''}',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey.shade600,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '${context.l10n.ownerBookingMoveIn}${booking.moveInDate}',
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey.shade600,
@@ -344,7 +330,7 @@ class _OwnerBookingDashboardState extends State<OwnerBookingDashboard> {
                       side: const BorderSide(color: Colors.red),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
-                    onPressed: () => _showConfirmSlipDialog(booking.id, 'rejected'),
+                    onPressed: () => _showConfirmSlipDialog(booking.id, booking.userId, 'rejected'),
                     child: Text(context.l10n.ownerBookingRejectSlip, style: const TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ),
@@ -357,7 +343,7 @@ class _OwnerBookingDashboardState extends State<OwnerBookingDashboard> {
                       elevation: 0,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
-                    onPressed: () => _showConfirmSlipDialog(booking.id, 'verified'),
+                    onPressed: () => _handleVerifySlipDatePicker(booking.id, booking.userId),
                     child: Text(context.l10n.ownerBookingVerifySlip, style: const TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ),
@@ -402,7 +388,7 @@ class _OwnerBookingDashboardState extends State<OwnerBookingDashboard> {
     );
   }
 
-  void _showConfirmSlipDialog(int bookingId, String action) {
+  void _showConfirmSlipDialog(int bookingId, int userId, String action) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -420,7 +406,7 @@ class _OwnerBookingDashboardState extends State<OwnerBookingDashboard> {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              _updateSlipStatus(bookingId, action);
+              _updateSlipStatus(bookingId, userId, action);
             },
             child: Text(
               context.l10n.ownerBookingConfirmTitle,
@@ -435,10 +421,63 @@ class _OwnerBookingDashboardState extends State<OwnerBookingDashboard> {
     );
   }
 
-  Future<void> _updateSlipStatus(int bookingId, String action) async {
+  Future<void> _handleVerifySlipDatePicker(int bookingId, int userId) async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 90)),
+      helpText: 'เลือกวันที่สามารถเข้าอยู่ได้',
+      cancelText: 'ยกเลิก',
+      confirmText: 'ตกลง',
+    );
+
+    if (pickedDate == null) return; // User cancelled
+
+    final thaiMonths = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+    final displayDateStr = '${pickedDate.day} ${thaiMonths[pickedDate.month - 1]} ${pickedDate.year + 543}';
+
+    if (!mounted) return;
+
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('ยืนยันการตั้งค่าวันเข้าอยู่', style: TextStyle(fontWeight: FontWeight.bold)),
+        content: Text('ยืนยันสลีปและกำหนดวันเข้าอยู่ $displayDateStr ?'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(context.l10n.ownerBookingCancel, style: const TextStyle(color: Colors.grey)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              context.l10n.ownerBookingConfirmTitle,
+              style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      final String apiDate = DateFormat('yyyy-MM-dd').format(pickedDate);
+      _updateSlipStatus(bookingId, userId, 'verified', moveInDate: apiDate, displayDateStr: displayDateStr);
+    }
+  }
+
+  Future<void> _updateSlipStatus(int bookingId, int userId, String action, {String? moveInDate, String? displayDateStr}) async {
     try {
       if (action == 'verified') {
-        await _ownerService.confirmPaymentSlip(bookingId);
+        await _ownerService.confirmPaymentSlip(bookingId, moveInDate: moveInDate);
+        if (displayDateStr != null) {
+          try {
+            await NotificationService().createSlipVerifiedNotification(userId, displayDateStr);
+          } catch (e) {
+            debugPrint('Notification Error: $e');
+          }
+        }
       } else {
         await _ownerService.rejectPaymentSlip(bookingId);
       }

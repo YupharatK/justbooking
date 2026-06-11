@@ -87,10 +87,14 @@ class OwnerService {
 
   // Payment Slips
     // ฟังก์ชันสำหรับตรวจสอบและยืนยันว่าได้รับเงินตามสลิปโอนเงินแล้ว
-  Future<void> confirmPaymentSlip(int bookingId) async {
-    await _api.patch('/api/owner/bookings/$bookingId/payment', body: {
+  Future<void> confirmPaymentSlip(int bookingId, {String? moveInDate}) async {
+    final body = <String, dynamic>{
       'status': 'verified',
-    });
+    };
+    if (moveInDate != null) {
+      body['move_in_date'] = moveInDate;
+    }
+    await _api.patch('/api/owner/bookings/$bookingId/payment', body: body);
   }
 
     // ฟังก์ชันสำหรับปฏิเสธสลิปโอนเงิน (กรณีไม่ถูกต้อง)

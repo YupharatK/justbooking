@@ -419,9 +419,9 @@ class _BookingDetailPageState extends State<BookingDetailPage> {
                                 _buildTenantRow(l10n.bookingTenantAddress, _currentUser?.address ?? '-'),
                                 _buildTenantRow(
                                   l10n.bookingStartDate,
-                                  DateTime.now().day.toString().padLeft(2, '0') + '/' +
-                                  DateTime.now().month.toString().padLeft(2, '0') + '/' +
-                                  (DateTime.now().year + 543).toString(),
+                                  (widget.existingBooking != null && widget.existingBooking!.moveInDate != null && widget.existingBooking!.moveInDate!.isNotEmpty) 
+                                      ? widget.existingBooking!.moveInDate! 
+                                      : 'รอเจ้าของหอกำหนด',
                                   isPill: true,
                                 ),
                               ],

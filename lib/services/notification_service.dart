@@ -185,6 +185,19 @@ class NotificationService {
     });
   }
 
+  // ฟังก์ชันสำหรับสร้างการแจ้งเตือนเมื่อเจ้าของหอพักตรวจสอบสลีปและกำหนดวันเข้าอยู่
+  Future<void> createSlipVerifiedNotification(int userId, String moveInDate) async {
+    final userNotifRef = _firestore.collection('notifications').doc();
+    await userNotifRef.set({
+      'userId': userId.toString(),
+      'type': 'slip_verified',
+      'title': 'การชำระเงินสำเร็จ',
+      'desc': 'ตรวจสอบสลีปเรียบร้อย คุณสามารถย้ายเข้าอยู่ได้ตั้งแต่วันที่ $moveInDate เป็นต้นไป',
+      'isRead': false,
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+  }
+
     // ฟังก์ชันสำหรับสร้างการแจ้งเตือนเมื่อผู้เช่าส่งสลิปชำระเงิน
   Future<void> createPaymentSlipNotification(int ownerId) async {
     final ownerNotifRef = _firestore.collection('notifications').doc();

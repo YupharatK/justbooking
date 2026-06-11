@@ -277,6 +277,17 @@ class _BookingHistoryTabState extends State<BookingHistoryTab> {
                         fontSize: 12
                       ),
                     ),
+                    if (booking.moveInDate != null && booking.moveInDate!.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        'วันที่เข้าอยู่: ${booking.moveInDate}',
+                        style: TextStyle(
+                          color: primaryColor,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
