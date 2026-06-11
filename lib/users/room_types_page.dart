@@ -44,7 +44,7 @@ class _RoomTypesPageState extends State<RoomTypesPage> {
         title: Column(
           children: [
             const Text(
-              'ประเภทห้องพักที่ว่าง',
+              'ประเภทห้องพัก',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -66,10 +66,10 @@ class _RoomTypesPageState extends State<RoomTypesPage> {
       body: Column(
         children: [
           Expanded(
-            child: widget.rooms.where((r) => r.availableCount > 0).toList().isEmpty
+            child: widget.rooms.isEmpty
                 ? Center(
                     child: Text(
-                      'ไม่มีข้อมูลห้องพักที่ว่าง',
+                      'ไม่มีข้อมูลห้องพัก',
                       style: TextStyle(color: Colors.grey.shade600),
                     ),
                   )
@@ -77,10 +77,9 @@ class _RoomTypesPageState extends State<RoomTypesPage> {
 ListView.builder(
                     physics: const BouncingScrollPhysics(),
                     padding: const EdgeInsets.all(16.0),
-                    itemCount: widget.rooms.where((r) => r.availableCount > 0).toList().length,
+                    itemCount: widget.rooms.length,
                     itemBuilder: (context, index) {
-                      final availableRooms = widget.rooms.where((r) => r.availableCount > 0).toList();
-                      final room = availableRooms[index];
+                      final room = widget.rooms[index];
                       final isAvailable = room.availableCount > 0;
                       
                       String tagText = isAvailable ? 'ว่าง ${room.availableCount} ห้อง' : 'ไม่ว่าง';
@@ -106,6 +105,12 @@ ListView.builder(
                           amenities: room.facilities.isNotEmpty ? room.facilities : ['ไม่มีข้อมูลสิ่งอำนวยความสะดวก'],
                           amenityIcons: List.generate(room.facilities.isNotEmpty ? room.facilities.length : 1, (index) => Icons.check_circle_outline_rounded),
                           onSelect: () {
+                            if (!isAvailable) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('ห้องนี้มีคนจองไปแล้วค่ะ')),
+                              );
+                              return;
+                            }
                             if (widget.isGuest) {
                                                             // คำสั่ง Navigator.push ใช้สำหรับเปลี่ยนหน้าต่างไปยังหน้าจอใหม่
 Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
@@ -393,7 +398,7 @@ ElevatedButton(
                         borderRadius: BorderRadius.circular(24),
                       ),
                     ),
-                    onPressed: isAvailable ? onSelect : null,
+                    onPressed: onSelect,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
