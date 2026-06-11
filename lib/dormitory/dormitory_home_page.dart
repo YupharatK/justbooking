@@ -12,6 +12,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import '../services/notification_service.dart';
 import '../users/edit_profile_page.dart';
+import 'owner_tenants_page.dart';
 
 /// ----------------------------------------------------------------------
 /// [DormitoryHomePage]
@@ -282,6 +283,29 @@ class _DormitoryHomePageState extends State<DormitoryHomePage> {
                         );
                       },
                     ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildMainMenuCard(
+                      icon: Icons.people_alt_outlined,
+                      title: 'ประวัติผู้เช่า',
+                      subtitle: 'รีวิว & จัดการผู้เช่า',
+                      iconBgColor: const Color(0xFFFFFBEB),
+                      iconColor: const Color(0xFFF59E0B),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const OwnerTenantsPage()),
+                        );
+                      },
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(), // Empty space for layout balance
                   ),
                 ],
               ),

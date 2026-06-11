@@ -249,10 +249,33 @@ class _OwnerBookingDashboardState extends State<OwnerBookingDashboard> {
                     else
                       Text('${context.l10n.ownerBookingEmail}-', style: TextStyle(fontSize: 14, color: Colors.grey.shade400)),
                     const SizedBox(height: 4),
-                    GestureDetector(
-                      onTap: () => _showTenantReviewsDialog(user?.id ?? 0, user?.firstName ?? ''),
-                      child: const Text('ดูประวัติรีวิวผู้เช่า', style: TextStyle(fontSize: 13, color: Color(0xFF4274E6), decoration: TextDecoration.underline, fontWeight: FontWeight.bold)),
-                    ),
+                    if (user?.averageRating != null && user!.reviewCount != null && user!.reviewCount! > 0)
+                      Row(
+                        children: [
+                          const Icon(Icons.star_rounded, color: Colors.amber, size: 16),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${user.averageRating!.toStringAsFixed(1)} (${user.reviewCount} รีวิว)',
+                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(width: 8),
+                          GestureDetector(
+                            onTap: () => _showTenantReviewsDialog(user.id, user.firstName ?? ''),
+                            child: const Text('ดูประวัติรีวิวผู้เช่า', style: TextStyle(fontSize: 13, color: Color(0xFF4274E6), decoration: TextDecoration.underline, fontWeight: FontWeight.bold)),
+                          ),
+                        ],
+                      )
+                    else
+                      Row(
+                        children: [
+                          const Text('ยังไม่มีคะแนนรีวิว', style: TextStyle(fontSize: 13, color: Colors.grey, fontStyle: FontStyle.italic)),
+                          const SizedBox(width: 8),
+                          GestureDetector(
+                            onTap: () => _showTenantReviewsDialog(user?.id ?? 0, user?.firstName ?? ''),
+                            child: const Text('ดูประวัติรีวิวผู้เช่า', style: TextStyle(fontSize: 13, color: Color(0xFF4274E6), decoration: TextDecoration.underline, fontWeight: FontWeight.bold)),
+                          ),
+                        ],
+                      ),
                   ],
                 ),
               ),

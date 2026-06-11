@@ -126,4 +126,10 @@ class OwnerService {
     final response = await _api.get('/api/owner/tenants/$tenantId/reviews');
     return List<Map<String, dynamic>>.from(response['reviews'] ?? []);
   }
+
+  // ดึงรายชื่อผู้เช่าทั้งหมด
+  Future<List<Map<String, dynamic>>> getOwnerTenants() async {
+    final response = await _api.get('/api/owner/tenants');
+    return List<Map<String, dynamic>>.from(response['tenants'] ?? []);
+  }
 }

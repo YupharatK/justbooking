@@ -95,6 +95,8 @@ class Booking {
         status: 'active',
         profileImageUrl: json['profileImageUrl'] ?? json['profile_image_url'] ?? json['user_profile_image_url'] ?? json['userProfileImageUrl'] ?? json['avatar'] ?? json['image'] ?? json['ProfileImageUrl'],
         promptpayId: json['promptpayId'] ?? json['promptpay_id'] ?? json['user_promptpay_id'] ?? json['userPromptpayId'] ?? json['PromptpayId'],
+        averageRating: json['averageRating'] != null ? double.tryParse(json['averageRating'].toString()) : (json['average_rating'] != null ? double.tryParse(json['average_rating'].toString()) : null),
+        reviewCount: json['reviewCount'] != null ? int.tryParse(json['reviewCount'].toString()) : (json['review_count'] != null ? int.tryParse(json['review_count'].toString()) : null),
       );
     }
 
