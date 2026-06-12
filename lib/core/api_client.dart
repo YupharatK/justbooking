@@ -156,4 +156,37 @@ class ApiClient {
     final response = await http.Response.fromStream(streamedResponse);
     return _handleResponse(response);
   }
+
+  Future<dynamic> multiFieldMultipartPost(
+      String endpoint,
+      Map<String, File> files, {
+      bool requireAuth = true,
+  }) async {
+    final url = Uri.parse('${ApiConfig.baseUrl}$endpoint');
+    final request = http.MultipartRequest('POST', url);
+    final headers = await _getHeaders(requireAuth: requireAuth);
+    headers.remove('Content-Type');
+    request.headers.addAll(headers);
+
+    for (var entry in files.entries) {
+      final fileField = entry.key;
+      final file = entry.value;
+      
+      final ext = file.path.split('.').last.toLowerCase();
+      MediaType? mediaType;
+      if (ext == 'png') mediaType = MediaType('image', 'png');
+      else if (ext == 'jpg' || ext == 'jpeg') mediaType = MediaType('image', 'jpeg');
+      else if (ext == 'pdf') mediaType = MediaType('application', 'pdf');
+      
+      request.files.add(await http.MultipartFile.fromPath(
+        fileField,
+        file.path,
+        contentType: mediaType,
+      ));
+    }
+
+    final streamedResponse = await request.send().timeout(const Duration(seconds: 45));
+    final response = await http.Response.fromStream(streamedResponse);
+    return _handleResponse(response);
+  }
 }

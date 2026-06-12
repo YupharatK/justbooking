@@ -82,7 +82,7 @@ class Booking {
     final userJson = json['user'] ?? json['User'] ?? json['tenant'] ?? json['customer'];
     if (userJson != null && userJson is Map<String, dynamic>) {
       parsedUser = User.fromJson(userJson);
-    } else if (json['first_name'] != null || json['firstName'] != null || json['FirstName'] != null) {
+    } else if (json['first_name'] != null || json['firstName'] != null || json['FirstName'] != null || json['user_first_name'] != null) {
       parsedUser = User(
         id: json['userId'] ?? json['user_id'] ?? json['UserId'] ?? 0,
         email: json['email'] ?? json['user_email'] ?? json['userEmail'] ?? json['Email'] ?? '',

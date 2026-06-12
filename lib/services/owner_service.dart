@@ -41,6 +41,17 @@ class OwnerService {
     return response['image']['url'];
   }
 
+  // ฟังก์ชันสำหรับอัปโหลดเอกสารยืนยันตัวตนและหอพัก
+  Future<void> uploadVerificationDocuments(int dormitoryId, File ownerIdCard, File dormDocument) async {
+    await _api.multiFieldMultipartPost(
+      '/api/owner/dormitories/$dormitoryId/verification-documents',
+      {
+        'ownerIdCard': ownerIdCard,
+        'dormDocument': dormDocument,
+      },
+    );
+  }
+
   // Rooms
     // ฟังก์ชันสำหรับเพิ่มประเภทห้องพักใหม่ในหอพัก
   Future<int> createRoom(int dormitoryId, Map<String, dynamic> data) async {

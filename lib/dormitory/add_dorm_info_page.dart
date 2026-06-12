@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:image_picker/image_picker.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:latlong2/latlong.dart' hide Path;
 import '../core/api_client.dart';
@@ -39,16 +40,14 @@ class _AddDormInfoPageState extends State<AddDormInfoPage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _rulesController = TextEditingController();
-  final TextEditingController _bankNameController = TextEditingController();
-  final TextEditingController _accountNameController = TextEditingController();
-  final TextEditingController _accountNumberController = TextEditingController();
-  final TextEditingController _promptPayNumberController = TextEditingController();
 
   String _selectedDormType = 'หอพักรวม';
   int _statusSelection = 0; // 0 = พร้อมเข้าอยู่, 1 = ว่างภายใน 1 เดือน
   int _availableRooms = 1;
 
   File? _coverImage;
+  File? _ownerIdCard;
+  File? _dormDocument;
   final ImagePicker _picker = ImagePicker();
   bool _isLoading = false;
 
@@ -77,13 +76,7 @@ class _AddDormInfoPageState extends State<AddDormInfoPage> {
     if (widget.dormitoryToEdit != null) {
       final dorm = widget.dormitoryToEdit!;
       _nameController.text = dorm.name;
-      _addressController.text = dorm.address;
       _rulesController.text = dorm.rules;
-      
-      if (dorm.bankName != null) _bankNameController.text = dorm.bankName!;
-      if (dorm.accountName != null) _accountNameController.text = dorm.accountName!;
-      if (dorm.accountNumber != null) _accountNumberController.text = dorm.accountNumber!;
-      if (dorm.promptPayNumber != null) _promptPayNumberController.text = dorm.promptPayNumber!;
       
       if (dorm.latitude != 0.0 && dorm.longitude != 0.0) {
         _latitude = dorm.latitude;
@@ -113,10 +106,6 @@ class _AddDormInfoPageState extends State<AddDormInfoPage> {
     _nameController.dispose();
     _addressController.dispose();
     _rulesController.dispose();
-    _bankNameController.dispose();
-    _accountNameController.dispose();
-    _accountNumberController.dispose();
-    _promptPayNumberController.dispose();
     super.dispose();
   }
 
@@ -125,6 +114,66 @@ class _AddDormInfoPageState extends State<AddDormInfoPage> {
     if (pickedFile != null) {
       setState(() {
         _coverImage = File(pickedFile.path);
+      });
+    }
+  }
+
+  Future<void> _pickOwnerIdCard() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
+    if (pickedFile != null) {
+      final file = File(pickedFile.path);
+      final bytes = await file.length();
+      if (bytes > 5 * 1024 * 1024) { // 5MB limit
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('ขนาดไฟล์รูปภาพต้องไม่เกิน 5MB')),
+        );
+        return;
+      }
+      setState(() {
+        _ownerIdCard = file;
+      });
+    }
+  }
+
+  Future<void> _pickDormDocument() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.any,
+    );
+
+    if (result != null && result.files.single.path != null) {
+      final fileObj = result.files.single;
+      final path = fileObj.path!;
+      
+      final isPdf = (fileObj.extension?.toLowerCase() == 'pdf') || 
+                    (fileObj.name.toLowerCase().endsWith('.pdf')) ||
+                    (path.toLowerCase().endsWith('.pdf'));
+
+      if (!isPdf) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('กรุณาเลือกไฟล์ PDF เท่านั้น')),
+        );
+        return;
+      }
+
+      File file = File(path);
+      // Ensure the file path ends with .pdf so api_client and backend accept it
+      if (!path.toLowerCase().endsWith('.pdf')) {
+        final newPath = '${path}_copy.pdf';
+        file = await file.copy(newPath);
+      }
+
+      final bytes = await file.length();
+      if (bytes > 10 * 1024 * 1024) { // 10MB limit
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('ขนาดไฟล์เอกสารต้องไม่เกิน 10MB')),
+        );
+        return;
+      }
+      setState(() {
+        _dormDocument = file;
       });
     }
   }
@@ -217,22 +266,40 @@ class _AddDormInfoPageState extends State<AddDormInfoPage> {
         'description': description,
         'facilities': selectedAmenities,
         'rules': rules.isNotEmpty ? rules : null,
-        'bank_name': _bankNameController.text.trim().isNotEmpty ? _bankNameController.text.trim() : null,
-        'account_name': _accountNameController.text.trim().isNotEmpty ? _accountNameController.text.trim() : null,
-        'account_number': _accountNumberController.text.trim().isNotEmpty ? _accountNumberController.text.trim() : null,
-        'promptpay_number': _promptPayNumberController.text.trim().isNotEmpty ? _promptPayNumberController.text.trim() : null,
       };
 
       if (widget.dormitoryToEdit == null) {
+        if (_ownerIdCard == null || _dormDocument == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('กรุณาอัปโหลดรูปบัตรประชาชนและเอกสารหอพักให้ครบถ้วน')),
+          );
+          setState(() {
+            _isLoading = false;
+          });
+          return;
+        }
+
         final dormId = await _ownerService.createDormitory(data);
 
         if (_coverImage != null) {
           await _ownerService.uploadDormitoryCoverImage(dormId, _coverImage!);
         }
+
+        try {
+          await _ownerService.uploadVerificationDocuments(dormId, _ownerIdCard!, _dormDocument!);
+        } catch (e) {
+          // If docs fail, we might want to tell the user they can retry later or something
+          // For now, let it fall through to the catch block to show error, but dorm is created.
+          rethrow;
+        }
       } else {
         await _ownerService.updateDormitory(widget.dormitoryToEdit!.id, data);
         if (_coverImage != null) {
           await _ownerService.uploadDormitoryCoverImage(widget.dormitoryToEdit!.id, _coverImage!);
+        }
+        
+        if (_ownerIdCard != null && _dormDocument != null) {
+          await _ownerService.uploadVerificationDocuments(widget.dormitoryToEdit!.id, _ownerIdCard!, _dormDocument!);
         }
       }
 
@@ -558,31 +625,105 @@ class _AddDormInfoPageState extends State<AddDormInfoPage> {
                   ),
                   const SizedBox(height: 24),
 
-                  // 9. Payment Info
-                  _buildSectionTitle(context.l10n.addDormPaymentTitle),
+                  // 9. Document Uploads
+                  _buildSectionTitle('เอกสารประกอบการพิจารณา'),
                   const SizedBox(height: 12),
-                  _buildTextField(
-                    controller: _bankNameController,
-                    hintText: context.l10n.addDormBankHint,
-                    bgColor: inputBgColor,
+                  
+                  // Owner ID Card
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: inputBgColor,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'รูปภาพบัตรประชาชน (ขนาดไม่เกิน 5MB)',
+                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: textDarkColor),
+                        ),
+                        const SizedBox(height: 12),
+                        GestureDetector(
+                          onTap: _pickOwnerIdCard,
+                          child: Container(
+                            height: 60,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.grey.shade300),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.image_rounded, color: primaryColor, size: 24),
+                                const SizedBox(width: 8),
+                                Text(
+                                  _ownerIdCard != null ? 'เลือกรูปแล้ว' : 'อัปโหลดรูปบัตรประชาชน',
+                                  style: TextStyle(
+                                    color: _ownerIdCard != null ? Colors.green : primaryColor,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 12),
-                  _buildTextField(
-                    controller: _accountNameController,
-                    hintText: context.l10n.addDormAccountNameHint,
-                    bgColor: inputBgColor,
-                  ),
-                  const SizedBox(height: 12),
-                  _buildTextField(
-                    controller: _accountNumberController,
-                    hintText: context.l10n.addDormAccountNumberHint,
-                    bgColor: inputBgColor,
-                  ),
-                  const SizedBox(height: 12),
-                  _buildTextField(
-                    controller: _promptPayNumberController,
-                    hintText: context.l10n.addDormPromptPayHint,
-                    bgColor: inputBgColor,
+                  const SizedBox(height: 16),
+                  
+                  // Dorm Document PDF
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: inputBgColor,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'เอกสารเกี่ยวกับหอพัก (ไฟล์ PDF ขนาดไม่เกิน 10MB)',
+                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: textDarkColor),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'เช่น ใบอนุญาตประกอบกิจการหอพัก หรือเอกสารอื่นๆ ที่ยืนยันได้',
+                          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                        ),
+                        const SizedBox(height: 12),
+                        GestureDetector(
+                          onTap: _pickDormDocument,
+                          child: Container(
+                            height: 60,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.grey.shade300),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.picture_as_pdf_rounded, color: primaryColor, size: 24),
+                                const SizedBox(width: 8),
+                                Flexible(
+                                  child: Text(
+                                    _dormDocument != null ? _dormDocument!.path.split('/').last : 'อัปโหลดไฟล์ PDF',
+                                    style: TextStyle(
+                                      color: _dormDocument != null ? Colors.green : primaryColor,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 40),
                 ],

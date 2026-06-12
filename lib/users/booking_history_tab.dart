@@ -3,6 +3,7 @@ import '../services/booking_service.dart';
 import '../models/booking.dart';
 import 'booking_detail_page.dart';
 import '../core/localization/localization_extension.dart';
+import '../services/pdf_service.dart';
 
 /// หน้าแสดงประวัติการจองห้องพักทั้งหมดของผู้ใช้งาน พร้อมบอกสถานะการจอง
 
@@ -379,22 +380,50 @@ class _BookingHistoryTabState extends State<BookingHistoryTab> {
                     ],
                   )
               else if (isCompleted)
-                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF0FDF4),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: const Color(0xFF22C55E)),
-                  ),
-                  child: Text(
-                    booking.status.translateBookingStatus(context),
-                    style: const TextStyle(
-                      color: Color(0xFF22C55E),
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12
+                 Column(
+                   crossAxisAlignment: CrossAxisAlignment.end,
+                   children: [
+                     Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF0FDF4),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: const Color(0xFF22C55E)),
+                      ),
+                      child: Text(
+                        booking.status.translateBookingStatus(context),
+                        style: const TextStyle(
+                          color: Color(0xFF22C55E),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12
+                        ),
+                      ),
                     ),
-                  ),
-                ),
+                    const SizedBox(height: 8),
+                    OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: primaryColor,
+                        side: BorderSide(color: primaryColor),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      ),
+                      icon: const Icon(Icons.download_rounded, size: 16),
+                      label: const Text('ดาวน์โหลดใบจอง', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                      onPressed: () async {
+                        // show loading or just generate
+                        try {
+                          await PdfService.generateAndShareBookingReceipt(booking);
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('ไม่สามารถสร้างใบจองได้: $e')),
+                            );
+                          }
+                        }
+                      },
+                    )
+                   ]
+                 ),
             ],
           ),
         ],
