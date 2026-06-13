@@ -265,7 +265,7 @@ class _DormitoryHomePageState extends State<DormitoryHomePage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(builder: (_) => const AddDormInfoPage()),
-                        );
+                        ).then((_) => _fetchDormitories());
                       },
                     ),
                   ),

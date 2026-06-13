@@ -91,6 +91,8 @@ class _AddRoomPageState extends State<AddRoomPage> {
     super.dispose();
   }
 
+  int? _createdRoomId;
+
   // ฟังก์ชันเลือกรูปภาพห้องพักจากเครื่องมือถือ
 
   Future<void> _pickImages() async {
@@ -155,12 +157,13 @@ class _AddRoomPageState extends State<AddRoomPage> {
             : null,
       };
 
-      if (widget.roomToEdit == null) {
-        final roomId = await _ownerService.createRoom(widget.dormitoryId, data);
-        if (_roomImages.isNotEmpty) await _ownerService.uploadRoomImages(roomId, _roomImages);
+      if (widget.roomToEdit == null && _createdRoomId == null) {
+        _createdRoomId = await _ownerService.createRoom(widget.dormitoryId, data);
+        if (_roomImages.isNotEmpty) await _ownerService.uploadRoomImages(_createdRoomId!, _roomImages);
       } else {
-        await _ownerService.updateRoom(widget.roomToEdit!.id, data);
-        if (_roomImages.isNotEmpty) await _ownerService.uploadRoomImages(widget.roomToEdit!.id, _roomImages);
+        final roomIdToUpdate = widget.roomToEdit?.id ?? _createdRoomId!;
+        await _ownerService.updateRoom(roomIdToUpdate, data);
+        if (_roomImages.isNotEmpty) await _ownerService.uploadRoomImages(roomIdToUpdate, _roomImages);
       }
 
       if (!mounted) return;
