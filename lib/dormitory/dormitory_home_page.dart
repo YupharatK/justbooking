@@ -643,6 +643,45 @@ class _DormitoryHomePageState extends State<DormitoryHomePage> {
               ),
             ],
           ),
+          if (isRejected && dorm.rejectionReason != null) ...[
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(10),
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFEF2F2),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFFCA5A5)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.info_outline_rounded, color: Color(0xFFEF4444), size: 16),
+                      const SizedBox(width: 6),
+                      const Text(
+                        'เหตุผลที่ถูกปฏิเสธ',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFFEF4444),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    dorm.rejectionReason!,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF991B1B),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
       ),

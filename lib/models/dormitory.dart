@@ -15,6 +15,7 @@ class Dormitory {
   final String rentalTerms;
   final String rules;
   final String status;
+  final String? rejectionReason;
   final String? coverImageUrl;
   final double? rating;
   final List<Room>? rooms;
@@ -40,6 +41,7 @@ class Dormitory {
     required this.rentalTerms,
     required this.rules,
     required this.status,
+    this.rejectionReason,
     this.coverImageUrl,
     this.rating,
     this.rooms,
@@ -73,6 +75,7 @@ class Dormitory {
       rentalTerms: json['rental_terms'] ?? '',
       rules: json['rules'] ?? '',
       status: json['status'] ?? 'pending',
+      rejectionReason: json['rejection_reason'],
       coverImageUrl: json['cover_image_url'],
       rating: json['rating'] != null ? _parseDouble(json['rating']) : null,
       rooms: json['rooms'] != null 

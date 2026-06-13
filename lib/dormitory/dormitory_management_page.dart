@@ -370,6 +370,47 @@ class _DormitoryManagementPageState extends State<DormitoryManagementPage> {
               ),
             ],
           ),
+          if (isRejected && _dormitory.rejectionReason != null) ...[
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFEF2F2),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFFCA5A5)),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.info_outline_rounded, color: Color(0xFFEF4444), size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'เหตุผลที่ปฏิเสธ:',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFFEF4444),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          _dormitory.rejectionReason!,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Color(0xFF991B1B),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: 16),
           const Divider(),
           const SizedBox(height: 12),
